@@ -1,14 +1,7 @@
 
 import React from "react";
-import { format, getDaysInMonth, startOfMonth, getDay, isSameDay, isWeekend, isSameMonth } from "date-fns";
-import { sv } from "date-fns/locale";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { MonthCard } from "@/components/MonthCard";
+import { CalendarLegend } from "@/components/CalendarLegend";
 
 interface Period {
   start: Date;
@@ -36,100 +29,6 @@ export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalend
   // Make sure to use the same periods as in the list view
   const sortedPeriods = [...schedule.periods];
   
-  // Funktion för att kontrollera om datum är inom en ledighetsperiod
-  const isInPeriod = (date: Date) => {
-    return sortedPeriods.some(period => {
-      const startDate = new Date(period.start);
-      const endDate = new Date(period.end);
-      return date >= startDate && date <= endDate;
-    });
-  };
-
-  // Funktion för att avgöra vilken typ av dag det är
-  const getDayType = (date: Date) => {
-    // Röd dag (helgdag)
-    if (holidays.some(holiday => isSameDay(holiday, date))) {
-      return { className: "bg-red-200 text-red-800", type: "Röd dag" };
-    }
-    
-    // Helg
-    if (isWeekend(date)) {
-      return { className: "bg-orange-100 text-orange-800", type: "Helg" };
-    }
-    
-    // Semesterdag (om inom en period och varken röd dag eller helg)
-    if (isInPeriod(date)) {
-      return { className: "bg-green-200 text-green-800 border-2 border-green-300", type: "Semesterdag" };
-    }
-    
-    // Vardag
-    return { className: "", type: "Vardag" };
-  };
-
-  // Skapa månadskalender för en specifik månad
-  const renderMonth = (monthIndex: number) => {
-    const monthDate = new Date(year, monthIndex, 1);
-    const daysInMonth = getDaysInMonth(monthDate);
-    const firstDayOfMonth = startOfMonth(monthDate);
-    const firstDayWeekday = getDay(firstDayOfMonth); // 0 för söndag, 1 för måndag, etc.
-    
-    // Vi använder svenska veckan som börjar med måndag (index 0)
-    const adjustedFirstDay = firstDayWeekday === 0 ? 6 : firstDayWeekday - 1;
-
-    const daysArray = [];
-    // Lägg till tomma celler för dagar före månadens start
-    for (let i = 0; i < adjustedFirstDay; i++) {
-      daysArray.push(<div key={`empty-${i}`} className="h-10 w-10"></div>);
-    }
-
-    // Lägg till dagar i månaden
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, monthIndex, day);
-      const dayType = getDayType(date);
-      
-      daysArray.push(
-        <TooltipProvider key={`day-${day}`}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div 
-                className={`h-10 w-10 flex items-center justify-center rounded-md cursor-help ${dayType.className}`}
-              >
-                <span className={dayType.type === "Semesterdag" ? "font-bold" : ""}>
-                  {day}
-                </span>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{format(date, "EEEE d MMMM", { locale: sv })} - {dayType.type}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      );
-    }
-
-    return (
-      <Card className="mb-4">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">
-            {format(monthDate, "MMMM yyyy", { locale: sv })}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-7 gap-1">
-            <div className="text-center text-gray-500 font-medium">Mån</div>
-            <div className="text-center text-gray-500 font-medium">Tis</div>
-            <div className="text-center text-gray-500 font-medium">Ons</div>
-            <div className="text-center text-gray-500 font-medium">Tor</div>
-            <div className="text-center text-gray-500 font-medium">Fre</div>
-            <div className="text-center text-gray-500 font-medium">Lör</div>
-            <div className="text-center text-gray-500 font-medium">Sön</div>
-            {daysArray}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
   // Find months that have vacation periods
   const relevantMonths = new Set<number>();
   
@@ -174,25 +73,17 @@ export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalend
       </div>
       
       <div className="p-4 border border-gray-200 rounded-lg bg-white">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex items-center gap-2">
-            <div className="h-4 w-4 bg-green-200 rounded"></div>
-            <span className="text-sm text-gray-600">Semesterdagar</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-4 w-4 bg-red-200 rounded"></div>
-            <span className="text-sm text-gray-600">Röda dagar</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-4 w-4 bg-orange-100 rounded"></div>
-            <span className="text-sm text-gray-600">Helg</span>
-          </div>
-        </div>
+        <CalendarLegend />
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {monthsToRender.map(month => (
             <div key={`month-${month}`}>
-              {renderMonth(month)}
+              <MonthCard 
+                year={year}
+                monthIndex={month}
+                periods={sortedPeriods}
+                holidays={holidays}
+              />
             </div>
           ))}
         </div>
