@@ -44,6 +44,7 @@ interface Schedule {
 interface ResultsProps {
   schedule: Schedule | null;
   year: number;
+  holidays?: Date[];
 }
 
 const getModeTitle = (mode: string) => {
@@ -57,7 +58,7 @@ const getModeTitle = (mode: string) => {
   }
 };
 
-const Results = ({ schedule, year }: ResultsProps) => {
+const Results = ({ schedule, year, holidays = [] }: ResultsProps) => {
   const isMobile = useIsMobile();
   
   if (!schedule) {
@@ -87,13 +88,13 @@ const Results = ({ schedule, year }: ResultsProps) => {
         </div>
         <h3 className="text-xl font-medium text-gray-800">Ledighetsdetaljer</h3>
         <div className={`${isMobile ? 'hidden' : 'ml-auto'} bg-purple-100 text-purple-800 px-4 py-1 rounded-full text-sm font-medium`}>
-          {schedule.periods.length} ledigheter planerade
+          {sortedPeriods.length} ledigheter planerade
         </div>
       </div>
 
       {isMobile && (
         <div className="bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-medium text-center">
-          {schedule.periods.length} ledigheter planerade
+          {sortedPeriods.length} ledigheter planerade
         </div>
       )}
 
@@ -147,7 +148,7 @@ const Results = ({ schedule, year }: ResultsProps) => {
         </TabsContent>
         
         <TabsContent value="calendar">
-          <MonthCalendarView schedule={{...schedule, periods: sortedPeriods}} year={year} holidays={[]} />
+          <MonthCalendarView schedule={{...schedule, periods: sortedPeriods}} year={year} holidays={holidays} />
         </TabsContent>
       </Tabs>
       

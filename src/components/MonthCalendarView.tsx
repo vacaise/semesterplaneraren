@@ -1,9 +1,8 @@
 
 import React from "react";
-import { format, getDaysInMonth, startOfMonth, getDay, endOfMonth, isSameDay, isWeekend, addMonths, isSameMonth, isAfter, isBefore } from "date-fns";
+import { format, getDaysInMonth, startOfMonth, getDay, isSameDay, isWeekend, isSameMonth } from "date-fns";
 import { sv } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { isDayOff } from "@/utils/vacationOptimizer";
 import { 
   Tooltip,
   TooltipContent,
@@ -30,13 +29,16 @@ interface Schedule {
 interface MonthCalendarViewProps {
   schedule: Schedule;
   year: number;
-  holidays?: Date[];
+  holidays: Date[];
 }
 
 export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalendarViewProps) => {
+  // Make sure to use the same periods as in the list view
+  const sortedPeriods = [...schedule.periods];
+  
   // Funktion för att kontrollera om datum är inom en ledighetsperiod
   const isInPeriod = (date: Date) => {
-    return schedule.periods.some(period => {
+    return sortedPeriods.some(period => {
       const startDate = new Date(period.start);
       const endDate = new Date(period.end);
       return date >= startDate && date <= endDate;
@@ -128,33 +130,19 @@ export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalend
     );
   };
 
-  // Only consider months from current date forward
-  const currentDate = new Date();
-  const currentMonth = currentDate.getMonth();
-  const currentYear = currentDate.getFullYear();
-
   // Find months that have vacation periods
   const relevantMonths = new Set<number>();
   
-  schedule.periods.forEach(period => {
+  sortedPeriods.forEach(period => {
     const startMonth = new Date(period.start).getMonth();
     const endMonth = new Date(period.end).getMonth();
-    const startYear = new Date(period.start).getFullYear();
-    const endYear = new Date(period.end).getFullYear();
-    
-    // Only consider periods in the current year or future years
-    if (startYear < currentYear) return;
     
     // If the period spans multiple months
     if (startMonth !== endMonth) {
       for (let m = startMonth; m <= endMonth; m++) {
-        // Only add months from the current month forward
-        if (startYear === currentYear && m < currentMonth) continue;
         relevantMonths.add(m);
       }
     } else {
-      // Only add months from the current month forward
-      if (startYear === currentYear && startMonth < currentMonth) return;
       relevantMonths.add(startMonth);
     }
   });

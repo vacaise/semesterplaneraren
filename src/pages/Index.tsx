@@ -136,6 +136,7 @@ const Index = () => {
           <Results 
             schedule={optimizedSchedule} 
             year={year}
+            holidays={holidays}
           />
         );
       default:

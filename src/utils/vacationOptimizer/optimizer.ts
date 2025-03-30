@@ -32,7 +32,7 @@ export const findOptimalSchedule = (
   const summerPeriods = findSummerPeriods(year);
   potentialPeriods.push(...summerPeriods);
   
-  // Filter out periods that have already passed completely or adjust those that have partially passed
+  // IMPORTANT: Filter out periods that have already passed completely
   potentialPeriods = potentialPeriods.filter(period => {
     const periodEndDate = new Date(period.end);
     
