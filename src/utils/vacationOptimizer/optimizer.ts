@@ -9,8 +9,9 @@ import {
 import { calculateVacationDaysNeeded } from './calculators';
 import { isDateInPast } from './helpers';
 import { scorePeriods } from './scoringSystem';
-import { filterPastPeriods, adjustPartialPastPeriods } from './pastDateHandler';
+import { processPastDates } from './pastDateHandler';
 import { selectOptimalPeriods } from './periodSelector';
+import { VacationPeriod } from './types';
 
 // Main function to find and optimize vacation periods
 export const findOptimalSchedule = (
@@ -20,7 +21,7 @@ export const findOptimalSchedule = (
   mode: string
 ) => {
   // Collect all potential periods
-  let potentialPeriods = [];
+  let potentialPeriods: VacationPeriod[] = [];
   
   // Find key holiday periods
   const keyPeriods = findKeyPeriods(year, holidays);
@@ -38,11 +39,8 @@ export const findOptimalSchedule = (
   const summerPeriods = findSummerPeriods(year);
   potentialPeriods.push(...summerPeriods);
   
-  // Filter out periods that are entirely in the past
-  potentialPeriods = filterPastPeriods(potentialPeriods);
-  
-  // Adjust periods that start in the past but end in the future
-  potentialPeriods = adjustPartialPastPeriods(potentialPeriods);
+  // Handle periods with dates in the past
+  potentialPeriods = processPastDates(potentialPeriods);
   
   // Calculate actual vacation days needed for each period based on holidays
   potentialPeriods.forEach(period => {
@@ -56,7 +54,7 @@ export const findOptimalSchedule = (
   });
   
   // Remove periods with negative scores (invalid periods)
-  potentialPeriods = potentialPeriods.filter(period => period.score >= 0);
+  potentialPeriods = potentialPeriods.filter(period => (period.score || 0) >= 0);
   
   // Score periods based on mode preference
   potentialPeriods = scorePeriods(potentialPeriods, mode);

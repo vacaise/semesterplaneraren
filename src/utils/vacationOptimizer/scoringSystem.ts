@@ -1,6 +1,8 @@
 
+import { VacationPeriod } from './types';
+
 // Score periods based on optimization mode
-export const scorePeriods = (periods: any[], mode: string) => {
+export const scorePeriods = (periods: VacationPeriod[], mode: string): VacationPeriod[] => {
   const scoredPeriods = [...periods];
   
   // Sort periods based on mode preference and chronologically (starting with nearest date)
@@ -14,8 +16,8 @@ export const scorePeriods = (periods: any[], mode: string) => {
     }
     
     // If dates are the same, sort by score and mode preference
-    let aScore = a.score;
-    let bScore = b.score;
+    let aScore = a.score || 0;
+    let bScore = b.score || 0;
     
     // Adjust scores based on optimization mode
     if (mode === "longweekends" && a.days <= 4) aScore += 30;

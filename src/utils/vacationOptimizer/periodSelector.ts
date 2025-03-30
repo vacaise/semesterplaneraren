@@ -1,23 +1,25 @@
 
 import { createExtraPeriods } from './periodFinders';
+import { VacationPeriod } from './types';
+import { isDateInPast } from './helpers';
 
 // Select the optimal periods based on the available vacation days
 export const selectOptimalPeriods = (
-  potentialPeriods: any[], 
+  potentialPeriods: VacationPeriod[], 
   vacationDays: number, 
   year: number, 
   holidays: Date[], 
   mode: string
-) => {
-  const selectedPeriods = [];
+): VacationPeriod[] => {
+  const selectedPeriods: VacationPeriod[] = [];
   let remainingVacationDays = vacationDays;
   
   // First pass: prioritize high-value periods
   for (const period of potentialPeriods) {
     // Check if the period has high value (is an important holiday period)
-    if (period.score >= 75 && period.vacationDaysNeeded <= remainingVacationDays) {
+    if ((period.score || 0) >= 75 && (period.vacationDaysNeeded || 0) <= remainingVacationDays) {
       selectedPeriods.push(period);
-      remainingVacationDays -= period.vacationDaysNeeded;
+      remainingVacationDays -= period.vacationDaysNeeded || 0;
     }
     
     // Break if all vacation days are allocated
@@ -39,9 +41,9 @@ export const selectOptimalPeriods = (
       else if (mode === "extended" && period.days > 9) periodFitsMode = true;
       else if (mode === "balanced") periodFitsMode = true;
       
-      if (periodFitsMode && period.vacationDaysNeeded <= remainingVacationDays) {
+      if (periodFitsMode && (period.vacationDaysNeeded || 0) <= remainingVacationDays) {
         selectedPeriods.push(period);
-        remainingVacationDays -= period.vacationDaysNeeded;
+        remainingVacationDays -= period.vacationDaysNeeded || 0;
       }
       
       // Break if all vacation days are allocated
@@ -57,9 +59,9 @@ export const selectOptimalPeriods = (
       if (selectedPeriods.some(p => p === period)) continue;
       
       // If the period fits within remaining days
-      if (period.vacationDaysNeeded <= remainingVacationDays) {
+      if ((period.vacationDaysNeeded || 0) <= remainingVacationDays) {
         selectedPeriods.push(period);
-        remainingVacationDays -= period.vacationDaysNeeded;
+        remainingVacationDays -= period.vacationDaysNeeded || 0;
       }
       
       // Break if all vacation days are allocated

@@ -3,6 +3,14 @@
 import { findOptimalSchedule } from './optimizer';
 import { calculateTotalDaysOff } from './calculators';
 import { isDayOff, isDateInPast } from './helpers';
+import { VacationPeriod } from './types';
+
+interface OptimizedSchedule {
+  totalDaysOff: number;
+  vacationDaysUsed: number;
+  mode: string;
+  periods: VacationPeriod[];
+}
 
 // Main export function for optimizing vacation
 export const optimizeVacation = (
@@ -10,7 +18,7 @@ export const optimizeVacation = (
   vacationDays: number,
   holidays: Date[],
   mode: string
-) => {
+): OptimizedSchedule => {
   // CRITICAL: Filter out holidays that have already passed
   const filteredHolidays = holidays.filter(holiday => !isDateInPast(holiday));
   
@@ -45,3 +53,4 @@ export const optimizeVacation = (
 };
 
 export { isDayOff, isDateInPast };
+export type { VacationPeriod };
