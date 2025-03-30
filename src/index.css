@@ -103,5 +103,5 @@
 
 /* Vänsterpositionerat toast-meddelande */
 .left-toast {
-  @apply fixed bottom-4 left-4 top-auto right-auto !important;
+  @apply fixed bottom-4 left-4 top-auto right-auto max-w-[300px] !important;
 }

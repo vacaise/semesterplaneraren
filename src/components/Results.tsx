@@ -17,12 +17,14 @@ interface Period {
   start: Date;
   end: Date;
   days: number;
-  vacationDaysUsed: number;
+  vacationDaysNeeded: number;
   description: string;
+  type: string;
 }
 
 interface Schedule {
   totalDaysOff: number;
+  vacationDaysUsed: number;
   mode: string;
   periods: Period[];
 }
@@ -44,10 +46,10 @@ const getModeTitle = (mode: string) => {
 };
 
 const getBreakType = (days: number) => {
-  if (days <= 4) return { type: "Long Weekend", class: "bg-green-100 text-green-800" };
-  if (days <= 6) return { type: "Mini Break", class: "bg-amber-100 text-amber-800" };
-  if (days <= 9) return { type: "Week Break", class: "bg-blue-100 text-blue-800" };
-  return { type: "Extended Break", class: "bg-purple-100 text-purple-800" };
+  if (days <= 4) return { type: "Långhelg", class: "bg-green-100 text-green-800" };
+  if (days <= 6) return { type: "Miniledighet", class: "bg-amber-100 text-amber-800" };
+  if (days <= 9) return { type: "Veckoledighet", class: "bg-blue-100 text-blue-800" };
+  return { type: "Längre ledighet", class: "bg-purple-100 text-purple-800" };
 };
 
 const Results = ({ schedule, year }: ResultsProps) => {
@@ -55,17 +57,13 @@ const Results = ({ schedule, year }: ResultsProps) => {
     return <div>Inget schema har genererats än.</div>;
   }
 
-  const totalVacationDays = schedule.periods.reduce(
-    (total, period) => total + period.vacationDaysUsed, 
-    0
-  );
-  
-  const totalDaysOff = schedule.periods.reduce(
-    (total, period) => total + period.days, 
-    0
-  );
+  const totalVacationDays = schedule.vacationDaysUsed || 0;
+  const totalDaysOff = schedule.totalDaysOff || 0;
 
-  const efficiency = (totalDaysOff / totalVacationDays).toFixed(2);
+  // Säkerställ att vi inte kan få NaN genom att använda defaults och kontrollera värden
+  const efficiency = totalVacationDays > 0 
+    ? (totalDaysOff / totalVacationDays).toFixed(2)
+    : "0.00";
 
   return (
     <div className="space-y-6">
@@ -179,7 +177,7 @@ const Results = ({ schedule, year }: ResultsProps) => {
                 <div className="p-4 flex flex-wrap gap-4 items-center justify-between border-b">
                   <div>
                     <h4 className="font-medium">
-                      {format(period.start, "d MMM", { locale: sv })} - {format(period.end, "d MMM", { locale: sv })}
+                      {format(new Date(period.start), "d MMM", { locale: sv })} - {format(new Date(period.end), "d MMM", { locale: sv })}
                     </h4>
                     <p className="text-sm text-gray-600">{period.days} dagar ledigt</p>
                   </div>
@@ -196,7 +194,7 @@ const Results = ({ schedule, year }: ResultsProps) => {
                     </div>
                     <div>
                       <div className="text-sm text-gray-600">Semesterdagar</div>
-                      <div className="font-medium">{period.vacationDaysUsed}</div>
+                      <div className="font-medium">{period.vacationDaysNeeded}</div>
                     </div>
                   </div>
                   

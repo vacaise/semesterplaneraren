@@ -78,7 +78,7 @@ export const optimizeVacation = (
   // Räkna den totala ledigheten (semesterdagar + röda dagar + helger)
   let totalDaysOff = 0;
   selectedPeriods.forEach(period => {
-    totalDaysOff += differenceInDays(period.end, period.start) + 1;
+    totalDaysOff += differenceInDays(new Date(period.end), new Date(period.start)) + 1;
   });
   
   return {
