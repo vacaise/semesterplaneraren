@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import StepOne from "@/components/StepOne";
 import StepTwo from "@/components/StepTwo";
@@ -7,6 +8,7 @@ import PageHeader from "@/components/PageHeader";
 import StepIndicator from "@/components/StepIndicator";
 import MainContainer from "@/components/MainContainer";
 import StepNavigationButtons from "@/components/StepNavigationButtons";
+import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { getHolidays } from "@/utils/holidays";
 import { optimizeVacation } from "@/utils/vacationOptimizer";
@@ -140,23 +142,26 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <PageHeader />
-        
-        {currentStep < 4 && <StepIndicator currentStep={currentStep} />}
+    <div className="min-h-screen bg-gray-50">
+      <div className="py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <PageHeader />
+          
+          {currentStep < 4 && <StepIndicator currentStep={currentStep} />}
 
-        <MainContainer currentStep={currentStep}>
-          {renderCurrentStep()}
-        </MainContainer>
+          <MainContainer currentStep={currentStep}>
+            {renderCurrentStep()}
+          </MainContainer>
 
-        <StepNavigationButtons 
-          currentStep={currentStep}
-          handleNextStep={handleNextStep}
-          handlePrevStep={handlePrevStep}
-          isLoading={isLoading}
-        />
+          <StepNavigationButtons 
+            currentStep={currentStep}
+            handleNextStep={handleNextStep}
+            handlePrevStep={handlePrevStep}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
+      <Footer />
     </div>
   );
 };
