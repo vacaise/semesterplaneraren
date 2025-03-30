@@ -95,7 +95,7 @@ const StepThree = ({
         onClick={fetchHolidays}
         disabled={isLoading}
         variant="outline"
-        className="w-full py-6 border-amber-200 bg-amber-50/50 hover:bg-amber-50 text-amber-800"
+        className="w-full py-6 border-red-200 bg-red-50/50 hover:bg-red-50 text-red-800"
       >
         <MapPin className="h-5 w-5 mr-2" />
         {isLoading ? "Hämtar..." : "Identifiera röda dagar automatiskt"}
@@ -116,8 +116,8 @@ const StepThree = ({
               defaultMonth={new Date(year, 0)}
               classNames={{
                 head_cell: "text-xs font-medium text-gray-500",
-                day: "h-9 w-9 text-sm p-0 font-normal aria-selected:opacity-100 aria-selected:bg-amber-100 aria-selected:text-amber-800 aria-selected:font-medium",
-                day_today: "bg-amber-50 text-amber-800 font-medium",
+                day: "h-9 w-9 text-sm p-0 font-normal aria-selected:opacity-100 aria-selected:bg-red-100 aria-selected:text-red-800 aria-selected:font-medium",
+                day_today: "bg-red-50 text-red-800 font-medium",
                 nav_button: "h-7 w-7 bg-transparent p-0 opacity-70 hover:opacity-100",
                 months: isMobile ? "flex flex-col space-y-4" : "",
                 month: isMobile ? "flex flex-col space-y-4" : "",
@@ -181,8 +181,8 @@ const StepThree = ({
         </div>
       </div>
 
-      <div className="bg-amber-50 p-4 rounded-md border border-amber-100">
-        <h3 className="font-medium text-amber-800 mb-2">Observera</h3>
+      <div className="bg-red-50 p-4 rounded-md border border-red-100">
+        <h3 className="font-medium text-red-800 mb-2">Observera</h3>
         <p className="text-sm text-gray-600">
           Röda dagar kan variera mellan år. Automatisk funktion för att hämta svenska röda dagar finns, men verifiera alltid att datumen stämmer.
         </p>

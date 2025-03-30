@@ -49,7 +49,7 @@ export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalend
   const getDayType = (date: Date) => {
     // Röd dag (helgdag)
     if (holidays.some(holiday => isSameDay(holiday, date))) {
-      return { className: "bg-amber-200 text-amber-800", type: "Röd dag" };
+      return { className: "bg-red-200 text-red-800", type: "Röd dag" };
     }
     
     // Helg
@@ -59,7 +59,7 @@ export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalend
     
     // Semesterdag (om inom en period och varken röd dag eller helg)
     if (isInPeriod(date)) {
-      return { className: "bg-pink-200 text-pink-800 border-2 border-pink-300", type: "Semesterdag" };
+      return { className: "bg-green-200 text-green-800 border-2 border-green-300", type: "Semesterdag" };
     }
     
     // Vardag
@@ -176,11 +176,11 @@ export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalend
       <div className="p-4 border border-gray-200 rounded-lg bg-white">
         <div className="flex items-center gap-3 mb-4">
           <div className="flex items-center gap-2">
-            <div className="h-4 w-4 bg-pink-200 rounded"></div>
+            <div className="h-4 w-4 bg-green-200 rounded"></div>
             <span className="text-sm text-gray-600">Semesterdagar</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="h-4 w-4 bg-amber-200 rounded"></div>
+            <div className="h-4 w-4 bg-red-200 rounded"></div>
             <span className="text-sm text-gray-600">Röda dagar</span>
           </div>
           <div className="flex items-center gap-2">

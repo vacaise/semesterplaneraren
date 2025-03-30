@@ -53,13 +53,13 @@ export const BreakSummaryCard = ({ period }: BreakSummaryCardProps) => {
     const totalBlocks = totalDays;
     let blocksCreated = 0;
     
-    // Create blocks for vacation days (pink)
+    // Create blocks for vacation days (green)
     for (let i = 0; i < vacationDays && blocksCreated < totalBlocks; i++) {
       blocks.push(
         <TooltipProvider key={`v-${i}`}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="h-4 rounded-sm bg-pink-200 flex-1" />
+              <div className="h-4 rounded-sm bg-green-200 flex-1" />
             </TooltipTrigger>
             <TooltipContent>
               <p className="text-xs">Semesterdag</p>
@@ -70,13 +70,13 @@ export const BreakSummaryCard = ({ period }: BreakSummaryCardProps) => {
       blocksCreated++;
     }
     
-    // Create blocks for holidays (yellow)
+    // Create blocks for holidays (red)
     for (let i = 0; i < holidays && blocksCreated < totalBlocks; i++) {
       blocks.push(
         <TooltipProvider key={`h-${i}`}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="h-4 rounded-sm bg-amber-200 flex-1" />
+              <div className="h-4 rounded-sm bg-red-200 flex-1" />
             </TooltipTrigger>
             <TooltipContent>
               <p className="text-xs">Röd dag</p>
@@ -110,7 +110,7 @@ export const BreakSummaryCard = ({ period }: BreakSummaryCardProps) => {
         <TooltipProvider key={`extra-${blocksCreated}`}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="h-4 rounded-sm bg-pink-200 flex-1" />
+              <div className="h-4 rounded-sm bg-green-200 flex-1" />
             </TooltipTrigger>
             <TooltipContent>
               <p className="text-xs">Semesterdag</p>
@@ -141,8 +141,8 @@ export const BreakSummaryCard = ({ period }: BreakSummaryCardProps) => {
       
       <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 bg-pink-100 rounded-md">
-            <Calendar className="h-4 w-4 text-pink-600" />
+          <div className="p-1.5 bg-green-100 rounded-md">
+            <Calendar className="h-4 w-4 text-green-600" />
           </div>
           <div>
             <div className="text-sm text-gray-600">Semesterdagar</div>
@@ -151,8 +151,8 @@ export const BreakSummaryCard = ({ period }: BreakSummaryCardProps) => {
         </div>
         
         <div className="flex items-center gap-2">
-          <div className="p-1.5 bg-amber-100 rounded-md">
-            <Calendar className="h-4 w-4 text-amber-600" />
+          <div className="p-1.5 bg-red-100 rounded-md">
+            <Calendar className="h-4 w-4 text-red-600" />
           </div>
           <div>
             <div className="text-sm text-gray-600">Röda dagar</div>
