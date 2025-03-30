@@ -4,7 +4,7 @@ import {
   Coffee, 
   Star, 
   SunsetIcon, 
-  Beach 
+  Palmtree 
 } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -45,7 +45,7 @@ const StepTwo = ({ selectedMode, setSelectedMode }: StepTwoProps) => {
       id: "extended",
       title: "Långa semestrar",
       description: "Längre 10-15 dagars ledigheter för djupare avkoppling",
-      icon: <Beach className="h-6 w-6 text-blue-600" />
+      icon: <Palmtree className="h-6 w-6 text-blue-600" />
     }
   ];
 

@@ -76,7 +76,7 @@ const StepThree = ({
               onSelect={setSelectedDate}
               className="rounded-md border"
               locale={sv}
-              year={year}
+              defaultMonth={new Date(year, 0)}
             />
           </div>
           <Button 
