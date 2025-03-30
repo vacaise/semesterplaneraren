@@ -11,11 +11,14 @@ export const optimizeVacation = (
   holidays: Date[],
   mode: string
 ) => {
+  // Filter out holidays that have already passed
+  const filteredHolidays = holidays.filter(holiday => !isDateInPast(holiday));
+  
   // Find potential periods based on the parameters
-  const selectedPeriods = findOptimalSchedule(year, vacationDays, holidays, mode);
+  const selectedPeriods = findOptimalSchedule(year, vacationDays, filteredHolidays, mode);
   
   // Calculate the total number of days off
-  let totalDaysOff = calculateTotalDaysOff(selectedPeriods, holidays);
+  let totalDaysOff = calculateTotalDaysOff(selectedPeriods, filteredHolidays);
   
   // Ensure totalDaysOff is not NaN
   if (isNaN(totalDaysOff)) {

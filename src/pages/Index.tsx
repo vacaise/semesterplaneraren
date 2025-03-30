@@ -88,7 +88,9 @@ const Index = () => {
     setIsLoading(true);
     
     try {
+      console.log("Generating schedule with holidays:", holidays);
       const optimizedScheduleData = optimizeVacation(year, vacationDays, holidays, selectedMode);
+      console.log("Generated schedule:", optimizedScheduleData);
       setOptimizedSchedule(optimizedScheduleData);
       setCurrentStep(4);
     } catch (error) {

@@ -27,5 +27,6 @@ export const formatDateToString = (date: Date) => {
 // Check if a date is in the past (before today)
 export const isDateInPast = (date: Date) => {
   const today = startOfDay(new Date());
-  return isBefore(date, today);
+  const dateToCheck = startOfDay(new Date(date));
+  return isBefore(dateToCheck, today);
 };
