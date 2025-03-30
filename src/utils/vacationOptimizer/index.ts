@@ -11,7 +11,7 @@ export const optimizeVacation = (
   holidays: Date[],
   mode: string
 ) => {
-  // Filter out holidays that have already passed
+  // CRITICAL: Filter out holidays that have already passed
   const filteredHolidays = holidays.filter(holiday => !isDateInPast(holiday));
   
   // Find potential periods based on the parameters
@@ -26,11 +26,21 @@ export const optimizeVacation = (
     console.error("totalDaysOff was NaN, setting to 0");
   }
   
+  // IMPORTANT: verify periods don't contain any past dates
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const validatedPeriods = selectedPeriods.filter(period => {
+    const endDate = new Date(period.end);
+    endDate.setHours(0, 0, 0, 0);
+    return endDate >= today;
+  });
+  
   return {
     totalDaysOff,
     vacationDaysUsed: vacationDays,
     mode,
-    periods: selectedPeriods
+    periods: validatedPeriods
   };
 };
 
