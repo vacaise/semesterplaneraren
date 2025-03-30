@@ -1,5 +1,5 @@
 
-import { parse, format } from "date-fns";
+import { parse, format, isPast } from "date-fns";
 
 // Funktion för att beräkna påskdagen baserat på år
 const calculateEaster = (year: number): Date => {
@@ -78,5 +78,7 @@ export const getHolidays = (year: number): Date[] => {
     allSaintsDay
   ];
 
-  return holidays;
+  // Filter out holidays that have already passed
+  const today = new Date();
+  return holidays.filter(holiday => !isPast(holiday));
 };

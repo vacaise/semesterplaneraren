@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { format } from "date-fns";
+import { format, isPast } from "date-fns";
 import { sv } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -45,16 +45,20 @@ const StepThree = ({
 }: StepThreeProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const isMobile = useIsMobile();
+  const today = new Date();
 
   const addHoliday = () => {
     if (selectedDate) {
-      // Check if date already exists
+      // Check if date already exists or is in the past
       const exists = holidays.some(
         (date) => format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
       );
       
-      if (!exists) {
+      if (!exists && !isPast(selectedDate)) {
         setHolidays([...holidays, selectedDate]);
+        setSelectedDate(undefined);
+      } else if (isPast(selectedDate)) {
+        // Don't allow adding past dates
         setSelectedDate(undefined);
       }
     }

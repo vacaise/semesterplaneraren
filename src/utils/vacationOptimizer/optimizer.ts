@@ -45,11 +45,10 @@ export const findOptimalSchedule = (
     // adjust the start date to today
     const periodStartDate = new Date(period.start);
     if (isDateInPast(periodStartDate)) {
-      period.start = currentDate;
+      period.start = new Date(currentDate);
       // Recalculate days based on the new start date
       const endDate = new Date(period.end);
-      const startDate = new Date(period.start);
-      period.days = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      period.days = Math.floor((endDate.getTime() - period.start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
       
       // If period becomes too short after adjustment, skip it
       if (period.days < 2) {
@@ -65,7 +64,7 @@ export const findOptimalSchedule = (
     const actualVacationDays = calculateVacationDaysNeeded(period.start, period.end, holidays);
     period.vacationDaysNeeded = actualVacationDays;
     
-    // Skip periods that would require more than the available vacation days or that are too short
+    // Skip periods that would require more than the available vacation days or that require no vacation days
     if (actualVacationDays > vacationDays || actualVacationDays <= 0) {
       period.score = -1; // Mark as invalid with a negative score
     }
@@ -74,8 +73,17 @@ export const findOptimalSchedule = (
   // Remove periods with negative scores (invalid periods)
   potentialPeriods = potentialPeriods.filter(period => period.score >= 0);
   
-  // Sort periods based on mode preference
+  // Sort periods based on mode preference and chronologically (starting with nearest date)
   potentialPeriods.sort((a, b) => {
+    // First sort by start date (chronologically)
+    const aStartTime = new Date(a.start).getTime();
+    const bStartTime = new Date(b.start).getTime();
+    
+    if (aStartTime !== bStartTime) {
+      return aStartTime - bStartTime; // Earlier periods first
+    }
+    
+    // If dates are the same, sort by score and mode preference
     let aScore = a.score;
     let bScore = b.score;
     
@@ -168,11 +176,10 @@ export const findOptimalSchedule = (
       
       const periodStartDate = new Date(period.start);
       if (isDateInPast(periodStartDate)) {
-        period.start = currentDate;
+        period.start = new Date(currentDate);
         // Recalculate days
         const endDate = new Date(period.end);
-        const startDate = new Date(period.start);
-        period.days = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        period.days = Math.floor((endDate.getTime() - period.start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
         
         // If period becomes too short after adjustment, skip it
         if (period.days < 2) {
@@ -185,6 +192,13 @@ export const findOptimalSchedule = (
     
     selectedPeriods.push(...validExtraPeriods);
   }
+  
+  // Sort the final selected periods by date (chronologically)
+  selectedPeriods.sort((a, b) => {
+    const aStartTime = new Date(a.start).getTime();
+    const bStartTime = new Date(b.start).getTime();
+    return aStartTime - bStartTime;
+  });
   
   return selectedPeriods;
 };
