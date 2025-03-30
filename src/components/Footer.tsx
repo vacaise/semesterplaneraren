@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   const isMobile = useIsMobile();
@@ -29,8 +30,8 @@ const Footer = () => {
   const handleSubmitReport = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // In a real implementation, this would send an email
-    // For now, just show a success toast and close the dialog
+    // I ett verkligt scenario skulle detta skicka ett mejl
+    // För tillfället visar vi bara en framgångstoast och stänger dialogen
     toast({
       title: "Rapport skickad",
       description: "Tack för din feedback! Vi kommer att titta på problemet så snart som möjligt.",
@@ -50,22 +51,42 @@ const Footer = () => {
       <div className="max-w-4xl mx-auto">
         <div className={`${isMobile ? 'flex flex-col gap-4' : 'flex justify-between'}`}>
           <div>
-            <h2 className={`text-lg font-semibold mb-2 ${isMobile ? 'text-center' : ''}`}>vacai</h2>
+            <h2 className={`text-lg font-semibold mb-2 ${isMobile ? 'text-center' : ''}`}>
+              <Link to="/" className="hover:text-teal-600 transition-colors">vacai</Link>
+            </h2>
             <p className={`text-gray-600 text-sm max-w-md ${isMobile ? 'text-center' : ''}`}>
               Optimera din semester för att maximera din ledighet. vacai hjälper dig att få ut mest möjligt av dina semesterdagar.
             </p>
           </div>
           
           <div className={`flex ${isMobile ? 'flex-row justify-center mt-4' : 'flex-col items-end'}`}>
-            <div className={`flex ${isMobile ? 'gap-6' : 'gap-4'}`}>
-              <a href="mailto:vacai.se@yahoo.com" className="text-gray-600 hover:text-gray-900 text-sm">Kontakt</a>
-              <button 
-                onClick={() => setReportDialogOpen(true)}
-                className="text-gray-600 hover:text-gray-900 text-sm"
-              >
-                Rapportera ett problem
-              </button>
-            </div>
+            <nav aria-label="Sidfot navigation">
+              <ul className={`flex ${isMobile ? 'gap-6' : 'gap-4'}`}>
+                <li>
+                  <a href="mailto:vacai.se@yahoo.com" 
+                     className="text-gray-600 hover:text-teal-600 transition-colors text-sm"
+                     aria-label="Kontakta oss via e-post">
+                    Kontakt
+                  </a>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => setReportDialogOpen(true)}
+                    className="text-gray-600 hover:text-teal-600 transition-colors text-sm"
+                    aria-label="Rapportera ett problem"
+                  >
+                    Rapportera ett problem
+                  </button>
+                </li>
+                <li>
+                  <a href="/sitemap.xml" 
+                     className="text-gray-600 hover:text-teal-600 transition-colors text-sm"
+                     aria-label="Visa sitemap">
+                    Sitemap
+                  </a>
+                </li>
+              </ul>
+            </nav>
             {!isMobile && (
               <p className="text-gray-500 text-xs mt-4">
                 &copy; {year} vacai.se. Alla rättigheter förbehållna.

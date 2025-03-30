@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import StepOne from "@/components/StepOne";
 import StepTwo from "@/components/StepTwo";
@@ -13,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getHolidays } from "@/utils/holidays";
 import { optimizeVacation } from "@/utils/vacationOptimizer";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Helmet } from "react-helmet";
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -25,12 +25,10 @@ const Index = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  // Add effect to scroll to top when step changes
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [currentStep]);
 
-  // Reset the holidays when the year changes
   useEffect(() => {
     setHolidays([]);
   }, [year]);
@@ -148,6 +146,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Helmet>
+        <title>vacai | Optimera din semester för maximal ledighet</title>
+        <meta name="description" content="Maximera din ledighet med smart semesterplanering. Planera dina semesterdagar optimalt för att få ut mest möjliga ledighet." />
+        <link rel="canonical" href="https://vacai.se" />
+      </Helmet>
+      
       <div className={`py-6 md:py-12 px-4 sm:px-6 lg:px-8`}>
         <div className="max-w-4xl mx-auto">
           <PageHeader />
