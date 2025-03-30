@@ -54,8 +54,12 @@ export const BreakSummaryCard = ({ period }: BreakSummaryCardProps) => {
   const createDayBlocks = () => {
     const blocks = [];
     
+    // Make sure we're creating exactly the right number of total blocks
+    const totalBlocks = totalDays;
+    let blocksCreated = 0;
+    
     // Create blocks for vacation days (pink)
-    for (let i = 0; i < vacationDays; i++) {
+    for (let i = 0; i < vacationDays && blocksCreated < totalBlocks; i++) {
       blocks.push(
         <TooltipProvider key={`v-${i}`}>
           <Tooltip>
@@ -68,10 +72,11 @@ export const BreakSummaryCard = ({ period }: BreakSummaryCardProps) => {
           </Tooltip>
         </TooltipProvider>
       );
+      blocksCreated++;
     }
     
     // Create blocks for holidays (yellow)
-    for (let i = 0; i < holidays; i++) {
+    for (let i = 0; i < holidays && blocksCreated < totalBlocks; i++) {
       blocks.push(
         <TooltipProvider key={`h-${i}`}>
           <Tooltip>
@@ -84,10 +89,11 @@ export const BreakSummaryCard = ({ period }: BreakSummaryCardProps) => {
           </Tooltip>
         </TooltipProvider>
       );
+      blocksCreated++;
     }
     
     // Create blocks for weekends (orange)
-    for (let i = 0; i < weekends; i++) {
+    for (let i = 0; i < weekends && blocksCreated < totalBlocks; i++) {
       blocks.push(
         <TooltipProvider key={`w-${i}`}>
           <Tooltip>
@@ -100,6 +106,24 @@ export const BreakSummaryCard = ({ period }: BreakSummaryCardProps) => {
           </Tooltip>
         </TooltipProvider>
       );
+      blocksCreated++;
+    }
+    
+    // If we still haven't created enough blocks (due to rounding), add more vacation days
+    while (blocksCreated < totalBlocks) {
+      blocks.push(
+        <TooltipProvider key={`extra-${blocksCreated}`}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="h-4 rounded-sm bg-pink-200 flex-1" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs">Semesterdag</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+      blocksCreated++;
     }
     
     return blocks;
