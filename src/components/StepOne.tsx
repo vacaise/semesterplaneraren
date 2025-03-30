@@ -103,9 +103,6 @@ const StepOne = ({ year, setYear, vacationDays, setVacationDays }: StepOneProps)
               placeholder="Ange dagar"
             />
           </div>
-          <p className="text-sm text-gray-500 mt-1">
-            De flesta svenskar har rätt till 25 dagar lagstadgad semester per år
-          </p>
         </div>
       </div>
     </div>

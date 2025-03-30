@@ -24,7 +24,7 @@ const MainContainer = ({ currentStep, children }: MainContainerProps) => {
           </CardTitle>
         )}
       </CardHeader>
-      <CardContent>
+      <CardContent className={currentStep === 4 ? "overflow-visible" : ""}>
         {children}
       </CardContent>
     </Card>

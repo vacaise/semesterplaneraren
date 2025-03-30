@@ -2,7 +2,7 @@
 import { format, addDays, differenceInDays } from "date-fns";
 import { sv } from "date-fns/locale";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, PlaneTakeoff, Building2, Clock } from "lucide-react";
+import { Calendar as CalendarIcon, PlaneTakeoff, Building2, Clock } from "lucide-react";
 import { 
   Table, 
   TableBody, 
@@ -12,6 +12,11 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BreakSummaryCard } from "@/components/BreakSummaryCard";
+import { MonthCalendarView } from "@/components/MonthCalendarView";
+import { BreakTypeExplanation } from "@/components/BreakTypeExplanation";
+import { StatisticCard } from "@/components/StatisticCard";
 
 interface Period {
   start: Date;
@@ -45,13 +50,6 @@ const getModeTitle = (mode: string) => {
   }
 };
 
-const getBreakType = (days: number) => {
-  if (days <= 4) return { type: "Långhelg", class: "bg-green-100 text-green-800" };
-  if (days <= 6) return { type: "Miniledighet", class: "bg-amber-100 text-amber-800" };
-  if (days <= 9) return { type: "Veckoledighet", class: "bg-blue-100 text-blue-800" };
-  return { type: "Längre ledighet", class: "bg-purple-100 text-purple-800" };
-};
-
 const Results = ({ schedule, year }: ResultsProps) => {
   if (!schedule) {
     return <div>Inget schema har genererats än.</div>;
@@ -77,156 +75,59 @@ const Results = ({ schedule, year }: ResultsProps) => {
         </div>
       </div>
 
-      <div className="p-4 border border-purple-100 rounded-lg bg-purple-50/50">
-        <h4 className="text-gray-800 font-medium mb-3">Förstå dina ledighetstyper</h4>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="bg-green-50 border border-green-100 rounded-lg p-3">
-            <div className="flex items-start gap-2">
-              <div className="p-2 bg-white rounded-md">
-                <PlaneTakeoff className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <h5 className="font-medium text-green-800">Långhelg</h5>
-                <p className="text-sm text-gray-600">3-4 dagar ledigt runt en helg</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-amber-50 border border-amber-100 rounded-lg p-3">
-            <div className="flex items-start gap-2">
-              <div className="p-2 bg-white rounded-md">
-                <Calendar className="h-5 w-5 text-amber-600" />
-              </div>
-              <div>
-                <h5 className="font-medium text-amber-800">Miniledighet</h5>
-                <p className="text-sm text-gray-600">5-6 dagar för en snabb getaway</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-blue-50 border border-blue-100 rounded-lg p-3">
-            <div className="flex items-start gap-2">
-              <div className="p-2 bg-white rounded-md">
-                <Calendar className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <h5 className="font-medium text-blue-800">Veckoledighet</h5>
-                <p className="text-sm text-gray-600">7-9 dagar för en ordentlig semester</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-purple-50 border border-purple-100 rounded-lg p-3">
-            <div className="flex items-start gap-2">
-              <div className="p-2 bg-white rounded-md">
-                <PlaneTakeoff className="h-5 w-5 text-purple-600" />
-              </div>
-              <div>
-                <h5 className="font-medium text-purple-800">Längre ledighet</h5>
-                <p className="text-sm text-gray-600">10-15 dagar för en utökad semester</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <BreakTypeExplanation />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-blue-50 border-blue-100">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <h3 className="text-xl font-semibold text-blue-800">{totalVacationDays}</h3>
-              <p className="text-sm text-gray-600">Semesterdagar</p>
-            </div>
-          </CardContent>
-        </Card>
+        <StatisticCard 
+          value={totalVacationDays} 
+          label="Semesterdagar" 
+          bgColor="bg-blue-50" 
+          borderColor="border-blue-100" 
+          textColor="text-blue-800" 
+        />
         
-        <Card className="bg-green-50 border-green-100">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <h3 className="text-xl font-semibold text-green-800">{totalDaysOff}</h3>
-              <p className="text-sm text-gray-600">Totalt lediga dagar</p>
-            </div>
-          </CardContent>
-        </Card>
+        <StatisticCard 
+          value={totalDaysOff} 
+          label="Totalt lediga dagar" 
+          bgColor="bg-green-50" 
+          borderColor="border-green-100" 
+          textColor="text-green-800" 
+        />
         
-        <Card className="bg-purple-50 border-purple-100">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <h3 className="text-xl font-semibold text-purple-800">
-                {efficiency}x
-              </h3>
-              <p className="text-sm text-gray-600">Effektivitet</p>
-            </div>
-          </CardContent>
-        </Card>
+        <StatisticCard 
+          value={`${efficiency}x`} 
+          label="Effektivitet" 
+          bgColor="bg-purple-50" 
+          borderColor="border-purple-100" 
+          textColor="text-purple-800" 
+        />
       </div>
 
-      <div>
-        <h3 className="text-lg font-medium mb-3">
-          Dina optimerade ledigheter för {year}
-        </h3>
-        <p className="text-gray-600 mb-4">
-          Baserat på din preferens: {getModeTitle(schedule.mode)}
-        </p>
+      <Tabs defaultValue="periods" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="periods">Ledighetsperioder</TabsTrigger>
+          <TabsTrigger value="calendar">Kalendervy</TabsTrigger>
+        </TabsList>
         
-        <div className="space-y-4">
-          {schedule.periods.map((period, index) => {
-            const breakStyle = getBreakType(period.days);
-            return (
-              <div key={index} className="border rounded-lg overflow-hidden bg-white">
-                <div className="p-4 flex flex-wrap gap-4 items-center justify-between border-b">
-                  <div>
-                    <h4 className="font-medium">
-                      {format(new Date(period.start), "d MMM", { locale: sv })} - {format(new Date(period.end), "d MMM", { locale: sv })}
-                    </h4>
-                    <p className="text-sm text-gray-600">{period.days} dagar ledigt</p>
-                  </div>
-                  
-                  <div className={`px-3 py-1 rounded-full text-sm ${breakStyle.class}`}>
-                    {breakStyle.type}
-                  </div>
-                </div>
-                
-                <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-pink-100 rounded-md">
-                      <Calendar className="h-4 w-4 text-pink-600" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-gray-600">Semesterdagar</div>
-                      <div className="font-medium">{period.vacationDaysNeeded}</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-amber-100 rounded-md">
-                      <Calendar className="h-4 w-4 text-amber-600" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-gray-600">Röda dagar</div>
-                      <div className="font-medium">2</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-orange-100 rounded-md">
-                      <Clock className="h-4 w-4 text-orange-600" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-gray-600">Helger</div>
-                      <div className="font-medium">2</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="px-4 py-2 bg-gray-50">
-                  <div className="text-sm text-gray-600">{period.description}</div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+        <TabsContent value="periods" className="space-y-4">
+          <h3 className="text-lg font-medium mb-3">
+            Dina optimerade ledigheter för {year}
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Baserat på din preferens: {getModeTitle(schedule.mode)}
+          </p>
+          
+          <div className="space-y-4">
+            {schedule.periods.map((period, index) => (
+              <BreakSummaryCard key={index} period={period} />
+            ))}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="calendar">
+          <MonthCalendarView schedule={schedule} year={year} />
+        </TabsContent>
+      </Tabs>
       
       <div className="bg-blue-50 p-4 rounded-md border border-blue-100">
         <h3 className="font-medium text-blue-800 mb-2">Tips</h3>
