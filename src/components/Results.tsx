@@ -13,6 +13,12 @@ import {
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { BreakSummaryCard } from "@/components/BreakSummaryCard";
 import { MonthCalendarView } from "@/components/MonthCalendarView";
 import { BreakTypeExplanation } from "@/components/BreakTypeExplanation";

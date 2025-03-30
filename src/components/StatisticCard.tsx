@@ -18,7 +18,16 @@ export const StatisticCard = ({
   textColor 
 }: StatisticCardProps) => {
   // Make sure the value is valid (not NaN or undefined)
-  const displayValue = typeof value === 'number' && isNaN(value) ? "0" : value;
+  const displayValue = (() => {
+    if (typeof value === 'number') {
+      return isNaN(value) ? "0" : value.toString();
+    } else if (value === null || value === undefined) {
+      return "0";
+    } else if (typeof value === 'string' && value.includes('NaN')) {
+      return value.replace('NaN', '0');
+    }
+    return value;
+  })();
 
   return (
     <Card className={`${bgColor} ${borderColor}`}>

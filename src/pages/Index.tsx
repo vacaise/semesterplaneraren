@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import StepOne from "@/components/StepOne";
 import StepTwo from "@/components/StepTwo";
@@ -26,6 +25,11 @@ const Index = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [currentStep]);
+
+  // Reset the holidays when the year changes
+  useEffect(() => {
+    setHolidays([]);
+  }, [year]);
 
   const handleNextStep = () => {
     if (currentStep === 1) {
@@ -89,6 +93,7 @@ const Index = () => {
         description: "Kunde inte optimera ditt schema, försök igen senare",
         variant: "destructive",
       });
+      console.error("Optimization error:", error);
     } finally {
       setIsLoading(false);
     }

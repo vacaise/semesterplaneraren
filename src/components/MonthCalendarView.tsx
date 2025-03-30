@@ -4,6 +4,12 @@ import { format, getDaysInMonth, startOfMonth, getDay, endOfMonth, isSameDay, is
 import { sv } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isDayOff } from "@/utils/vacationOptimizer";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Period {
   start: Date;
@@ -41,21 +47,21 @@ export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalend
   const getDayType = (date: Date) => {
     // Röd dag (helgdag)
     if (holidays.some(holiday => isSameDay(holiday, date))) {
-      return { className: "bg-amber-200 text-amber-800", type: "holiday" };
+      return { className: "bg-amber-200 text-amber-800", type: "Röd dag" };
     }
     
     // Helg
     if (isWeekend(date)) {
-      return { className: "bg-orange-100 text-orange-800", type: "weekend" };
+      return { className: "bg-orange-100 text-orange-800", type: "Helg" };
     }
     
     // Semesterdag (om inom en period och varken röd dag eller helg)
     if (isInPeriod(date)) {
-      return { className: "bg-pink-200 text-pink-800 border-2 border-pink-300", type: "vacation" };
+      return { className: "bg-pink-200 text-pink-800 border-2 border-pink-300", type: "Semesterdag" };
     }
     
     // Vardag
-    return { className: "", type: "regular" };
+    return { className: "", type: "Vardag" };
   };
 
   // Skapa månadskalender för en specifik månad
@@ -80,14 +86,22 @@ export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalend
       const dayType = getDayType(date);
       
       daysArray.push(
-        <div 
-          key={`day-${day}`} 
-          className={`h-10 w-10 flex items-center justify-center rounded-md ${dayType.className}`}
-        >
-          <span className={dayType.type === "vacation" ? "font-bold" : ""}>
-            {day}
-          </span>
-        </div>
+        <TooltipProvider key={`day-${day}`}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div 
+                className={`h-10 w-10 flex items-center justify-center rounded-md cursor-help ${dayType.className}`}
+              >
+                <span className={dayType.type === "Semesterdag" ? "font-bold" : ""}>
+                  {day}
+                </span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{format(date, "EEEE d MMMM", { locale: sv })} - {dayType.type}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       );
     }
 
@@ -153,7 +167,7 @@ export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalend
           </div>
           <div className="flex items-center gap-2">
             <div className="h-4 w-4 bg-orange-100 rounded"></div>
-            <span className="text-sm text-gray-600">Helger</span>
+            <span className="text-sm text-gray-600">Helg</span>
           </div>
         </div>
         
