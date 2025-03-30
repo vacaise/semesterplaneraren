@@ -14,9 +14,35 @@ export const selectOptimalPeriods = (
   const selectedPeriods: VacationPeriod[] = [];
   let remainingVacationDays = vacationDays;
   
-  // First pass: prioritize high-value periods
-  for (const period of potentialPeriods) {
-    // Check if the period has high value (is an important holiday period)
+  // Filter periods by mode preference
+  let modePriorityPeriods: VacationPeriod[] = [];
+  let otherPeriods: VacationPeriod[] = [];
+  
+  potentialPeriods.forEach(period => {
+    let matches = false;
+    
+    if (mode === "longweekends" && period.days <= 4) {
+      matches = true;
+    } else if (mode === "minibreaks" && period.days <= 6 && period.days > 4) {
+      matches = true;
+    } else if (mode === "weeks" && period.days <= 9 && period.days > 6) {
+      matches = true;
+    } else if (mode === "extended" && period.days > 9) {
+      matches = true;
+    } else if (mode === "balanced") {
+      matches = true;
+    }
+    
+    if (matches) {
+      modePriorityPeriods.push(period);
+    } else {
+      otherPeriods.push(period);
+    }
+  });
+  
+  // First pass: prioritize high-value periods that match the mode
+  for (const period of modePriorityPeriods) {
+    // Check if period is high-value (score >= 75 or it's an important holiday period)
     if ((period.score || 0) >= 75 && (period.vacationDaysNeeded || 0) <= remainingVacationDays) {
       selectedPeriods.push(period);
       remainingVacationDays -= period.vacationDaysNeeded || 0;
@@ -26,22 +52,14 @@ export const selectOptimalPeriods = (
     if (remainingVacationDays <= 0) break;
   }
   
-  // Second pass: add periods based on optimization mode
+  // Second pass: add remaining mode priority periods
   if (remainingVacationDays > 0) {
-    for (const period of potentialPeriods) {
+    for (const period of modePriorityPeriods) {
       // Skip already selected periods
       if (selectedPeriods.some(p => p === period)) continue;
       
-      // Check if the period fits the optimization mode and if we have enough days
-      let periodFitsMode = false;
-      
-      if (mode === "longweekends" && period.days <= 4) periodFitsMode = true;
-      else if (mode === "minibreaks" && period.days <= 6 && period.days > 4) periodFitsMode = true;
-      else if (mode === "weeks" && period.days <= 9 && period.days > 6) periodFitsMode = true;
-      else if (mode === "extended" && period.days > 9) periodFitsMode = true;
-      else if (mode === "balanced") periodFitsMode = true;
-      
-      if (periodFitsMode && (period.vacationDaysNeeded || 0) <= remainingVacationDays) {
+      // If the period fits within remaining days
+      if ((period.vacationDaysNeeded || 0) <= remainingVacationDays) {
         selectedPeriods.push(period);
         remainingVacationDays -= period.vacationDaysNeeded || 0;
       }
@@ -51,13 +69,9 @@ export const selectOptimalPeriods = (
     }
   }
   
-  // Third pass: use remaining days
+  // Third pass: use other periods if we still have days left
   if (remainingVacationDays > 0) {
-    // Choose smaller periods or short breaks
-    for (const period of potentialPeriods) {
-      // Skip already selected periods
-      if (selectedPeriods.some(p => p === period)) continue;
-      
+    for (const period of otherPeriods) {
       // If the period fits within remaining days
       if ((period.vacationDaysNeeded || 0) <= remainingVacationDays) {
         selectedPeriods.push(period);
