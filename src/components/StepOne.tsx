@@ -1,39 +1,30 @@
-
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { CalendarDays, Info } from "lucide-react";
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useIsMobile } from "@/hooks/use-mobile";
-
 interface StepOneProps {
   year: number;
   setYear: (year: number) => void;
   vacationDays: number;
   setVacationDays: (days: number) => void;
 }
-
-const StepOne = ({ year, setYear, vacationDays, setVacationDays }: StepOneProps) => {
+const StepOne = ({
+  year,
+  setYear,
+  vacationDays,
+  setVacationDays
+}: StepOneProps) => {
   const currentYear = new Date().getFullYear();
   // Skapa en array med år från nuvarande år till 2030
-  const years = Array.from({ length: 2030 - currentYear + 1 }, (_, i) => currentYear + i);
+  const years = Array.from({
+    length: 2030 - currentYear + 1
+  }, (_, i) => currentYear + i);
   const isMobile = useIsMobile();
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div className="flex items-center gap-2 mb-4">
         <div className="bg-teal-50 text-teal-800 h-8 w-8 rounded-full flex items-center justify-center font-medium">1</div>
         <h3 className="text-xl font-medium text-gray-800">Ange dina dagar</h3>
@@ -60,55 +51,29 @@ const StepOne = ({ year, setYear, vacationDays, setVacationDays }: StepOneProps)
           
           <div className="flex items-center gap-2">
             <span className="text-gray-600">År:</span>
-            <Select
-              value={year.toString()}
-              onValueChange={(value) => setYear(parseInt(value))}
-            >
+            <Select value={year.toString()} onValueChange={value => setYear(parseInt(value))}>
               <SelectTrigger className="w-[100px]">
                 <SelectValue placeholder={year.toString()} />
               </SelectTrigger>
               <SelectContent>
-                {years.map((y) => (
-                  <SelectItem key={y} value={y.toString()}>
+                {years.map(y => <SelectItem key={y} value={y.toString()}>
                     {y}
-                  </SelectItem>
-                ))}
+                  </SelectItem>)}
               </SelectContent>
             </Select>
           </div>
         </div>
 
-        <p className="text-gray-600 mb-6">
-          Ange hur många betalda semesterdagar du har tillgängliga. Appen kommer att optimera deras användning från nu till slutet av året.
-        </p>
+        <p className="text-gray-600 mb-6">Sidan hur många betalda semesterdagar du har tillgängliga. Appen kommer att optimera deras användning från nu till slutet av året.</p>
 
         <div className="space-y-4">
           <Label htmlFor="vacationDays" className="text-gray-700 text-base">Antal dagar</Label>
           <div className={`${isMobile ? 'flex flex-col gap-3' : 'flex items-center space-x-4'}`}>
-            <Slider
-              id="vacationDays"
-              defaultValue={[vacationDays]}
-              max={40}
-              min={1}
-              step={1}
-              onValueChange={(val) => setVacationDays(val[0])}
-              className="flex-1"
-            />
-            <Input
-              type="number"
-              id="vacationDaysInput"
-              value={vacationDays}
-              onChange={(e) => setVacationDays(Number(e.target.value))}
-              className={`${isMobile ? 'w-full' : 'w-24'}`}
-              min={1}
-              max={40}
-              placeholder="Ange dagar"
-            />
+            <Slider id="vacationDays" defaultValue={[vacationDays]} max={40} min={1} step={1} onValueChange={val => setVacationDays(val[0])} className="flex-1" />
+            <Input type="number" id="vacationDaysInput" value={vacationDays} onChange={e => setVacationDays(Number(e.target.value))} className={`${isMobile ? 'w-full' : 'w-24'}`} min={1} max={40} placeholder="Ange dagar" />
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default StepOne;
