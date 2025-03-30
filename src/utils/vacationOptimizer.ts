@@ -59,7 +59,7 @@ export const optimizeVacation = (
 
 // Denna funktion skulle avgöra om en given dag är en arbetsfri dag (helgdag eller helg)
 export const isDayOff = (date: Date, holidays: Date[]) => {
-  // Kontrollera om dagen är en helg
+  // Kontrollera om dagen är en helg (lördag eller söndag)
   if (isWeekend(date)) return true;
   
   // Kontrollera om dagen är en helgdag

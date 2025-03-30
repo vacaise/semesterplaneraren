@@ -6,7 +6,7 @@ import StepThree from "@/components/StepThree";
 import Results from "@/components/Results";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { getHolidays } from "@/utils/holidays";
 import { CalendarDays, ArrowRight } from "lucide-react";
 
@@ -51,10 +51,14 @@ const Index = () => {
     try {
       const fetchedHolidays = getHolidays(year);
       setHolidays(fetchedHolidays);
-      toast({
-        title: "Röda dagar hämtade",
-        description: `${fetchedHolidays.length} helgdagar laddades för ${year}`,
-      });
+      
+      // Flytta toasten uppåt från knappen
+      setTimeout(() => {
+        toast({
+          title: "Röda dagar hämtade",
+          description: `${fetchedHolidays.length} helgdagar laddades för ${year}`,
+        });
+      }, 100);
     } catch (error) {
       toast({
         title: "Fel vid hämtning av röda dagar",
