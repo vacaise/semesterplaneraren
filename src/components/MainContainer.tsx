@@ -16,7 +16,7 @@ const MainContainer = ({ currentStep, children }: MainContainerProps) => {
   };
 
   return (
-    <Card className="mb-8 shadow-sm border border-gray-200 bg-white">
+    <Card className="mb-8 shadow-sm border border-gray-200 bg-white" id="main-container">
       <CardHeader className={currentStep === 4 ? "pb-0" : ""}>
         {currentStep < 4 && (
           <CardTitle className="text-xl text-gray-800">

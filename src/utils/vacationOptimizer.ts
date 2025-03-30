@@ -39,18 +39,38 @@ export const optimizeVacation = (
   const weekendPeriods = findExtendedWeekends(year, holidays);
   potentialPeriods.push(...weekendPeriods);
   
+  // Lägg till sommarsemester som en period
+  const summerPeriods = findSummerPeriods(year);
+  potentialPeriods.push(...summerPeriods);
+  
   // Sortera perioder efter prioritet baserat på valt läge
+  // Anpassa sortering baserat på olika modes
   potentialPeriods.sort((a, b) => {
+    // Justera score baserat på valt läge
+    let aScore = a.score;
+    let bScore = b.score;
+    
+    if (mode === "longweekends" && a.days <= 4) aScore += 30;
+    if (mode === "longweekends" && b.days <= 4) bScore += 30;
+    
+    if (mode === "minibreaks" && a.days <= 6 && a.days > 4) aScore += 30;
+    if (mode === "minibreaks" && b.days <= 6 && b.days > 4) bScore += 30;
+    
+    if (mode === "weeks" && a.days <= 9 && a.days > 6) aScore += 30;
+    if (mode === "weeks" && b.days <= 9 && b.days > 6) bScore += 30;
+    
+    if (mode === "extended" && a.days > 9) aScore += 30;
+    if (mode === "extended" && b.days > 9) bScore += 30;
+    
     // Sortera efter poäng, högre poäng först
-    return b.score - a.score;
+    return bScore - aScore;
   });
   
-  // Optimera fördelningen av semesterdagar baserat på läge
+  // Optimera fördelningen av semesterdagar
   const selectedPeriods = [];
   let remainingVacationDays = vacationDays;
   
   // Fördela semesterdagar enligt valt läge
-  // Olika strategier beroende på läge
   let periodIndex = 0;
   
   // Fortsätt lägga till perioder tills alla semesterdagar är fördelade
@@ -69,10 +89,16 @@ export const optimizeVacation = (
   // Om vi fortfarande har dagar kvar, lägg till extra dagar till befintliga perioder
   // eller skapa nya korta perioder
   if (remainingVacationDays > 0) {
-    // Skapa nya korta perioder för återstående dagar
-    const extraPeriods = createExtraPeriods(year, remainingVacationDays, selectedPeriods, holidays);
-    selectedPeriods.push(...extraPeriods);
-    remainingVacationDays = 0;
+    // Försök att förlänga befintliga perioder först
+    let extraDaysApplied = extendExistingPeriods(selectedPeriods, remainingVacationDays);
+    remainingVacationDays -= extraDaysApplied;
+    
+    // Om vi fortfarande har dagar kvar, skapa nya korta perioder
+    if (remainingVacationDays > 0) {
+      const extraPeriods = createExtraPeriods(year, remainingVacationDays, selectedPeriods, holidays);
+      selectedPeriods.push(...extraPeriods);
+      remainingVacationDays = 0;
+    }
   }
   
   // Räkna den totala ledigheten (semesterdagar + röda dagar + helger)
@@ -89,6 +115,28 @@ export const optimizeVacation = (
   };
 };
 
+// Försök att förlänga befintliga perioder med extra dagar
+function extendExistingPeriods(selectedPeriods, extraDays) {
+  let daysApplied = 0;
+  
+  // Prioritera kortare perioder för förlängning
+  const periodsToExtend = [...selectedPeriods].sort((a, b) => a.days - b.days);
+  
+  for (let i = 0; i < periodsToExtend.length && daysApplied < extraDays; i++) {
+    const period = periodsToExtend[i];
+    
+    // Lägg till en extra dag och öka vacationDaysNeeded
+    if (daysApplied < extraDays) {
+      period.end = addDays(new Date(period.end), 1);
+      period.days += 1;
+      period.vacationDaysNeeded += 1;
+      daysApplied += 1;
+    }
+  }
+  
+  return daysApplied;
+}
+
 // Hitta viktiga högtidsperioder
 function findKeyPeriods(year, holidays) {
   const periods = [];
@@ -96,10 +144,10 @@ function findKeyPeriods(year, holidays) {
   // Påsk (uppskatta påskhelgen)
   const easterPeriod = {
     start: new Date(year, 3, 1),  // Uppskattning, exakt datum varierar
-    end: new Date(year, 3, 6),
-    days: 6,
-    vacationDaysNeeded: 3,
-    description: "Påskledighet",
+    end: new Date(year, 3, 12),
+    days: 12,
+    vacationDaysNeeded: 8,
+    description: "Påskledighet med klämdagar",
     score: 80,  // Hög poäng för viktiga högtider
     type: "holiday"
   };
@@ -117,10 +165,10 @@ function findKeyPeriods(year, holidays) {
   
   // Jul och nyår
   const christmasPeriod = {
-    start: new Date(year, 11, 22),
+    start: new Date(year, 11, 20),
     end: new Date(year, 11, 31),
-    days: 10,
-    vacationDaysNeeded: 5,
+    days: 12,
+    vacationDaysNeeded: 6,
     description: "Julledighet",
     score: 90,  // Högsta poäng för jul/nyår
     type: "holiday"
@@ -134,18 +182,29 @@ function findKeyPeriods(year, holidays) {
 function findBridgeDays(year, holidays) {
   const periods = [];
   
-  // Exempel på "klämdagsperiod"
-  const bridgePeriod = {
+  // Maj-klämdagar (Kristi himmelsfärd/första maj)
+  const mayBridgePeriod = {
     start: new Date(year, 4, 1),  // Första maj
-    end: new Date(year, 4, 5),
-    days: 5,
-    vacationDaysNeeded: 2,
-    description: "Klämdagar kring första maj",
+    end: new Date(year, 4, 12),
+    days: 12,
+    vacationDaysNeeded: 7,
+    description: "Klämdagar kring Kristi himmelsfärd",
     score: 70,
     type: "bridge"
   };
   
-  periods.push(bridgePeriod);
+  // November-klämdagar (Alla helgons dag)
+  const novemberBridgePeriod = {
+    start: new Date(year, 10, 1),
+    end: new Date(year, 10, 5),
+    days: 5,
+    vacationDaysNeeded: 2,
+    description: "Klämdagar kring Alla helgons dag",
+    score: 65,
+    type: "bridge"
+  };
+  
+  periods.push(mayBridgePeriod, novemberBridgePeriod);
   return periods;
 }
 
@@ -153,28 +212,54 @@ function findBridgeDays(year, holidays) {
 function findExtendedWeekends(year, holidays) {
   const periods = [];
   
-  // Exempel på långhelger
-  const extendedWeekend1 = {
-    start: new Date(year, 9, 29),  // Fredag
-    end: new Date(year, 10, 1),    // Söndag
-    days: 4,
-    vacationDaysNeeded: 1,
-    description: "Långhelg i oktober",
-    score: 60,
-    type: "weekend"
+  // Långhelger varje månad
+  for (let month = 0; month < 12; month++) {
+    // Skippa månader med stora högtider som redan har perioder
+    if (month === 3 || month === 5 || month === 11) continue;
+    
+    const extendedWeekend = {
+      start: new Date(year, month, 10),  // Mitten av månaden
+      end: new Date(year, month, 14),
+      days: 5,
+      vacationDaysNeeded: 3,
+      description: `Långhelg i ${getMonthName(month)}`,
+      score: 60 - Math.abs(6 - month) * 2,  // Högre poäng för sommar/vinter
+      type: "weekend"
+    };
+    
+    periods.push(extendedWeekend);
+  }
+  
+  return periods;
+}
+
+// Hitta sommarsemesterperioder
+function findSummerPeriods(year) {
+  const periods = [];
+  
+  // Juli semester (3 veckor)
+  const julySummerPeriod = {
+    start: new Date(year, 6, 1),
+    end: new Date(year, 6, 21),
+    days: 21,
+    vacationDaysNeeded: 15,
+    description: "Sommarsemester i juli",
+    score: 75,
+    type: "summer"
   };
   
-  const extendedWeekend2 = {
-    start: new Date(year, 7, 10),  // Fredag
-    end: new Date(year, 7, 13),    // Måndag
-    days: 4,
-    vacationDaysNeeded: 1,
-    description: "Långhelg i augusti",
-    score: 60,
-    type: "weekend"
+  // Augusti semester (2 veckor)
+  const augustSummerPeriod = {
+    start: new Date(year, 7, 1),
+    end: new Date(year, 7, 14),
+    days: 14,
+    vacationDaysNeeded: 10,
+    description: "Sommarsemester i augusti",
+    score: 73,
+    type: "summer"
   };
   
-  periods.push(extendedWeekend1, extendedWeekend2);
+  periods.push(julySummerPeriod, augustSummerPeriod);
   return periods;
 }
 
@@ -182,26 +267,27 @@ function findExtendedWeekends(year, holidays) {
 function createExtraPeriods(year, remainingDays, selectedPeriods, holidays) {
   const extraPeriods = [];
   
-  // Sommarperiod
+  // Beroende på antal dagar, skapa olika typer av perioder
   if (remainingDays >= 5) {
-    const summerPeriod = {
-      start: new Date(year, 6, 15),
-      end: new Date(year, 6, 15 + remainingDays + 2),  // Lägg till helgdagar
+    // Skapa en sportlovs-period
+    const winterPeriod = {
+      start: new Date(year, 1, 15),
+      end: new Date(year, 1, 15 + remainingDays + 2),  // Lägg till helgdagar
       days: remainingDays + 2,
       vacationDaysNeeded: remainingDays,
-      description: "Sommarsemester",
+      description: "Sportlov",
       score: 50,
-      type: "summer"
+      type: "winter"
     };
-    extraPeriods.push(summerPeriod);
+    extraPeriods.push(winterPeriod);
   } else {
-    // Skapa en kort period med de resterande dagarna
+    // Skapa en kort period i oktober
     const shortPeriod = {
-      start: new Date(year, 8, 10),
-      end: new Date(year, 8, 10 + remainingDays),
+      start: new Date(year, 9, 10),
+      end: new Date(year, 9, 10 + remainingDays),
       days: remainingDays,
       vacationDaysNeeded: remainingDays,
-      description: "Kort ledighet",
+      description: "Kort höstledighet",
       score: 40,
       type: "short"
     };
@@ -209,6 +295,15 @@ function createExtraPeriods(year, remainingDays, selectedPeriods, holidays) {
   }
   
   return extraPeriods;
+}
+
+// Returnar månadens namn på svenska
+function getMonthName(monthIndex) {
+  const months = [
+    "januari", "februari", "mars", "april", "maj", "juni",
+    "juli", "augusti", "september", "oktober", "november", "december"
+  ];
+  return months[monthIndex];
 }
 
 // Denna funktion avgör om en given dag är en arbetsfri dag (helgdag eller helg)

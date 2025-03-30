@@ -92,7 +92,7 @@ const StepThree = ({
         className="w-full py-6 border-amber-200 bg-amber-50/50 hover:bg-amber-50 text-amber-800"
       >
         <MapPin className="h-5 w-5 mr-2" />
-        {isLoading ? "Hämtar..." : "Identifiera svenska röda dagar automatiskt"}
+        {isLoading ? "Hämtar..." : "Identifiera röda dagar automatiskt"}
       </Button>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

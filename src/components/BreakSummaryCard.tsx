@@ -3,6 +3,17 @@ import React from "react";
 import { format } from "date-fns";
 import { sv } from "date-fns/locale";
 import { Calendar, Clock } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 interface Period {
   start: Date;
@@ -39,23 +50,67 @@ export const BreakSummaryCard = ({ period }: BreakSummaryCardProps) => {
     
     // Skapa block för semesterdagar (rosa)
     for (let i = 0; i < vacationDays; i++) {
-      blocks.push(<div key={`v-${i}`} className="h-4 rounded-sm bg-pink-200 flex-1" />);
+      blocks.push(
+        <TooltipProvider key={`v-${i}`}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="h-4 rounded-sm bg-pink-200 flex-1" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs">Semesterdag</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
     }
     
     // Skapa block för röda dagar (gul)
     for (let i = 0; i < holidays; i++) {
-      blocks.push(<div key={`h-${i}`} className="h-4 rounded-sm bg-amber-200 flex-1" />);
+      blocks.push(
+        <TooltipProvider key={`h-${i}`}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="h-4 rounded-sm bg-amber-200 flex-1" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs">Röd dag</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
     }
     
     // Skapa block för helger (orange)
     for (let i = 0; i < weekends; i++) {
-      blocks.push(<div key={`w-${i}`} className="h-4 rounded-sm bg-orange-200 flex-1" />);
+      blocks.push(
+        <TooltipProvider key={`w-${i}`}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="h-4 rounded-sm bg-orange-200 flex-1" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs">Helgdag (lördag/söndag)</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
     }
     
     // Fyll på med vanliga dagar om det behövs (beige)
     const remainingDays = totalDays - vacationDays - holidays - weekends;
     for (let i = 0; i < remainingDays; i++) {
-      blocks.push(<div key={`r-${i}`} className="h-4 rounded-sm bg-amber-50 flex-1" />);
+      blocks.push(
+        <TooltipProvider key={`r-${i}`}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="h-4 rounded-sm bg-amber-50 flex-1" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs">Vardag</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
     }
     
     return blocks;
@@ -102,7 +157,7 @@ export const BreakSummaryCard = ({ period }: BreakSummaryCardProps) => {
             <Clock className="h-4 w-4 text-orange-600" />
           </div>
           <div>
-            <div className="text-sm text-gray-600">Helger</div>
+            <div className="text-sm text-gray-600">Helg</div>
             <div className="font-medium">2</div>
           </div>
         </div>
