@@ -1,5 +1,11 @@
 
-import { findKeyPeriods, findBridgeDays, findExtendedWeekends, findSummerPeriods, createExtraPeriods } from './periodFinders';
+import { 
+  findKeyPeriods, 
+  findBridgeDays, 
+  findExtendedWeekends, 
+  findSummerPeriods, 
+  createExtraPeriods 
+} from './periodFinders';
 import { calculateVacationDaysNeeded } from './calculators';
 import { isDateInPast } from './helpers';
 import { scorePeriods } from './scoringSystem';
