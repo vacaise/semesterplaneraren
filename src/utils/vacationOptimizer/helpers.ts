@@ -1,5 +1,5 @@
 
-import { isSameDay, isWeekend, format } from 'date-fns';
+import { isSameDay, isWeekend, format, isBefore, startOfDay } from 'date-fns';
 
 // Helper function to determine if a day is a day off (weekend or holiday)
 export const isDayOff = (date: Date, holidays: Date[]) => {
@@ -22,4 +22,10 @@ export const getMonthName = (monthIndex: number) => {
 // Format date to a string for set operations
 export const formatDateToString = (date: Date) => {
   return format(date, 'yyyy-MM-dd');
+};
+
+// Check if a date is in the past (before today)
+export const isDateInPast = (date: Date) => {
+  const today = startOfDay(new Date());
+  return isBefore(date, today);
 };

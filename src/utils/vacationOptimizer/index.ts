@@ -2,7 +2,7 @@
 // Main entry point for the vacation optimizer
 import { findOptimalSchedule } from './optimizer';
 import { calculateTotalDaysOff } from './calculators';
-import { isDayOff } from './helpers';
+import { isDayOff, isDateInPast } from './helpers';
 
 // Main export function for optimizing vacation
 export const optimizeVacation = (
@@ -31,4 +31,4 @@ export const optimizeVacation = (
   };
 };
 
-export { isDayOff };
+export { isDayOff, isDateInPast };

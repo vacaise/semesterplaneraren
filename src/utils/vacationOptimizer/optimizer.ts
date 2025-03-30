@@ -1,6 +1,7 @@
 
 import { findKeyPeriods, findBridgeDays, findExtendedWeekends, findSummerPeriods, createExtraPeriods } from './periodFinders';
 import { calculateVacationDaysNeeded } from './calculators';
+import { isDateInPast } from './helpers';
 
 // Main function to find and optimize vacation periods
 export const findOptimalSchedule = (
@@ -28,14 +29,35 @@ export const findOptimalSchedule = (
   const summerPeriods = findSummerPeriods(year);
   potentialPeriods.push(...summerPeriods);
   
+  // Filter out periods that have already passed
+  const currentDate = new Date();
+  const filteredPeriods = potentialPeriods.filter(period => {
+    // If the end date is in the past, skip this period
+    if (isDateInPast(new Date(period.end))) {
+      return false;
+    }
+    
+    // If the start date is in the past but end date is in the future,
+    // adjust the start date to today
+    if (isDateInPast(new Date(period.start))) {
+      period.start = currentDate;
+      // Recalculate days
+      const endDate = new Date(period.end);
+      const startDate = new Date(period.start);
+      period.days = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    }
+    
+    return true;
+  });
+  
   // Calculate actual vacation days needed for each period based on holidays
-  potentialPeriods.forEach(period => {
+  filteredPeriods.forEach(period => {
     const actualVacationDays = calculateVacationDaysNeeded(period.start, period.end, holidays);
     period.vacationDaysNeeded = actualVacationDays;
   });
   
   // Sort periods based on mode preference
-  potentialPeriods.sort((a, b) => {
+  filteredPeriods.sort((a, b) => {
     let aScore = a.score;
     let bScore = b.score;
     
@@ -61,7 +83,7 @@ export const findOptimalSchedule = (
   let remainingVacationDays = vacationDays;
   
   // First pass: prioritize high-value periods
-  for (const period of potentialPeriods) {
+  for (const period of filteredPeriods) {
     // Check if the period has high value (is an important holiday period)
     if (period.score >= 75 && period.vacationDaysNeeded <= remainingVacationDays) {
       selectedPeriods.push(period);
@@ -74,7 +96,7 @@ export const findOptimalSchedule = (
   
   // Second pass: add periods based on optimization mode
   if (remainingVacationDays > 0) {
-    for (const period of potentialPeriods) {
+    for (const period of filteredPeriods) {
       // Skip already selected periods
       if (selectedPeriods.some(p => p === period)) continue;
       
@@ -100,7 +122,7 @@ export const findOptimalSchedule = (
   // Third pass: use remaining days
   if (remainingVacationDays > 0) {
     // Choose smaller periods or short breaks
-    for (const period of potentialPeriods) {
+    for (const period of filteredPeriods) {
       // Skip already selected periods
       if (selectedPeriods.some(p => p === period)) continue;
       
@@ -118,7 +140,11 @@ export const findOptimalSchedule = (
   // Create extra small periods if there are days left
   if (remainingVacationDays > 0) {
     const extraPeriods = createExtraPeriods(year, remainingVacationDays);
-    selectedPeriods.push(...extraPeriods);
+    
+    // Filter out past extra periods
+    const validExtraPeriods = extraPeriods.filter(period => !isDateInPast(new Date(period.end)));
+    
+    selectedPeriods.push(...validExtraPeriods);
   }
   
   return selectedPeriods;
