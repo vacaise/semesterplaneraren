@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface StepOneProps {
   year: number;
@@ -29,6 +30,7 @@ const StepOne = ({ year, setYear, vacationDays, setVacationDays }: StepOneProps)
   const currentYear = new Date().getFullYear();
   // Skapa en array med år från nuvarande år till 2030
   const years = Array.from({ length: 2030 - currentYear + 1 }, (_, i) => currentYear + i);
+  const isMobile = useIsMobile();
 
   return (
     <div className="space-y-6">
@@ -49,8 +51,8 @@ const StepOne = ({ year, setYear, vacationDays, setVacationDays }: StepOneProps)
         </TooltipProvider>
       </div>
 
-      <div className="p-6 rounded-lg border border-gray-100 bg-white">
-        <div className="flex justify-between items-center mb-4">
+      <div className="p-4 md:p-6 rounded-lg border border-gray-100 bg-white">
+        <div className={`${isMobile ? 'flex flex-col gap-2' : 'flex justify-between items-center'} mb-4`}>
           <div className="flex items-center gap-2">
             <CalendarDays className="h-5 w-5 text-teal-600" />
             <h3 className="font-medium text-lg text-gray-800">Planera ditt år</h3>
@@ -82,7 +84,7 @@ const StepOne = ({ year, setYear, vacationDays, setVacationDays }: StepOneProps)
 
         <div className="space-y-4">
           <Label htmlFor="vacationDays" className="text-gray-700 text-base">Antal dagar</Label>
-          <div className="flex items-center space-x-4">
+          <div className={`${isMobile ? 'flex flex-col gap-3' : 'flex items-center space-x-4'}`}>
             <Slider
               id="vacationDays"
               defaultValue={[vacationDays]}
@@ -97,7 +99,7 @@ const StepOne = ({ year, setYear, vacationDays, setVacationDays }: StepOneProps)
               id="vacationDaysInput"
               value={vacationDays}
               onChange={(e) => setVacationDays(Number(e.target.value))}
-              className="w-24"
+              className={`${isMobile ? 'w-full' : 'w-24'}`}
               min={1}
               max={40}
               placeholder="Ange dagar"

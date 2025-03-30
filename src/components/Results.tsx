@@ -23,6 +23,7 @@ import { BreakSummaryCard } from "@/components/BreakSummaryCard";
 import { MonthCalendarView } from "@/components/MonthCalendarView";
 import { BreakTypeExplanation } from "@/components/BreakTypeExplanation";
 import { StatisticCard } from "@/components/StatisticCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Period {
   start: Date;
@@ -57,6 +58,8 @@ const getModeTitle = (mode: string) => {
 };
 
 const Results = ({ schedule, year }: ResultsProps) => {
+  const isMobile = useIsMobile();
+  
   if (!schedule) {
     return <div>Inget schema har genererats än.</div>;
   }
@@ -64,7 +67,7 @@ const Results = ({ schedule, year }: ResultsProps) => {
   const totalVacationDays = schedule.vacationDaysUsed || 0;
   const totalDaysOff = schedule.totalDaysOff || 0;
 
-  // Säkerställ att vi inte kan få NaN genom att använda defaults och kontrollera värden
+  // Säkerställ att totalDaysOff inte är NaN genom att använda defaults och kontrollera värden
   const efficiency = totalVacationDays > 0 
     ? (totalDaysOff / totalVacationDays).toFixed(2)
     : "0.00";
@@ -76,14 +79,20 @@ const Results = ({ schedule, year }: ResultsProps) => {
           <Building2 className="h-5 w-5" />
         </div>
         <h3 className="text-xl font-medium text-gray-800">Ledighetsdetaljer</h3>
-        <div className="ml-auto bg-purple-100 text-purple-800 px-4 py-1 rounded-full text-sm font-medium">
+        <div className={`${isMobile ? 'hidden' : 'ml-auto'} bg-purple-100 text-purple-800 px-4 py-1 rounded-full text-sm font-medium`}>
           {schedule.periods.length} ledigheter planerade
         </div>
       </div>
 
+      {isMobile && (
+        <div className="bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-medium text-center">
+          {schedule.periods.length} ledigheter planerade
+        </div>
+      )}
+
       <BreakTypeExplanation />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className={`grid grid-cols-1 ${isMobile ? 'gap-3' : 'md:grid-cols-3 gap-4'}`}>
         <StatisticCard 
           value={totalVacationDays} 
           label="Semesterdagar" 
@@ -110,7 +119,7 @@ const Results = ({ schedule, year }: ResultsProps) => {
       </div>
 
       <Tabs defaultValue="periods" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className={`grid w-full grid-cols-2`}>
           <TabsTrigger value="periods">Ledighetsperioder</TabsTrigger>
           <TabsTrigger value="calendar">Kalendervy</TabsTrigger>
         </TabsList>

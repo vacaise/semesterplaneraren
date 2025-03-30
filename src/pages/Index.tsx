@@ -12,6 +12,7 @@ import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { getHolidays } from "@/utils/holidays";
 import { optimizeVacation } from "@/utils/vacationOptimizer";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -22,6 +23,7 @@ const Index = () => {
   const [optimizedSchedule, setOptimizedSchedule] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   // Add effect to scroll to top when step changes
   useEffect(() => {
@@ -143,7 +145,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="py-12 px-4 sm:px-6 lg:px-8">
+      <div className={`py-6 md:py-12 px-4 sm:px-6 lg:px-8`}>
         <div className="max-w-4xl mx-auto">
           <PageHeader />
           

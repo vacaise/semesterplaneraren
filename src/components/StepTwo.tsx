@@ -16,6 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface StepTwoProps {
   selectedMode: string;
@@ -23,6 +24,8 @@ interface StepTwoProps {
 }
 
 const StepTwo = ({ selectedMode, setSelectedMode }: StepTwoProps) => {
+  const isMobile = useIsMobile();
+  
   const modes = [
     {
       id: "balanced",
@@ -88,36 +91,38 @@ const StepTwo = ({ selectedMode, setSelectedMode }: StepTwoProps) => {
         {modes.map((mode) => (
           <div
             key={mode.id}
-            className={`flex items-center space-x-4 p-4 rounded-lg border transition-all ${
+            className={`flex ${isMobile ? 'flex-col' : 'items-center'} space-x-0 ${isMobile ? 'space-y-2' : 'space-x-4'} p-4 rounded-lg border transition-all ${
               selectedMode === mode.id
                 ? "border-blue-300 bg-blue-50"
                 : "border-gray-100 hover:border-blue-200 hover:bg-blue-50/30"
             }`}
           >
-            <RadioGroupItem
-              value={mode.id}
-              id={mode.id}
-              className="h-5 w-5"
-            />
-            <div className="flex items-center justify-center h-12 w-12 bg-blue-100 rounded-md">
-              {mode.icon}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center">
-                <Label
-                  htmlFor={mode.id}
-                  className="text-base font-medium cursor-pointer"
-                >
-                  {mode.title}
-                </Label>
-                {mode.recommended && (
-                  <span className="ml-2 text-xs rounded-full bg-blue-100 text-blue-800 px-2 py-1">
-                    Rekommenderad
-                  </span>
-                )}
+            <div className={`flex ${isMobile ? 'w-full' : ''} items-center gap-3`}>
+              <RadioGroupItem
+                value={mode.id}
+                id={mode.id}
+                className="h-5 w-5"
+              />
+              <div className="flex items-center justify-center h-12 w-12 bg-blue-100 rounded-md">
+                {mode.icon}
               </div>
-              <p className="text-sm text-gray-600 mt-1">{mode.description}</p>
+              <div className={`${isMobile ? 'flex-1' : ''}`}>
+                <div className="flex items-center">
+                  <Label
+                    htmlFor={mode.id}
+                    className="text-base font-medium cursor-pointer"
+                  >
+                    {mode.title}
+                  </Label>
+                  {mode.recommended && (
+                    <span className="ml-2 text-xs rounded-full bg-blue-100 text-blue-800 px-2 py-1">
+                      Rekommenderad
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
+            <p className={`text-sm text-gray-600 ${isMobile ? 'pl-8' : 'mt-1'}`}>{mode.description}</p>
           </div>
         ))}
       </RadioGroup>

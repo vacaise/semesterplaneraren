@@ -26,6 +26,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface StepThreeProps {
   holidays: Date[];
@@ -43,6 +44,7 @@ const StepThree = ({
   isLoading 
 }: StepThreeProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const isMobile = useIsMobile();
 
   const addHoliday = () => {
     if (selectedDate) {
@@ -95,29 +97,33 @@ const StepThree = ({
         {isLoading ? "Hämtar..." : "Identifiera röda dagar automatiskt"}
       </Button>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className={`grid grid-cols-1 ${isMobile ? 'gap-4' : 'md:grid-cols-2 gap-6'}`}>
         <div className="border rounded-lg overflow-hidden bg-white p-4">
           <div className="flex items-center justify-between mb-4">
             <h4 className="font-medium text-gray-800">Välj datum</h4>
           </div>
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={setSelectedDate}
-            className="rounded-md"
-            locale={sv}
-            defaultMonth={new Date(year, 0)}
-            classNames={{
-              head_cell: "text-xs font-medium text-gray-500",
-              day: "h-9 w-9 text-sm p-0 font-normal aria-selected:opacity-100 aria-selected:bg-amber-100 aria-selected:text-amber-800 aria-selected:font-medium",
-              day_today: "bg-amber-50 text-amber-800 font-medium",
-              nav_button: "h-7 w-7 bg-transparent p-0 opacity-70 hover:opacity-100"
-            }}
-            components={{
-              IconLeft: () => <ChevronLeft className="h-4 w-4" />,
-              IconRight: () => <ChevronRight className="h-4 w-4" />,
-            }}
-          />
+          <div className={`${isMobile ? 'flex justify-center' : ''}`}>
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              className="rounded-md"
+              locale={sv}
+              defaultMonth={new Date(year, 0)}
+              classNames={{
+                head_cell: "text-xs font-medium text-gray-500",
+                day: "h-9 w-9 text-sm p-0 font-normal aria-selected:opacity-100 aria-selected:bg-amber-100 aria-selected:text-amber-800 aria-selected:font-medium",
+                day_today: "bg-amber-50 text-amber-800 font-medium",
+                nav_button: "h-7 w-7 bg-transparent p-0 opacity-70 hover:opacity-100",
+                months: isMobile ? "flex flex-col space-y-4" : "",
+                month: isMobile ? "flex flex-col space-y-4" : "",
+              }}
+              components={{
+                IconLeft: () => <ChevronLeft className="h-4 w-4" />,
+                IconRight: () => <ChevronRight className="h-4 w-4" />,
+              }}
+            />
+          </div>
           <Button 
             onClick={addHoliday} 
             disabled={!selectedDate}
@@ -130,7 +136,7 @@ const StepThree = ({
         <div className="border rounded-lg overflow-hidden bg-white p-4">
           <h4 className="font-medium text-gray-800 mb-4">Röda dagar ({holidays.length})</h4>
           {holidays.length > 0 ? (
-            <ScrollArea className="h-[250px]">
+            <ScrollArea className={`${isMobile ? 'h-[200px]' : 'h-[250px]'}`}>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -142,7 +148,11 @@ const StepThree = ({
                 <TableBody>
                   {[...holidays].sort((a, b) => a.getTime() - b.getTime()).map((date, index) => (
                     <TableRow key={index}>
-                      <TableCell className="font-medium">{format(date, "d MMMM yyyy", { locale: sv })}</TableCell>
+                      <TableCell className="font-medium">
+                        {isMobile 
+                          ? format(date, "d MMM yyyy", { locale: sv }) 
+                          : format(date, "d MMMM yyyy", { locale: sv })}
+                      </TableCell>
                       <TableCell>{format(date, "EEEE", { locale: sv })}</TableCell>
                       <TableCell>
                         <Button
@@ -160,7 +170,7 @@ const StepThree = ({
               </Table>
             </ScrollArea>
           ) : (
-            <div className="flex items-center justify-center h-[250px] bg-gray-50 rounded-md">
+            <div className={`flex items-center justify-center ${isMobile ? 'h-[200px]' : 'h-[250px]'} bg-gray-50 rounded-md`}>
               <p className="text-gray-500">Inga röda dagar tillagda än</p>
             </div>
           )}

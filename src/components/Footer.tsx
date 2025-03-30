@@ -1,43 +1,40 @@
 
-import React from "react";
-import { CalendarDays, Heart, Mail, Github } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Footer = () => {
+  const isMobile = useIsMobile();
+  const year = new Date().getFullYear();
+  
   return (
-    <footer className="bg-gray-100 py-8 mt-12 border-t border-gray-200">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <footer className={`mt-8 py-8 ${isMobile ? 'px-4' : 'px-8'} bg-gray-50 border-t border-gray-200`}>
+      <div className="max-w-4xl mx-auto">
+        <div className={`${isMobile ? 'flex flex-col gap-4' : 'flex justify-between'}`}>
           <div>
-            <h3 className="text-lg font-semibold mb-3">Om vacai</h3>
-            <p className="text-gray-600 text-sm">
-              Optimera din semester med vacai. Vi hjälper dig maximera din lediga tid genom att strategiskt planera dina semesterdagar.
+            <h2 className={`text-lg font-semibold mb-2 ${isMobile ? 'text-center' : ''}`}>vacai</h2>
+            <p className={`text-gray-600 text-sm max-w-md ${isMobile ? 'text-center' : ''}`}>
+              Optimera din semester för att maximera din ledighet. vacai hjälper dig att få ut mest möjligt av dina semesterdagar.
             </p>
           </div>
           
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Kontakt</h3>
-            <div className="flex items-center space-x-2 text-gray-600 text-sm mb-2">
-              <Mail size={16} />
-              <span>info@vacai.se</span>
+          <div className={`flex ${isMobile ? 'flex-row justify-center mt-4' : 'flex-col items-end'}`}>
+            <div className={`flex ${isMobile ? 'gap-6' : 'gap-4'}`}>
+              <a href="#" className="text-gray-600 hover:text-gray-900 text-sm">Om oss</a>
+              <a href="#" className="text-gray-600 hover:text-gray-900 text-sm">Kontakt</a>
+              <a href="#" className="text-gray-600 hover:text-gray-900 text-sm">Hjälp</a>
             </div>
-          </div>
-          
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Följ oss</h3>
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-600 hover:text-teal-600 transition-colors">
-                <Github size={20} />
-              </a>
-            </div>
+            {!isMobile && (
+              <p className="text-gray-500 text-xs mt-4">
+                &copy; {year} vacai. Alla rättigheter förbehållna.
+              </p>
+            )}
           </div>
         </div>
         
-        <div className="border-t border-gray-200 mt-6 pt-6 text-center text-sm text-gray-600">
-          <p>© {new Date().getFullYear()} vacai. Alla rättigheter förbehållna.</p>
-          <p className="mt-2 flex items-center justify-center">
-            Skapad med <Heart size={14} className="mx-1 text-red-500" /> för bättre semesterplanering
+        {isMobile && (
+          <p className="text-gray-500 text-xs mt-6 text-center">
+            &copy; {year} vacai. Alla rättigheter förbehållna.
           </p>
-        </div>
+        )}
       </div>
     </footer>
   );
