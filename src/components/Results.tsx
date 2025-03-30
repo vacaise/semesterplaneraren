@@ -71,6 +71,13 @@ const Results = ({ schedule, year }: ResultsProps) => {
   const efficiency = totalVacationDays > 0 
     ? (totalDaysOff / totalVacationDays).toFixed(2)
     : "0.00";
+    
+  // Sort periods chronologically by start date
+  const sortedPeriods = [...schedule.periods].sort((a, b) => {
+    const dateA = new Date(a.start);
+    const dateB = new Date(b.start);
+    return dateA.getTime() - dateB.getTime();
+  });
 
   return (
     <div className="space-y-6">
@@ -133,14 +140,14 @@ const Results = ({ schedule, year }: ResultsProps) => {
           </p>
           
           <div className="space-y-4">
-            {schedule.periods.map((period, index) => (
+            {sortedPeriods.map((period, index) => (
               <BreakSummaryCard key={index} period={period} />
             ))}
           </div>
         </TabsContent>
         
         <TabsContent value="calendar">
-          <MonthCalendarView schedule={schedule} year={year} />
+          <MonthCalendarView schedule={{...schedule, periods: sortedPeriods}} year={year} holidays={[]} />
         </TabsContent>
       </Tabs>
       

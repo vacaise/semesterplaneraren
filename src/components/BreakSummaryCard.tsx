@@ -1,6 +1,6 @@
 
 import React from "react";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { sv } from "date-fns/locale";
 import { Calendar, Clock } from "lucide-react";
 import {
@@ -38,17 +38,23 @@ export const BreakSummaryCard = ({ period }: BreakSummaryCardProps) => {
 
   const breakStyle = getBreakType(period.days);
   
-  // Här skapar vi en simpel visualisering av dagarna
+  // Calculate approximate weekends and holidays
+  const totalDays = period.days;
+  const vacationDays = period.vacationDaysNeeded;
+  
+  // Estimate 2 weekend days per 7 days of the period, rounded down
+  const weekendEstimate = Math.floor(totalDays / 7) * 2;
+  // Add one more if the period is odd and longer than 3 days
+  const weekends = weekendEstimate + (totalDays % 7 >= 3 ? 1 : 0);
+  
+  // Estimate holidays - this is just an approximation
+  const holidays = Math.max(0, totalDays - vacationDays - weekends);
+  
+  // Function to create visualization blocks for the proper number of days
   const createDayBlocks = () => {
-    const totalDays = period.days;
     const blocks = [];
     
-    // Antagande: semesterdagar först, röda dagar i mitten, helger i slutet
-    const vacationDays = period.vacationDaysNeeded;
-    const holidays = 2; // Förenkla med antagande (kan ersättas med faktiskt data)
-    const weekends = 2; // Förenkla med antagande (kan ersättas med faktiskt data)
-    
-    // Skapa block för semesterdagar (rosa)
+    // Create blocks for vacation days (pink)
     for (let i = 0; i < vacationDays; i++) {
       blocks.push(
         <TooltipProvider key={`v-${i}`}>
@@ -64,7 +70,7 @@ export const BreakSummaryCard = ({ period }: BreakSummaryCardProps) => {
       );
     }
     
-    // Skapa block för röda dagar (gul)
+    // Create blocks for holidays (yellow)
     for (let i = 0; i < holidays; i++) {
       blocks.push(
         <TooltipProvider key={`h-${i}`}>
@@ -80,7 +86,7 @@ export const BreakSummaryCard = ({ period }: BreakSummaryCardProps) => {
       );
     }
     
-    // Skapa block för helger (orange)
+    // Create blocks for weekends (orange)
     for (let i = 0; i < weekends; i++) {
       blocks.push(
         <TooltipProvider key={`w-${i}`}>
@@ -90,23 +96,6 @@ export const BreakSummaryCard = ({ period }: BreakSummaryCardProps) => {
             </TooltipTrigger>
             <TooltipContent>
               <p className="text-xs">Helgdag (lördag/söndag)</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      );
-    }
-    
-    // Fyll på med vanliga dagar om det behövs (beige)
-    const remainingDays = totalDays - vacationDays - holidays - weekends;
-    for (let i = 0; i < remainingDays; i++) {
-      blocks.push(
-        <TooltipProvider key={`r-${i}`}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="h-4 rounded-sm bg-amber-50 flex-1" />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="text-xs">Vardag</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -148,7 +137,7 @@ export const BreakSummaryCard = ({ period }: BreakSummaryCardProps) => {
           </div>
           <div>
             <div className="text-sm text-gray-600">Röda dagar</div>
-            <div className="font-medium">2</div>
+            <div className="font-medium">{holidays}</div>
           </div>
         </div>
         
@@ -158,7 +147,7 @@ export const BreakSummaryCard = ({ period }: BreakSummaryCardProps) => {
           </div>
           <div>
             <div className="text-sm text-gray-600">Helg</div>
-            <div className="font-medium">2</div>
+            <div className="font-medium">{weekends}</div>
           </div>
         </div>
       </div>

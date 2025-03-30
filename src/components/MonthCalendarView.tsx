@@ -1,6 +1,6 @@
 
 import React from "react";
-import { format, getDaysInMonth, startOfMonth, getDay, endOfMonth, isSameDay, isWeekend, addMonths } from "date-fns";
+import { format, getDaysInMonth, startOfMonth, getDay, endOfMonth, isSameDay, isWeekend, addMonths, isSameMonth, isAfter, isBefore } from "date-fns";
 import { sv } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isDayOff } from "@/utils/vacationOptimizer";
@@ -128,25 +128,55 @@ export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalend
     );
   };
 
-  // Render endast relevanta månader (de med ledigheter)
+  // Only consider months from current date forward
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+
+  // Find months that have vacation periods
   const relevantMonths = new Set<number>();
   
   schedule.periods.forEach(period => {
     const startMonth = new Date(period.start).getMonth();
     const endMonth = new Date(period.end).getMonth();
+    const startYear = new Date(period.start).getFullYear();
+    const endYear = new Date(period.end).getFullYear();
     
-    // Om perioden sträcker sig över flera månader
+    // Only consider periods in the current year or future years
+    if (startYear < currentYear) return;
+    
+    // If the period spans multiple months
     if (startMonth !== endMonth) {
       for (let m = startMonth; m <= endMonth; m++) {
+        // Only add months from the current month forward
+        if (startYear === currentYear && m < currentMonth) continue;
         relevantMonths.add(m);
       }
     } else {
+      // Only add months from the current month forward
+      if (startYear === currentYear && startMonth < currentMonth) return;
       relevantMonths.add(startMonth);
     }
   });
 
   // Konvertera Set till Array och sortera
   const monthsToRender = Array.from(relevantMonths).sort((a, b) => a - b);
+
+  // If no relevant months found, show message
+  if (monthsToRender.length === 0) {
+    return (
+      <div className="space-y-4">
+        <div className="mb-4">
+          <h3 className="text-lg font-medium mb-2">Kalendervy</h3>
+          <p className="text-gray-600">Se dina optimerade ledigheter för {year}</p>
+        </div>
+        
+        <div className="p-8 border border-gray-200 rounded-lg bg-white text-center text-gray-500">
+          Inga ledighetsperioder planerade för resten av året.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
