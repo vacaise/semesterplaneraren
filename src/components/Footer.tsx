@@ -1,50 +1,10 @@
 
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { toast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
   const isMobile = useIsMobile();
   const year = new Date().getFullYear();
-  const [reportDialogOpen, setReportDialogOpen] = useState(false);
-  const [reportForm, setReportForm] = useState({
-    name: "",
-    email: "",
-    problem: ""
-  });
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setReportForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmitReport = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // I ett verkligt scenario skulle detta skicka ett mejl
-    // För tillfället visar vi bara en framgångstoast och stänger dialogen
-    toast({
-      title: "Rapport skickad",
-      description: "Tack för din feedback! Vi kommer att titta på problemet så snart som möjligt.",
-    });
-    
-    setReportForm({
-      name: "",
-      email: "",
-      problem: ""
-    });
-    
-    setReportDialogOpen(false);
-  };
   
   return (
     <footer className={`mt-8 py-8 ${isMobile ? 'px-4' : 'px-8'} bg-gray-50 border-t border-gray-200`}>
@@ -70,20 +30,11 @@ const Footer = () => {
                   </a>
                 </li>
                 <li>
-                  <button 
-                    onClick={() => setReportDialogOpen(true)}
-                    className="text-gray-600 hover:text-teal-600 transition-colors text-sm"
-                    aria-label="Rapportera ett problem"
-                  >
-                    Rapportera ett problem
-                  </button>
-                </li>
-                <li>
-                  <a href="/sitemap.xml" 
+                  <Link to="/sitemap" 
                      className="text-gray-600 hover:text-teal-600 transition-colors text-sm"
                      aria-label="Visa sitemap">
                     Sitemap
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </nav>
@@ -101,72 +52,6 @@ const Footer = () => {
           </p>
         )}
       </div>
-
-      <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Rapportera ett problem</DialogTitle>
-            <DialogDescription>
-              Beskriv problemet du upplevt och vi kommer att titta på det så snart som möjligt.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <form onSubmit={handleSubmitReport}>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Namn
-                </Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={reportForm.name}
-                  onChange={handleInputChange}
-                  className="col-span-3"
-                  required
-                />
-              </div>
-              
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="email" className="text-right">
-                  E-post
-                </Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={reportForm.email}
-                  onChange={handleInputChange}
-                  className="col-span-3"
-                  required
-                />
-              </div>
-              
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="problem" className="text-right">
-                  Problem
-                </Label>
-                <Textarea
-                  id="problem"
-                  name="problem"
-                  value={reportForm.problem}
-                  onChange={handleInputChange}
-                  className="col-span-3"
-                  rows={5}
-                  required
-                />
-              </div>
-            </div>
-            
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setReportDialogOpen(false)}>
-                Avbryt
-              </Button>
-              <Button type="submit">Skicka rapport</Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
     </footer>
   );
 };
