@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import StepOne from "@/components/StepOne";
 import StepTwo from "@/components/StepTwo";
@@ -8,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { getHolidays } from "@/utils/holidays";
+import { optimizeVacation } from "@/utils/vacationOptimizer";
 import { CalendarDays, ArrowRight } from "lucide-react";
 
 const Index = () => {
@@ -21,7 +21,6 @@ const Index = () => {
   const { toast } = useToast();
 
   const handleNextStep = () => {
-    // Validera innan vi går vidare
     if (currentStep === 1) {
       if (vacationDays <= 0) {
         toast({
@@ -52,11 +51,11 @@ const Index = () => {
       const fetchedHolidays = getHolidays(year);
       setHolidays(fetchedHolidays);
       
-      // Flytta toasten uppåt från knappen
       setTimeout(() => {
         toast({
           title: "Röda dagar hämtade",
           description: `${fetchedHolidays.length} helgdagar laddades för ${year}`,
+          className: "left-toast",
         });
       }, 100);
     } catch (error) {
@@ -72,41 +71,20 @@ const Index = () => {
 
   const generateOptimizedSchedule = () => {
     setIsLoading(true);
-    // Simulera beräkning (kommer att ersättas med faktisk optimeringslogik)
-    setTimeout(() => {
-      // Enkelt exempel på formaterad data - detta kommer att ersättas med faktisk logik
-      const dummySchedule = {
-        totalDaysOff: vacationDays + holidays.length,
-        mode: selectedMode,
-        periods: [
-          { 
-            start: new Date(year, 3, 1), 
-            end: new Date(year, 3, 6),
-            days: 6, 
-            vacationDaysUsed: 4,
-            description: "Påskledighet"
-          },
-          { 
-            start: new Date(year, 5, 20), 
-            end: new Date(year, 5, 30),
-            days: 11, 
-            vacationDaysUsed: 8,
-            description: "Midsommarledighet"
-          },
-          { 
-            start: new Date(year, 11, 22), 
-            end: new Date(year, 11, 31),
-            days: 10, 
-            vacationDaysUsed: 5,
-            description: "Julledighet"
-          }
-        ]
-      };
-      
-      setOptimizedSchedule(dummySchedule);
+    
+    try {
+      const optimizedScheduleData = optimizeVacation(year, vacationDays, holidays, selectedMode);
+      setOptimizedSchedule(optimizedScheduleData);
       setCurrentStep(4);
+    } catch (error) {
+      toast({
+        title: "Fel vid generering av schema",
+        description: "Kunde inte optimera ditt schema, försök igen senare",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (

@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -98,4 +99,9 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Vänsterpositionerat toast-meddelande */
+.left-toast {
+  @apply fixed bottom-4 left-4 top-auto right-auto !important;
 }

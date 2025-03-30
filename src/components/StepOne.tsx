@@ -10,6 +10,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface StepOneProps {
   year: number;
@@ -20,7 +27,8 @@ interface StepOneProps {
 
 const StepOne = ({ year, setYear, vacationDays, setVacationDays }: StepOneProps) => {
   const currentYear = new Date().getFullYear();
-  const years = [currentYear, currentYear + 1, currentYear + 2];
+  // Skapa en array med år från nuvarande år till 2030
+  const years = Array.from({ length: 2030 - currentYear + 1 }, (_, i) => currentYear + i);
 
   return (
     <div className="space-y-6">
@@ -50,22 +58,21 @@ const StepOne = ({ year, setYear, vacationDays, setVacationDays }: StepOneProps)
           
           <div className="flex items-center gap-2">
             <span className="text-gray-600">År:</span>
-            <div className="flex border rounded-md overflow-hidden">
-              {years.map((y) => (
-                <button
-                  key={y}
-                  type="button"
-                  onClick={() => setYear(y)}
-                  className={`px-4 py-1.5 text-sm font-medium ${
-                    y === year
-                      ? "bg-teal-600 text-white"
-                      : "bg-white text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  {y}
-                </button>
-              ))}
-            </div>
+            <Select
+              value={year.toString()}
+              onValueChange={(value) => setYear(parseInt(value))}
+            >
+              <SelectTrigger className="w-[100px]">
+                <SelectValue placeholder={year.toString()} />
+              </SelectTrigger>
+              <SelectContent>
+                {years.map((y) => (
+                  <SelectItem key={y} value={y.toString()}>
+                    {y}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
