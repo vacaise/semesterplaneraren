@@ -4,10 +4,18 @@ import {
   Coffee, 
   Star, 
   SunsetIcon, 
-  Palmtree 
+  Palmtree,
+  Info, 
+  Zap
 } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface StepTwoProps {
   selectedMode: string;
@@ -20,7 +28,7 @@ const StepTwo = ({ selectedMode, setSelectedMode }: StepTwoProps) => {
       id: "balanced",
       title: "Balanserad mix",
       description: "En smart blandning av kortare ledigheter och längre semestrar",
-      icon: <Calendar className="h-6 w-6 text-blue-600" />,
+      icon: <Zap className="h-6 w-6 text-blue-600" />,
       recommended: true
     },
     {
@@ -51,6 +59,23 @@ const StepTwo = ({ selectedMode, setSelectedMode }: StepTwoProps) => {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="bg-blue-50 text-blue-800 h-8 w-8 rounded-full flex items-center justify-center font-medium">2</div>
+        <h3 className="text-xl font-medium text-gray-800">Välj din stil</h3>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button className="text-gray-400 hover:text-gray-600">
+                <Info className="h-5 w-5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="max-w-xs">Välj hur du vill fördela din tid. Detta påverkar längden och frekvensen på dina ledigheter under året.</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+      
       <p className="text-gray-600">
         Välj hur du vill fördela din ledighet. Detta påverkar längden och frekvensen av dina ledigheter under året.
       </p>
@@ -58,15 +83,15 @@ const StepTwo = ({ selectedMode, setSelectedMode }: StepTwoProps) => {
       <RadioGroup
         value={selectedMode}
         onValueChange={setSelectedMode}
-        className="space-y-4"
+        className="space-y-3"
       >
         {modes.map((mode) => (
           <div
             key={mode.id}
             className={`flex items-center space-x-4 p-4 rounded-lg border transition-all ${
               selectedMode === mode.id
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-200 hover:border-blue-200 hover:bg-blue-50/30"
+                ? "border-blue-300 bg-blue-50"
+                : "border-gray-100 hover:border-blue-200 hover:bg-blue-50/30"
             }`}
           >
             <RadioGroupItem
@@ -74,7 +99,7 @@ const StepTwo = ({ selectedMode, setSelectedMode }: StepTwoProps) => {
               id={mode.id}
               className="h-5 w-5"
             />
-            <div className="min-w-12">
+            <div className="flex items-center justify-center h-12 w-12 bg-blue-100 rounded-md">
               {mode.icon}
             </div>
             <div className="flex-1">
