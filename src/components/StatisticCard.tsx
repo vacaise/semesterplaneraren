@@ -17,23 +17,23 @@ export const StatisticCard = ({
   borderColor, 
   textColor 
 }: StatisticCardProps) => {
-  // Förbättrad logik för att hantera och visa värden
+  // Display value formatting
   const displayValue = (() => {
     if (typeof value === 'number') {
       if (label === "Effektivitet") {
-        // Garantera 2 decimaler för effektivitet och lägg till "x" som suffix
-        return `${value.toFixed(2)}x`;
+        // Add "x" suffix for efficiency
+        return `${value}x`;
       } else if (Number.isInteger(value)) {
-        // För heltal, visa utan decimaler
+        // For integers, display without decimals
         return value.toString();
       } else {
-        // För decimaltal, visa med 1 decimal
+        // For decimals, display with 1 decimal
         return value.toFixed(1);
       }
     } else if (value === null || value === undefined) {
       return "0";
     } else if (typeof value === 'string') {
-      // Hantera fall där värdet redan är en sträng
+      // Handle case where value is already a string
       if (value.includes('NaN')) {
         return "0";
       }

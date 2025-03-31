@@ -44,22 +44,22 @@ export const optimizeVacation = (
   });
   console.log(`After filtering past periods: ${validatedPeriods.length} periods remain`);
   
-  // Helt nyskriven beräkningsmetod som ger faktiskt antal lediga dagar
-  const actualTotalDaysOff = calculateTotalDaysOff(validatedPeriods, filteredHolidays);
+  // Beräkna totalt antal lediga dagar
+  const totalDaysOff = calculateTotalDaysOff(validatedPeriods, filteredHolidays);
   
-  // Beräkna effektivitetskvot med den förbättrade metoden
-  const efficiencyRatio = calculateEfficiencyRatio(actualTotalDaysOff, vacationDays);
+  // Beräkna effektivitetskvot
+  const efficiencyRatio = calculateEfficiencyRatio(totalDaysOff, vacationDays);
   
   console.log("--------------------------------");
   console.log("OPTIMIZATION RESULTS");
   console.log("--------------------------------");
-  console.log("TOTAL ANTAL UNIKA LEDIGA DAGAR:", actualTotalDaysOff);
+  console.log("TOTAL ANTAL LEDIGA DAGAR:", totalDaysOff);
   console.log("ANVÄNDA SEMESTERDAGAR:", vacationDays);
   console.log("EFFEKTIVITETSKVOT:", efficiencyRatio);
   console.log("--------------------------------");
   
   return {
-    totalDaysOff: actualTotalDaysOff,
+    totalDaysOff,
     vacationDaysUsed: vacationDays,
     mode,
     periods: validatedPeriods
