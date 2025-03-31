@@ -10,11 +10,11 @@ const Footer = () => {
       <div className="max-w-4xl mx-auto">
         <div className={`${isMobile ? 'flex flex-col gap-4' : 'flex justify-between'}`}>
           <div>
-            {/* Replace text with logo */}
+            {/* Replace with logo from page header */}
             <h2 className={`text-lg font-semibold mb-2 ${isMobile ? 'text-center' : ''}`}>
               <Link to="/" className="hover:text-teal-600 transition-colors" aria-label="Hem">
                 <img 
-                  src="/lovable-uploads/f65dbaf4-022d-4879-8f21-c099cac057f5.png" 
+                  src="/lovable-uploads/ba846d2b-4df7-4b0e-af89-5d0748a13e5d.png" 
                   alt="vacai logo" 
                   className="h-7"
                 />
