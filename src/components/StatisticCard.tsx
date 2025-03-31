@@ -22,7 +22,10 @@ export const StatisticCard = ({
     if (typeof value === 'number') {
       if (label.toLowerCase() === "effektivitet") {
         // Format efficiency as 2.5x with no trailing zeros
-        return value.toFixed(2).replace(/\.?0+$/, '') + 'x';
+        // First round to 2 decimals
+        const roundedValue = Math.round(value * 100) / 100;
+        // Then remove trailing zeros (convert to string and use regex)
+        return roundedValue.toFixed(2).replace(/\.?0+$/, '') + 'x';
       } else if (Number.isInteger(value)) {
         // For integers, display without decimals
         return value.toString();

@@ -1,6 +1,7 @@
 
 import { addDays, differenceInDays } from 'date-fns';
 import { calculateEaster, calculateMidsummer } from '../dateCalculators';
+import { calculateVacationDaysNeeded } from '../calculators';
 
 // Find important holiday periods
 export const findKeyPeriods = (year: number, holidays: Date[]) => {
@@ -26,6 +27,20 @@ export const findKeyPeriods = (year: number, holidays: Date[]) => {
     type: "holiday"
   };
   
+  // Also create an alternative shorter Easter period
+  const shortEasterStart = addDays(easterThursday, -1);
+  const shortEasterEnd = addDays(easterMonday, 1);
+  
+  const shortEasterPeriod = {
+    start: shortEasterStart,
+    end: shortEasterEnd,
+    days: differenceInDays(shortEasterEnd, shortEasterStart) + 1,
+    vacationDaysNeeded: 3, // Will be calculated properly later
+    description: "Kort påskledighet",
+    score: 80,
+    type: "holiday"
+  };
+  
   // Midsummer period
   const midsummerStart = addDays(midsummerDate, -3); // A few days before Midsummer
   const midsummerEnd = addDays(midsummerDate, 5); // A few days after Midsummer
@@ -37,6 +52,20 @@ export const findKeyPeriods = (year: number, holidays: Date[]) => {
     vacationDaysNeeded: 5,
     description: "Midsommarledighet",
     score: 80,
+    type: "holiday"
+  };
+  
+  // Create an alternative shorter midsummer period
+  const shortMidsummerStart = addDays(midsummerDate, -3);
+  const shortMidsummerEnd = addDays(midsummerDate, 2);
+  
+  const shortMidsummerPeriod = {
+    start: shortMidsummerStart,
+    end: shortMidsummerEnd,
+    days: differenceInDays(shortMidsummerEnd, shortMidsummerStart) + 1,
+    vacationDaysNeeded: 3, // Will be calculated properly later
+    description: "Kort midsommarledighet",
+    score: 75,
     type: "holiday"
   };
   
@@ -79,11 +108,161 @@ export const findKeyPeriods = (year: number, holidays: Date[]) => {
     type: "bridge"
   };
   
-  // NEW: Generate extended periods for important holiday clusters
-  // Find clusters of holidays that are close to each other
+  // NEW: Generate efficient alternatives around holidays
+  // For each holiday, create efficient short breaks that maximize the days off to vacation days ratio
   const sortedHolidays = [...holidays].sort((a, b) => a.getTime() - b.getTime());
   
-  // Look for holiday clusters (holidays that are close to each other)
+  for (const holiday of sortedHolidays) {
+    const holidayDayOfWeek = holiday.getDay();
+    
+    // Skip weekends as they're already off
+    if (holidayDayOfWeek === 0 || holidayDayOfWeek === 6) continue;
+    
+    // Create strategic periods around weekday holidays
+    // For Monday holidays: Thursday before to Monday (4 days off, 1-2 vacation days)
+    if (holidayDayOfWeek === 1) {
+      const thursdayBefore = addDays(holiday, -4);
+      const efficientPeriod = {
+        start: thursdayBefore,
+        end: holiday,
+        days: 5,
+        vacationDaysNeeded: 2, // Thursday, Friday
+        description: `Lång helg med röd dag (${holiday.getDate()}/${holiday.getMonth() + 1})`,
+        score: 78,
+        type: "efficient-holiday"
+      };
+      periods.push(efficientPeriod);
+      
+      // Also add Friday-Monday option (very efficient)
+      const fridayBefore = addDays(holiday, -3);
+      const shortEfficientPeriod = {
+        start: fridayBefore, 
+        end: holiday,
+        days: 4,
+        vacationDaysNeeded: 1, // Just Friday
+        description: `Effektiv långhelg (${holiday.getDate()}/${holiday.getMonth() + 1})`,
+        score: 82,
+        type: "efficient-holiday"
+      };
+      periods.push(shortEfficientPeriod);
+    }
+    
+    // For Friday holidays: Friday to Monday after (4 days off, 1 vacation day)
+    if (holidayDayOfWeek === 5) {
+      const mondayAfter = addDays(holiday, 3);
+      const efficientPeriod = {
+        start: holiday,
+        end: mondayAfter,
+        days: 4,
+        vacationDaysNeeded: 1, // Just Monday
+        description: `Effektiv långhelg (${holiday.getDate()}/${holiday.getMonth() + 1})`,
+        score: 82,
+        type: "efficient-holiday"
+      };
+      periods.push(efficientPeriod);
+    }
+    
+    // For Tuesday holidays: Friday before to Tuesday (5 days off, 1 vacation day)
+    if (holidayDayOfWeek === 2) {
+      const fridayBefore = addDays(holiday, -4);
+      const efficientPeriod = {
+        start: fridayBefore,
+        end: holiday,
+        days: 5,
+        vacationDaysNeeded: 1, // Just Monday
+        description: `Effektiv långhelg (${holiday.getDate()}/${holiday.getMonth() + 1})`,
+        score: 85,
+        type: "efficient-holiday"
+      };
+      periods.push(efficientPeriod);
+      
+      // Also add option from Tuesday to Sunday (6 days off, 3 vacation days)
+      const sundayAfter = addDays(holiday, 5);
+      const weekExtensionPeriod = {
+        start: holiday,
+        end: sundayAfter, 
+        days: 6,
+        vacationDaysNeeded: 3, // Wed, Thu, Fri
+        description: `Förlängd vecka med röd dag (${holiday.getDate()}/${holiday.getMonth() + 1})`,
+        score: 77,
+        type: "efficient-holiday"
+      };
+      periods.push(weekExtensionPeriod);
+    }
+    
+    // For Thursday holidays: Thursday to Sunday (4 days off, 1 vacation day)
+    if (holidayDayOfWeek === 4) {
+      const sundayAfter = addDays(holiday, 3);
+      const efficientPeriod = {
+        start: holiday,
+        end: sundayAfter,
+        days: 4,
+        vacationDaysNeeded: 1, // Just Friday
+        description: `Effektiv långhelg (${holiday.getDate()}/${holiday.getMonth() + 1})`,
+        score: 82,
+        type: "efficient-holiday"
+      };
+      periods.push(efficientPeriod);
+      
+      // Also add Monday to Thursday (4 days off, 3 vacation days)
+      const mondayBefore = addDays(holiday, -3);
+      const weekStartPeriod = {
+        start: mondayBefore,
+        end: holiday,
+        days: 4,
+        vacationDaysNeeded: 3, // Mon, Tue, Wed
+        description: `Kort vecka med röd dag (${holiday.getDate()}/${holiday.getMonth() + 1})`,
+        score: 73,
+        type: "efficient-holiday"
+      };
+      periods.push(weekStartPeriod);
+    }
+    
+    // For Wednesday holidays: create both before and after periods
+    if (holidayDayOfWeek === 3) {
+      // Monday-Wednesday (3 days off, 2 vacation days)
+      const mondayBefore = addDays(holiday, -2);
+      const firstHalfPeriod = {
+        start: mondayBefore,
+        end: holiday,
+        days: 3,
+        vacationDaysNeeded: 2, // Mon, Tue
+        description: `Halv vecka med röd dag (${holiday.getDate()}/${holiday.getMonth() + 1})`,
+        score: 75,
+        type: "efficient-holiday"
+      };
+      periods.push(firstHalfPeriod);
+      
+      // Wednesday-Sunday (5 days off, 2 vacation days)
+      const sundayAfter = addDays(holiday, 4);
+      const secondHalfPeriod = {
+        start: holiday,
+        end: sundayAfter,
+        days: 5,
+        vacationDaysNeeded: 2, // Thu, Fri
+        description: `Förlängd helg med röd dag (${holiday.getDate()}/${holiday.getMonth() + 1})`,
+        score: 80,
+        type: "efficient-holiday"
+      };
+      periods.push(secondHalfPeriod);
+      
+      // Friday before to Sunday after (9 days off, 4 vacation days)
+      const fridayBefore = addDays(holiday, -5);
+      const extendedPeriod = {
+        start: fridayBefore,
+        end: sundayAfter,
+        days: 9,
+        vacationDaysNeeded: 4, // Mon, Tue, Thu, Fri
+        description: `Effektiv 9-dagarsledighet (${holiday.getDate()}/${holiday.getMonth() + 1})`,
+        score: 83,
+        type: "efficient-holiday"
+      };
+      periods.push(extendedPeriod);
+    }
+  }
+  
+  // NEW: Generate extended periods for important holiday clusters
+  // Find clusters of holidays that are close to each other
   for (let i = 0; i < sortedHolidays.length - 1; i++) {
     const currentHoliday = sortedHolidays[i];
     const nextHoliday = sortedHolidays[i + 1];
@@ -107,6 +286,49 @@ export const findKeyPeriods = (year: number, holidays: Date[]) => {
       };
       
       periods.push(clusterPeriod);
+      
+      // Add more efficient alternatives for the cluster
+      // Option 1: Friday before first holiday to first holiday
+      if (currentHoliday.getDay() > 1) { // If not Monday or Sunday
+        const fridayBefore = new Date(currentHoliday);
+        while (fridayBefore.getDay() !== 5) {
+          fridayBefore.setDate(fridayBefore.getDate() - 1);
+        }
+        
+        if (differenceInDays(currentHoliday, fridayBefore) <= 4) {
+          const efficientStartPeriod = {
+            start: fridayBefore,
+            end: currentHoliday,
+            days: differenceInDays(currentHoliday, fridayBefore) + 1,
+            vacationDaysNeeded: 2, // Estimate, will be calculated properly later
+            description: `Effektiv start till röd dag (${currentHoliday.getDate()}/${currentHoliday.getMonth() + 1})`,
+            score: 78,
+            type: "efficient-cluster"
+          };
+          periods.push(efficientStartPeriod);
+        }
+      }
+      
+      // Option 2: Last holiday to Sunday after
+      if (nextHoliday.getDay() < 6) { // If not Saturday
+        const sundayAfter = new Date(nextHoliday);
+        while (sundayAfter.getDay() !== 0) {
+          sundayAfter.setDate(sundayAfter.getDate() + 1);
+        }
+        
+        if (differenceInDays(sundayAfter, nextHoliday) <= 4) {
+          const efficientEndPeriod = {
+            start: nextHoliday,
+            end: sundayAfter,
+            days: differenceInDays(sundayAfter, nextHoliday) + 1,
+            vacationDaysNeeded: 2, // Estimate, will be calculated properly later
+            description: `Effektivt slut efter röd dag (${nextHoliday.getDate()}/${nextHoliday.getMonth() + 1})`,
+            score: 78,
+            type: "efficient-cluster"
+          };
+          periods.push(efficientEndPeriod);
+        }
+      }
     }
   }
   
@@ -146,6 +368,6 @@ export const findKeyPeriods = (year: number, holidays: Date[]) => {
     }
   }
   
-  periods.push(easterPeriod, midsummerPeriod, christmasPeriod, newYearPeriod, ascensionPeriod);
+  periods.push(easterPeriod, shortEasterPeriod, midsummerPeriod, shortMidsummerPeriod, christmasPeriod, newYearPeriod, ascensionPeriod);
   return periods;
 };

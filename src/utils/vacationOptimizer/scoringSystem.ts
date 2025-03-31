@@ -1,16 +1,34 @@
 
 import { VacationPeriod } from './types';
 import { isDayOff } from './helpers';
+import { calculateVacationDaysNeeded } from './calculators';
 
-// Score periods based on optimization mode
+// Score periods based on optimization mode and efficiency
 export const scorePeriods = (periods: VacationPeriod[], mode: string, holidays: Date[]): VacationPeriod[] => {
   const scoredPeriods = [...periods];
   
-  // Apply base scores based on period characteristics
+  // Calculate efficiency for each period to use in scoring
   scoredPeriods.forEach(period => {
     // Default base score if not set
     if (period.score === undefined) {
       period.score = 0;
+    }
+    
+    // Calculate actual vacation days needed for each period
+    if (period.vacationDaysNeeded === undefined) {
+      period.vacationDaysNeeded = calculateVacationDaysNeeded(period.start, period.end, holidays);
+    }
+    
+    // Calculate efficiency ratio (days off / vacation days needed)
+    const efficiencyRatio = period.vacationDaysNeeded > 0 
+      ? period.days / period.vacationDaysNeeded 
+      : 0;
+    
+    // Add efficiency bonus - higher efficiency = higher score
+    // Use a sliding scale where efficiency above 1.5 starts to get significant bonuses
+    if (efficiencyRatio >= 1.5) {
+      // Exponentially increase the bonus for high efficiency ratios
+      period.score += Math.pow(efficiencyRatio - 1, 2) * 30;
     }
     
     // Apply mode-specific scoring with stronger emphasis
@@ -84,6 +102,16 @@ export const scorePeriods = (periods: VacationPeriod[], mode: string, holidays: 
       if (mode === "extended" && holidayCount >= 2) {
         period.score += 25;
       }
+    }
+    
+    // Final efficiency multiplier - give more weight to efficient periods
+    // This helps find periods like in the example (Jun 16-22 with 4 vacation days)
+    if (efficiencyRatio > 1.75) {
+      period.score *= 1.3; // Significant boost for very efficient periods
+    } else if (efficiencyRatio > 1.5) {
+      period.score *= 1.2; // Good boost for efficient periods
+    } else if (efficiencyRatio > 1.25) {
+      period.score *= 1.1; // Small boost for somewhat efficient periods
     }
   });
   
