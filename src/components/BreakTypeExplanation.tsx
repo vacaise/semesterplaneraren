@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Calendar, PlaneTakeoff, Clock } from "lucide-react";
+import { Calendar, Coffee, Clock } from "lucide-react";
 
 export const BreakTypeExplanation = () => {
   return (
@@ -10,7 +10,7 @@ export const BreakTypeExplanation = () => {
         <div className="bg-green-50 border border-green-100 rounded-lg p-3">
           <div className="flex items-start gap-2">
             <div className="p-2 bg-white rounded-md">
-              <PlaneTakeoff className="h-5 w-5 text-green-600" />
+              <Coffee className="h-5 w-5 text-green-600" />
             </div>
             <div>
               <h5 className="font-medium text-green-800">Långhelg</h5>

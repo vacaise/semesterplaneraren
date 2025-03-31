@@ -2,7 +2,7 @@
 import React from "react";
 import { format, differenceInDays } from "date-fns";
 import { sv } from "date-fns/locale";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, Coffee } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -25,10 +25,10 @@ interface BreakSummaryCardProps {
 
 export const BreakSummaryCard = ({ period }: BreakSummaryCardProps) => {
   const getBreakType = (days: number) => {
-    if (days <= 4) return { type: "Långhelg", class: "bg-green-100 text-green-800" };
-    if (days <= 6) return { type: "Miniledighet", class: "bg-amber-100 text-amber-800" };
-    if (days <= 9) return { type: "Veckoledighet", class: "bg-blue-100 text-blue-800" };
-    return { type: "Längre ledighet", class: "bg-purple-100 text-purple-800" };
+    if (days <= 4) return { type: "Långhelg", class: "bg-green-100 text-green-800", icon: <Coffee className="h-4 w-4 text-green-600" /> };
+    if (days <= 6) return { type: "Miniledighet", class: "bg-amber-100 text-amber-800", icon: <Calendar className="h-4 w-4 text-amber-600" /> };
+    if (days <= 9) return { type: "Veckoledighet", class: "bg-blue-100 text-blue-800", icon: <Calendar className="h-4 w-4 text-blue-600" /> };
+    return { type: "Längre ledighet", class: "bg-purple-100 text-purple-800", icon: <Calendar className="h-4 w-4 text-purple-600" /> };
   };
 
   const breakStyle = getBreakType(period.days);

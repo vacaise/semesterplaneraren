@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format, isPast } from "date-fns";
 import { sv } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -72,6 +72,18 @@ const StepThree = ({
     );
   };
 
+  const handleFetchHolidays = () => {
+    fetchHolidays();
+    
+    // Scroll to navigation buttons after a short delay to allow for holidays to be fetched
+    setTimeout(() => {
+      const navButtons = document.querySelector("#main-container + div");
+      if (navButtons) {
+        navButtons.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 500);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 mb-4">
@@ -92,7 +104,7 @@ const StepThree = ({
       </div>
 
       <Button
-        onClick={fetchHolidays}
+        onClick={handleFetchHolidays}
         disabled={isLoading}
         variant="outline"
         className="w-full py-6 border-red-200 bg-red-50/50 hover:bg-red-50 text-red-800"
