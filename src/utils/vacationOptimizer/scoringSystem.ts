@@ -23,28 +23,32 @@ export const scorePeriods = (periods: VacationPeriod[], mode: string, holidays: 
     } else if (mode === "extended" && period.days > 9) {
       period.score += 80; // Increased from 50 to 80
     } else if (mode === "balanced") {
-      // For balanced mode, give even scoring across different period lengths
-      if (period.days <= 4) period.score += 30;
-      else if (period.days <= 6) period.score += 30;
-      else if (period.days <= 9) period.score += 30;
-      else period.score += 30;
+      // For balanced mode, create a true mix by giving higher scores to different period types
+      // but with slight preference for shorter periods (they're more efficient)
+      if (period.days <= 4) period.score += 60; // Longweekends get good score
+      else if (period.days <= 6) period.score += 50; // Minibreaks get good score
+      else if (period.days <= 9) period.score += 40; // Weeks get moderate score 
+      else period.score += 30; // Extended periods get lower but still significant score
     }
     
     // Apply stronger penalties to periods that don't match the selected mode
-    if (mode === "longweekends" && period.days > 4) {
-      period.score -= (period.days > 6) ? 40 : 30; // Steeper penalty for periods further from the preferred type
-    }
-    if (mode === "minibreaks" && (period.days <= 4 || period.days > 6)) {
-      period.score -= (period.days > 9 || period.days <= 2) ? 40 : 30;
-    }
-    if (mode === "weeks" && (period.days <= 6 || period.days > 9)) {
-      period.score -= (period.days <= 4 || period.days > 12) ? 40 : 30;
-    }
-    if (mode === "extended" && period.days <= 9) {
-      period.score -= period.days <= 6 ? 40 : 30;
+    // But don't apply these penalties in balanced mode
+    if (mode !== "balanced") {
+      if (mode === "longweekends" && period.days > 4) {
+        period.score -= (period.days > 6) ? 40 : 30; // Steeper penalty for periods further from the preferred type
+      }
+      if (mode === "minibreaks" && (period.days <= 4 || period.days > 6)) {
+        period.score -= (period.days > 9 || period.days <= 2) ? 40 : 30;
+      }
+      if (mode === "weeks" && (period.days <= 6 || period.days > 9)) {
+        period.score -= (period.days <= 4 || period.days > 12) ? 40 : 30;
+      }
+      if (mode === "extended" && period.days <= 9) {
+        period.score -= period.days <= 6 ? 40 : 30;
+      }
     }
     
-    // NEW: Score based on holiday inclusion
+    // Score based on holiday inclusion
     // Count how many holidays are included in the period
     let holidayCount = 0;
     let currentDay = new Date(period.start);

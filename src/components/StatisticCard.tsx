@@ -20,9 +20,9 @@ export const StatisticCard = ({
   // Display value formatting
   const displayValue = (() => {
     if (typeof value === 'number') {
-      if (label === "Effektivitet") {
-        // Add "x" suffix for efficiency
-        return `${value}x`;
+      if (label.toLowerCase() === "effektivitet") {
+        // Format efficiency as 2.5x with no trailing zeros
+        return value.toFixed(2).replace(/\.?0+$/, '') + 'x';
       } else if (Number.isInteger(value)) {
         // For integers, display without decimals
         return value.toString();
@@ -36,6 +36,10 @@ export const StatisticCard = ({
       // Handle case where value is already a string
       if (value.includes('NaN')) {
         return "0";
+      }
+      // If it's already formatted as "Nx", return as is
+      if (value.includes('x')) {
+        return value;
       }
       return value;
     }
