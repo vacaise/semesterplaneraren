@@ -32,6 +32,17 @@ const CookieBanner = () => {
     setShowBanner(false);
   };
 
+  const rejectAllCookies = () => {
+    // Deny all cookies including analytics
+    if (typeof window.gtag === 'function') {
+      window.gtag("consent", "update", {
+        analytics_storage: "denied",
+      });
+    }
+    localStorage.setItem("cookie-consent", "rejected");
+    setShowBanner(false);
+  };
+
   const closeBanner = () => {
     setShowBanner(false);
   };
@@ -64,7 +75,14 @@ const CookieBanner = () => {
             <X size={20} />
           </button>
         </div>
-        <div className="flex gap-3 mt-4 justify-end">
+        <div className="flex flex-wrap gap-3 mt-4 justify-end">
+          <Button 
+            variant="ghost" 
+            onClick={rejectAllCookies}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            Neka alla
+          </Button>
           <Button 
             variant="outline" 
             onClick={acceptNecessaryCookies}
