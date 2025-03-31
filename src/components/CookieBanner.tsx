@@ -22,9 +22,12 @@ const CookieBanner = () => {
 
   const acceptNecessaryCookies = () => {
     // Set Google Analytics to respect Do Not Track
-    window.gtag?.("consent", "update", {
-      analytics_storage: "denied",
-    });
+    // Using optional chaining to safely access gtag
+    if (typeof window.gtag === 'function') {
+      window.gtag("consent", "update", {
+        analytics_storage: "denied",
+      });
+    }
     localStorage.setItem("cookie-consent", "necessary");
     setShowBanner(false);
   };
