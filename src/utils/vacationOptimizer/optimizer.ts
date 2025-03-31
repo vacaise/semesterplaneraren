@@ -6,7 +6,7 @@ import {
   findSummerPeriods, 
   createExtraPeriods 
 } from './periodFinders';
-import { calculateVacationDaysNeeded } from './calculators';
+import { calculateVacationDaysNeeded, calculateTotalDaysOff } from './calculators';
 import { isDateInPast } from './helpers';
 import { scorePeriods } from './scoringSystem';
 import { processPastDates } from './pastDateHandler';
@@ -75,5 +75,11 @@ export const findOptimalSchedule = (
   // Select the optimal periods based on the available vacation days
   const selectedPeriods = selectOptimalPeriods(potentialPeriods, vacationDays, year, holidays, mode);
   
-  return selectedPeriods;
+  // Calculate total days off with the selected periods
+  const totalDaysOff = calculateTotalDaysOff(selectedPeriods, holidays);
+  
+  return {
+    periods: selectedPeriods,
+    totalDaysOff
+  };
 };

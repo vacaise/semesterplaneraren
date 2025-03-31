@@ -1,7 +1,7 @@
 
 // Main entry point for the vacation optimizer
 import { findOptimalSchedule } from './optimizer';
-import { calculateTotalDaysOff } from './calculators';
+import { calculateTotalDaysOff, calculateEfficiencyRatio } from './calculators';
 import { isDayOff, isDateInPast } from './helpers';
 import { VacationPeriod } from './types';
 
@@ -23,16 +23,7 @@ export const optimizeVacation = (
   const filteredHolidays = holidays.filter(holiday => !isDateInPast(holiday));
   
   // Find potential periods based on the parameters
-  const selectedPeriods = findOptimalSchedule(year, vacationDays, filteredHolidays, mode);
-  
-  // Calculate the total number of days off
-  let totalDaysOff = calculateTotalDaysOff(selectedPeriods, filteredHolidays);
-  
-  // Ensure totalDaysOff is not NaN
-  if (isNaN(totalDaysOff)) {
-    totalDaysOff = 0;
-    console.error("totalDaysOff was NaN, setting to 0");
-  }
+  const { periods: selectedPeriods, totalDaysOff } = findOptimalSchedule(year, vacationDays, filteredHolidays, mode);
   
   // IMPORTANT: verify periods don't contain any past dates
   const today = new Date();

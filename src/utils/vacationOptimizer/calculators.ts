@@ -1,6 +1,6 @@
 
 import { addDays, format, differenceInDays } from 'date-fns';
-import { formatDateToString } from './helpers';
+import { formatDateToString, isDayOff } from './helpers';
 
 // Calculate total days off from all selected periods
 export const calculateTotalDaysOff = (periods: any[], holidays: Date[]) => {
@@ -47,4 +47,10 @@ export const calculateVacationDaysNeeded = (start: Date, end: Date, holidays: Da
 // Calculate total days in a period
 export const calculatePeriodDays = (start: Date, end: Date) => {
   return differenceInDays(end, start) + 1;
+};
+
+// NEW: Enhanced calculation for efficiency ratio
+export const calculateEfficiencyRatio = (totalDaysOff: number, vacationDaysUsed: number) => {
+  if (vacationDaysUsed <= 0) return 0;
+  return totalDaysOff / vacationDaysUsed;
 };
