@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Sitemap from "./pages/Sitemap";
 import NotFound from "./pages/NotFound";
 
+// Create a new query client instance
 const queryClient = new QueryClient();
 
 const App = () => (
