@@ -10,8 +10,15 @@ const Footer = () => {
       <div className="max-w-4xl mx-auto">
         <div className={`${isMobile ? 'flex flex-col gap-4' : 'flex justify-between'}`}>
           <div>
+            {/* Replace text with logo */}
             <h2 className={`text-lg font-semibold mb-2 ${isMobile ? 'text-center' : ''}`}>
-              <Link to="/" className="hover:text-teal-600 transition-colors">vacai</Link>
+              <Link to="/" className="hover:text-teal-600 transition-colors" aria-label="Hem">
+                <img 
+                  src="/lovable-uploads/f65dbaf4-022d-4879-8f21-c099cac057f5.png" 
+                  alt="vacai logo" 
+                  className="h-7"
+                />
+              </Link>
             </h2>
             <p className={`text-gray-600 text-sm max-w-md ${isMobile ? 'text-center' : ''}`}>Optimera din semester för att maximera din ledighet och röda dagar. vacai hjälper dig att få ut mest möjligt av dina semesterdagar.</p>
           </div>
@@ -19,11 +26,7 @@ const Footer = () => {
           <div className={`flex ${isMobile ? 'flex-row justify-center mt-4' : 'flex-col items-end'}`}>
             <nav aria-label="Sidfot navigation">
               <ul className={`flex ${isMobile ? 'gap-6' : 'gap-4'}`}>
-                <li>
-                  <Link to="/articles" className="text-gray-600 hover:text-teal-600 transition-colors text-sm" aria-label="Läs våra artiklar">
-                    Artiklar
-                  </Link>
-                </li>
+                {/* Move Artiklar to the last position */}
                 <li>
                   <a href="mailto:vacai.se@yahoo.com" className="text-gray-600 hover:text-teal-600 transition-colors text-sm" aria-label="Kontakta oss via e-post">
                     Kontakt
@@ -37,6 +40,11 @@ const Footer = () => {
                 <li>
                   <Link to="/cookie-policy" className="text-gray-600 hover:text-teal-600 transition-colors text-sm" aria-label="Visa cookie policy">
                     Cookie Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/articles" className="text-gray-600 hover:text-teal-600 transition-colors text-sm" aria-label="Läs våra artiklar">
+                    Artiklar
                   </Link>
                 </li>
               </ul>
