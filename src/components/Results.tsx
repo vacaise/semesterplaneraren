@@ -1,4 +1,3 @@
-
 import { format, addDays, differenceInDays } from "date-fns";
 import { sv } from "date-fns/locale";
 import { Card, CardContent } from "@/components/ui/card";
@@ -65,25 +64,18 @@ const Results = ({ schedule, year, holidays = [] }: ResultsProps) => {
     return <div>Inget schema har genererats än.</div>;
   }
 
-  // Beräkna totalt antal lediga dagar direkt från perioderna
-  // Detta säkerställer att vi bara räknar dagar inom de faktiska ledighetsperioderna
-  let totalDaysFromPeriods = 0;
-  schedule.periods.forEach(period => {
-    totalDaysFromPeriods += period.days;
-  });
-  
-  // Använd summan av dagar från perioderna direkt
+  // Use the totalDaysOff and vacationDaysUsed directly from the schedule
   const totalVacationDays = schedule.vacationDaysUsed || 0;
-  const totalDaysOff = totalDaysFromPeriods;
+  const totalDaysOff = schedule.totalDaysOff || 0;
 
-  // Se till att totalDaysOff och totalVacationDays är giltiga siffror
+  // Make sure totalDaysOff and totalVacationDays are valid numbers
   const validTotalDaysOff = isNaN(totalDaysOff) ? 0 : totalDaysOff;
   const validTotalVacationDays = (totalVacationDays <= 0 || isNaN(totalVacationDays)) ? 1 : totalVacationDays;
   
-  // Beräkna effektivitet med giltiga siffror och formatera till 2 decimaler
+  // Calculate efficiency with valid numbers and format to 2 decimal places
   const efficiency = (validTotalDaysOff / validTotalVacationDays).toFixed(2);
     
-  // Sortera perioder kronologiskt efter startdatum
+  // Sort periods chronologically by start date
   const sortedPeriods = [...schedule.periods].sort((a, b) => {
     const dateA = new Date(a.start);
     const dateB = new Date(b.start);
