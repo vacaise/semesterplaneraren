@@ -1,9 +1,11 @@
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Link } from "react-router-dom";
+
 const Footer = () => {
   const isMobile = useIsMobile();
   const year = new Date().getFullYear();
+  
   return <footer className={`mt-8 py-8 ${isMobile ? 'px-4' : 'px-8'} bg-gray-50 border-t border-gray-200`}>
       <div className="max-w-4xl mx-auto">
         <div className={`${isMobile ? 'flex flex-col gap-4' : 'flex justify-between'}`}>
@@ -17,6 +19,11 @@ const Footer = () => {
           <div className={`flex ${isMobile ? 'flex-row justify-center mt-4' : 'flex-col items-end'}`}>
             <nav aria-label="Sidfot navigation">
               <ul className={`flex ${isMobile ? 'gap-6' : 'gap-4'}`}>
+                <li>
+                  <Link to="/articles" className="text-gray-600 hover:text-teal-600 transition-colors text-sm" aria-label="Läs våra artiklar">
+                    Artiklar
+                  </Link>
+                </li>
                 <li>
                   <a href="mailto:vacai.se@yahoo.com" className="text-gray-600 hover:text-teal-600 transition-colors text-sm" aria-label="Kontakta oss via e-post">
                     Kontakt
@@ -46,4 +53,5 @@ const Footer = () => {
       </div>
     </footer>;
 };
+
 export default Footer;

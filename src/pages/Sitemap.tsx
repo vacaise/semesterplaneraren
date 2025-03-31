@@ -52,6 +52,36 @@ const Sitemap = () => {
               </section>
               
               <section>
+                <h2 className="text-xl font-semibold mb-4">Artiklar</h2>
+                <ul className="list-disc pl-8 space-y-2">
+                  <li>
+                    <Link to="/articles" className="text-teal-600 hover:underline">
+                      Alla artiklar
+                    </Link>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Översikt över alla våra semestertips och guider.
+                    </p>
+                  </li>
+                  <li>
+                    <Link to="/articles/maxa-semester-2025" className="text-teal-600 hover:underline">
+                      Maxa din semester 2025
+                    </Link>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Få ut mest av röda dagar under 2025.
+                    </p>
+                  </li>
+                  <li>
+                    <Link to="/articles/optimera-ledighet-2026" className="text-teal-600 hover:underline">
+                      Optimera din ledighet 2026
+                    </Link>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Planera för långledighet under 2026.
+                    </p>
+                  </li>
+                </ul>
+              </section>
+              
+              <section>
                 <h2 className="text-xl font-semibold mb-4">Stödsidor</h2>
                 <ul className="list-disc pl-8 space-y-2">
                   <li>
