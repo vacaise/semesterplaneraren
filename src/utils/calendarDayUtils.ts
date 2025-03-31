@@ -17,17 +17,8 @@ const isDateInPeriods = (date: Date, periods: any[] = []): boolean => {
     const start = new Date(period.start);
     const end = new Date(period.end);
     
-    if (
-      date.getFullYear() >= start.getFullYear() &&
-      date.getMonth() >= start.getMonth() &&
-      date.getDate() >= start.getDate() &&
-      date.getFullYear() <= end.getFullYear() &&
-      date.getMonth() <= end.getMonth() &&
-      date.getDate() <= end.getDate()
-    ) {
-      return true;
-    }
-    return false;
+    // Fix the date comparison logic to correctly check if a date falls within a period
+    return date >= start && date <= end;
   });
 };
 

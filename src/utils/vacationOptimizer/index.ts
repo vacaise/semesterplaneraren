@@ -44,7 +44,8 @@ export const optimizeVacation = (
   });
   console.log(`After filtering past periods: ${validatedPeriods.length} periods remain`);
   
-  // Beräkna totalt antal lediga dagar
+  // Beräkna totalt antal lediga dagar från de faktiska perioderna
+  // Detta räknar endast dagar som ingår i de valda perioderna
   const totalDaysOff = calculateTotalDaysOff(validatedPeriods, filteredHolidays);
   
   // Beräkna effektivitetskvot

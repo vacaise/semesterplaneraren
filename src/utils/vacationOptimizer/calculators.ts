@@ -3,11 +3,12 @@ import { addDays, format, differenceInDays, isWeekend } from 'date-fns';
 import { formatDateToString, isDayOff } from './helpers';
 import { VacationPeriod } from './types';
 
-// Calculates total days off across all periods
+// Calculates total days off across all periods - only counting days within periods
 export const calculateTotalDaysOff = (periods: VacationPeriod[], holidays: Date[]) => {
   let totalDaysOff = 0;
   
   // For each period, add the total days
+  // This correctly counts only days within the selected periods
   periods.forEach(period => {
     totalDaysOff += period.days;
   });

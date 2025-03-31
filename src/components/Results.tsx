@@ -65,24 +65,25 @@ const Results = ({ schedule, year, holidays = [] }: ResultsProps) => {
     return <div>Inget schema har genererats än.</div>;
   }
 
-  // Calculate the total days from each period, for a more accurate representation
+  // Beräkna totalt antal lediga dagar direkt från perioderna
+  // Detta säkerställer att vi bara räknar dagar inom de faktiska ledighetsperioderna
   let totalDaysFromPeriods = 0;
   schedule.periods.forEach(period => {
     totalDaysFromPeriods += period.days;
   });
   
-  // Use the sum of days from the periods directly
+  // Använd summan av dagar från perioderna direkt
   const totalVacationDays = schedule.vacationDaysUsed || 0;
   const totalDaysOff = totalDaysFromPeriods;
 
-  // Make sure totalDaysOff and totalVacationDays are valid numbers
+  // Se till att totalDaysOff och totalVacationDays är giltiga siffror
   const validTotalDaysOff = isNaN(totalDaysOff) ? 0 : totalDaysOff;
   const validTotalVacationDays = (totalVacationDays <= 0 || isNaN(totalVacationDays)) ? 1 : totalVacationDays;
   
-  // Calculate efficiency with valid numbers and format to 2 decimal places
+  // Beräkna effektivitet med giltiga siffror och formatera till 2 decimaler
   const efficiency = (validTotalDaysOff / validTotalVacationDays).toFixed(2);
     
-  // Sort periods chronologically by start date
+  // Sortera perioder kronologiskt efter startdatum
   const sortedPeriods = [...schedule.periods].sort((a, b) => {
     const dateA = new Date(a.start);
     const dateB = new Date(b.start);
