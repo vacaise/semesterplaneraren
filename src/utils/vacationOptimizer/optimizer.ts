@@ -60,6 +60,20 @@ export const findOptimalSchedule = (
     const actualVacationDays = calculateVacationDaysNeeded(period.start, period.end, holidays);
     period.vacationDaysNeeded = actualVacationDays;
     
+    // Calculate efficiency ratio (days off / vacation days needed)
+    if (actualVacationDays > 0) {
+      const efficiencyRatio = period.days / actualVacationDays;
+      
+      // Boost the score of highly efficient periods
+      if (efficiencyRatio > 2.5) {
+        period.score = (period.score || 0) * 1.4; // 40% boost for super efficient periods
+      } else if (efficiencyRatio > 2.0) {
+        period.score = (period.score || 0) * 1.3; // 30% boost for very efficient periods
+      } else if (efficiencyRatio > 1.7) {
+        period.score = (period.score || 0) * 1.2; // 20% boost for efficient periods
+      }
+    }
+    
     // Skip periods that would require more than the available vacation days or that require no vacation days
     if (actualVacationDays > vacationDays || actualVacationDays <= 0) {
       period.score = -1; // Mark as invalid with a negative score

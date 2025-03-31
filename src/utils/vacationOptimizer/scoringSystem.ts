@@ -26,9 +26,11 @@ export const scorePeriods = (periods: VacationPeriod[], mode: string, holidays: 
     
     // Add efficiency bonus - higher efficiency = higher score
     // Use a sliding scale where efficiency above 1.5 starts to get significant bonuses
-    if (efficiencyRatio >= 1.5) {
+    if (efficiencyRatio >= 2.0) {
       // Exponentially increase the bonus for high efficiency ratios
-      period.score += Math.pow(efficiencyRatio - 1, 2) * 30;
+      period.score += Math.pow(efficiencyRatio - 1, 2) * 50; // Increased from 30 to 50
+    } else if (efficiencyRatio >= 1.5) {
+      period.score += Math.pow(efficiencyRatio - 1, 2) * 40; // Increased from 30 to 40
     }
     
     // Apply mode-specific scoring with stronger emphasis
@@ -91,10 +93,10 @@ export const scorePeriods = (periods: VacationPeriod[], mode: string, holidays: 
     // The more holidays included, the higher the score boost
     if (holidayCount > 0) {
       // Base bonus for including any holidays
-      const baseHolidayBonus = 10;
+      const baseHolidayBonus = 15; // Increased from 10 to 15
       
       // Additional bonus per holiday (higher for extended vacations)
-      const perHolidayBonus = mode === "extended" ? 15 : 8;
+      const perHolidayBonus = mode === "extended" ? 20 : 15; // Increased from 15/8 to 20/15
       
       period.score += baseHolidayBonus + (holidayCount * perHolidayBonus);
       
@@ -106,12 +108,14 @@ export const scorePeriods = (periods: VacationPeriod[], mode: string, holidays: 
     
     // Final efficiency multiplier - give more weight to efficient periods
     // This helps find periods like in the example (Jun 16-22 with 4 vacation days)
-    if (efficiencyRatio > 1.75) {
-      period.score *= 1.3; // Significant boost for very efficient periods
+    if (efficiencyRatio > 2.0) {
+      period.score *= 1.5; // Significant boost for very efficient periods (increased from 1.3)
+    } else if (efficiencyRatio > 1.75) {
+      period.score *= 1.3; // Significant boost for very efficient periods (increased from 1.2)
     } else if (efficiencyRatio > 1.5) {
-      period.score *= 1.2; // Good boost for efficient periods
+      period.score *= 1.2; // Good boost for efficient periods (kept the same)
     } else if (efficiencyRatio > 1.25) {
-      period.score *= 1.1; // Small boost for somewhat efficient periods
+      period.score *= 1.1; // Small boost for somewhat efficient periods (kept the same)
     }
   });
   

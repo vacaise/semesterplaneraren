@@ -40,8 +40,7 @@ export const findExtendedWeekends = (year: number) => {
       
       periods.push(extendedWeekend);
       
-      // NEW: Add ultra-efficient Friday-Monday weekend option
-      // This gives 4 days off with just 1 vacation day
+      // Friday-Monday weekend option (4 days off with just 1 vacation day)
       const efficientWeekendStart = currentDate; // Friday
       const efficientWeekendEnd = addDays(currentDate, 3); // Monday
       
@@ -57,8 +56,7 @@ export const findExtendedWeekends = (year: number) => {
       
       periods.push(efficientWeekend);
       
-      // NEW: Add Thursday-Sunday weekend option
-      // This gives 4 days off with just 1 vacation day (Thursday)
+      // Thursday-Sunday weekend option (4 days off with just 1 vacation day - Thursday)
       const thursdayWeekendStart = addDays(currentDate, -1); // Thursday
       const thursdayWeekendEnd = addDays(currentDate, 2); // Sunday
       
@@ -74,7 +72,7 @@ export const findExtendedWeekends = (year: number) => {
       
       periods.push(thursdayWeekend);
       
-      // NEW: Add Wednesday-Sunday option for a 5-day break with 2 vacation days
+      // Wednesday-Sunday option for a 5-day break with 2 vacation days
       const wednesdayWeekendStart = addDays(currentDate, -2); // Wednesday
       const wednesdayWeekendEnd = addDays(currentDate, 2); // Sunday
       
@@ -89,6 +87,22 @@ export const findExtendedWeekends = (year: number) => {
       };
       
       periods.push(wednesdayWeekend);
+      
+      // NEW: Add Tuesday-Sunday option (6 days with 3 vacation days)
+      const tuesdayWeekendStart = addDays(currentDate, -3); // Tuesday
+      const tuesdayWeekendEnd = addDays(currentDate, 2); // Sunday
+      
+      const tuesdayWeekend = {
+        start: tuesdayWeekendStart,
+        end: tuesdayWeekendEnd,
+        days: 6,
+        vacationDaysNeeded: 3, // Tuesday, Wednesday, Thursday
+        description: `Lång helg (tis-sön) i ${getMonthName(month)}`,
+        score: 59 - Math.abs(6 - month) * 2,
+        type: "extended-weekend"
+      };
+      
+      periods.push(tuesdayWeekend);
     }
   }
   

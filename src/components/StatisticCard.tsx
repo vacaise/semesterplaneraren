@@ -20,7 +20,7 @@ export const StatisticCard = ({
   // Display value formatting
   const displayValue = (() => {
     if (typeof value === 'number') {
-      if (label.toLowerCase() === "effektivitet") {
+      if (label.toLowerCase().includes("effektivitet")) {
         // Format efficiency as 2.5x with no trailing zeros
         // First round to 2 decimals
         const roundedValue = Math.round(value * 100) / 100;
