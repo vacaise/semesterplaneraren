@@ -5,7 +5,8 @@ import { VacationPeriod } from './types';
 
 // Calculate total days off from all selected periods
 export const calculateTotalDaysOff = (periods: VacationPeriod[], holidays: Date[]) => {
-  const allDaysOff = new Set<string>(); // Use Set to avoid counting days twice
+  // Use Set to avoid counting days twice
+  const allDaysOff = new Set<string>();
   
   // Add all days from all periods
   periods.forEach(period => {

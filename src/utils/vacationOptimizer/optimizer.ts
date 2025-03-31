@@ -75,11 +75,17 @@ export const findOptimalSchedule = (
   // Select the optimal periods based on the available vacation days
   const selectedPeriods = selectOptimalPeriods(potentialPeriods, vacationDays, year, holidays, mode);
   
-  // Calculate total days off with the selected periods (CRITICAL: Calculate here after periods are selected)
-  const totalDaysOff = calculateTotalDaysOff(selectedPeriods, holidays);
+  // Calculate total days off from selected periods
+  const totalDays = selectedPeriods.reduce((sum, period) => sum + period.days, 0);
+  
+  // But also calculate unique total days to avoid double counting
+  const totalUniqueCards = calculateTotalDaysOff(selectedPeriods, holidays);
+  
+  console.log("Total days from adding period.days:", totalDays);
+  console.log("Total unique days (removing overlaps):", totalUniqueCards);
   
   return {
     periods: selectedPeriods,
-    totalDaysOff
+    totalDaysOff: totalUniqueCards
   };
 };

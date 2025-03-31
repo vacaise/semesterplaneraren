@@ -38,6 +38,11 @@ export const optimizeVacation = (
   // Recalculate total days off directly from the validated periods - this is critical for accuracy
   const actualTotalDaysOff = calculateTotalDaysOff(validatedPeriods, filteredHolidays);
   
+  // Count the sum of all days from periods without considering overlaps, for debugging
+  const totalDayCount = validatedPeriods.reduce((sum, period) => sum + period.days, 0);
+  console.log("Sum of all period days:", totalDayCount);
+  console.log("Total unique days off:", actualTotalDaysOff);
+  
   return {
     totalDaysOff: actualTotalDaysOff,
     vacationDaysUsed: vacationDays,
