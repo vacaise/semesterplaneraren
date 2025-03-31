@@ -17,14 +17,23 @@ export const StatisticCard = ({
   borderColor, 
   textColor 
 }: StatisticCardProps) => {
-  // Make sure the value is valid (not NaN or undefined)
+  // Ensure we always display a valid value
   const displayValue = (() => {
     if (typeof value === 'number') {
+      // Format numbers to handle decimal places properly
+      if (label === "Effektivitet") {
+        // For efficiency, always show with "x" suffix and 2 decimal places
+        return `${value}x`;
+      }
       return isNaN(value) ? "0" : value.toString();
     } else if (value === null || value === undefined) {
       return "0";
-    } else if (typeof value === 'string' && value.includes('NaN')) {
-      return value.replace('NaN', '0');
+    } else if (typeof value === 'string') {
+      // Clean up any NaN strings
+      if (value.includes('NaN')) {
+        return value.replace('NaN', '0');
+      }
+      return value;
     }
     return value;
   })();

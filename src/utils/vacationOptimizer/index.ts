@@ -23,7 +23,7 @@ export const optimizeVacation = (
   const filteredHolidays = holidays.filter(holiday => !isDateInPast(holiday));
   
   // Find potential periods based on the parameters
-  const { periods: selectedPeriods, totalDaysOff } = findOptimalSchedule(year, vacationDays, filteredHolidays, mode);
+  const { periods: selectedPeriods } = findOptimalSchedule(year, vacationDays, filteredHolidays, mode);
   
   // IMPORTANT: verify periods don't contain any past dates
   const today = new Date();
@@ -35,13 +35,18 @@ export const optimizeVacation = (
     return endDate >= today;
   });
 
-  // Recalculate total days off directly from the validated periods - this is critical for accuracy
+  // CRUCIAL: Calculate actual total days off from all periods combined
   const actualTotalDaysOff = calculateTotalDaysOff(validatedPeriods, filteredHolidays);
   
-  // Count the sum of all days from periods without considering overlaps, for debugging
-  const totalDayCount = validatedPeriods.reduce((sum, period) => sum + period.days, 0);
-  console.log("Sum of all period days:", totalDayCount);
-  console.log("Total unique days off:", actualTotalDaysOff);
+  // Sum of individual period days (without removing duplicates) for debugging
+  const rawTotalDays = validatedPeriods.reduce((sum, period) => sum + period.days, 0);
+  
+  console.log("RAW SUM (with potential duplicates):", rawTotalDays);
+  console.log("ACTUAL UNIQUE DAYS OFF:", actualTotalDaysOff);
+  
+  // Calculate efficiency ratio
+  const efficiencyRatio = calculateEfficiencyRatio(actualTotalDaysOff, vacationDays);
+  console.log("EFFICIENCY RATIO:", efficiencyRatio);
   
   return {
     totalDaysOff: actualTotalDaysOff,

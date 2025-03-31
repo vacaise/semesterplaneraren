@@ -6,7 +6,7 @@ import {
   findSummerPeriods, 
   createExtraPeriods 
 } from './periodFinders';
-import { calculateVacationDaysNeeded, calculateTotalDaysOff } from './calculators';
+import { calculateVacationDaysNeeded } from './calculators';
 import { isDateInPast } from './helpers';
 import { scorePeriods } from './scoringSystem';
 import { processPastDates } from './pastDateHandler';
@@ -75,17 +75,7 @@ export const findOptimalSchedule = (
   // Select the optimal periods based on the available vacation days
   const selectedPeriods = selectOptimalPeriods(potentialPeriods, vacationDays, year, holidays, mode);
   
-  // Calculate total days off from selected periods
-  const totalDays = selectedPeriods.reduce((sum, period) => sum + period.days, 0);
-  
-  // But also calculate unique total days to avoid double counting
-  const totalUniqueCards = calculateTotalDaysOff(selectedPeriods, holidays);
-  
-  console.log("Total days from adding period.days:", totalDays);
-  console.log("Total unique days (removing overlaps):", totalUniqueCards);
-  
   return {
-    periods: selectedPeriods,
-    totalDaysOff: totalUniqueCards
+    periods: selectedPeriods
   };
 };

@@ -3,24 +3,36 @@ import { addDays, format, differenceInDays } from 'date-fns';
 import { formatDateToString, isDayOff } from './helpers';
 import { VacationPeriod } from './types';
 
-// Calculate total days off from all selected periods
+// Completely rewritten function to accurately count total unique days off
 export const calculateTotalDaysOff = (periods: VacationPeriod[], holidays: Date[]) => {
-  // Use Set to avoid counting days twice
-  const allDaysOff = new Set<string>();
+  // Create a Set to track all unique days across all periods
+  const uniqueDaysSet = new Set<string>();
   
-  // Add all days from all periods
+  // Process each period and add all days within it to the Set
   periods.forEach(period => {
-    let currentDay = new Date(period.start);
-    const periodEnd = new Date(period.end);
+    const startDate = new Date(period.start);
+    const endDate = new Date(period.end);
     
-    while (currentDay <= periodEnd) {
-      // Add date in the format YYYY-MM-DD to avoid counting twice
-      allDaysOff.add(formatDateToString(currentDay));
-      currentDay = addDays(currentDay, 1);
+    // Iterate through every day in the period
+    let currentDate = new Date(startDate);
+    while (currentDate <= endDate) {
+      // Format date as string to ensure uniqueness in the Set
+      const dateString = formatDateToString(currentDate);
+      uniqueDaysSet.add(dateString);
+      
+      // Move to next day
+      currentDate = addDays(currentDate, 1);
     }
   });
   
-  return allDaysOff.size; // Return number of unique days
+  // The size of the Set is the count of unique days
+  const totalUniqueDays = uniqueDaysSet.size;
+  
+  // Add debug logging
+  console.log(`ACCURATE COUNT: Found ${totalUniqueDays} unique days off in total`);
+  console.log(`Days: ${Array.from(uniqueDaysSet).join(', ')}`);
+  
+  return totalUniqueDays;
 };
 
 // Calculate required vacation days for a period
@@ -51,8 +63,11 @@ export const calculatePeriodDays = (start: Date, end: Date) => {
   return differenceInDays(end, start) + 1;
 };
 
-// Enhanced calculation for efficiency ratio
+// Completely rewritten efficiency calculation that returns a precise number
 export const calculateEfficiencyRatio = (totalDaysOff: number, vacationDaysUsed: number) => {
   if (vacationDaysUsed <= 0) return 0;
-  return totalDaysOff / vacationDaysUsed;
+  
+  // Calculate with 2 decimal places
+  const ratio = totalDaysOff / vacationDaysUsed;
+  return parseFloat(ratio.toFixed(2));
 };
