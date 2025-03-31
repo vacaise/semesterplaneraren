@@ -19,11 +19,19 @@ export const optimizeVacation = (
   holidays: Date[],
   mode: string
 ): OptimizedSchedule => {
+  console.log("--------------------------------");
+  console.log("STARTING VACATION OPTIMIZATION");
+  console.log("--------------------------------");
+  console.log(`Year: ${year}, Vacation Days: ${vacationDays}, Mode: ${mode}`);
+  console.log(`Holidays: ${holidays.length}`);
+  
   // Filtrera bort helgdagar som redan har passerat
   const filteredHolidays = holidays.filter(holiday => !isDateInPast(holiday));
+  console.log(`After filtering past dates: ${filteredHolidays.length} holidays remain`);
   
-  // Hitta potentiella perioder baserat på parametrarna
+  // Hitta optimala perioder baserat på parametrarna
   const { periods: selectedPeriods } = findOptimalSchedule(year, vacationDays, filteredHolidays, mode);
+  console.log(`Optimal schedule found: ${selectedPeriods.length} periods`);
   
   // Verifiera att perioder inte innehåller några passerade datum
   const today = new Date();
@@ -34,17 +42,21 @@ export const optimizeVacation = (
     endDate.setHours(0, 0, 0, 0);
     return endDate >= today;
   });
-
-  // Beräkna faktiskt totalt antal lediga dagar från alla perioder kombinerade
+  console.log(`After filtering past periods: ${validatedPeriods.length} periods remain`);
+  
+  // Helt nyskriven beräkningsmetod som ger faktiskt antal lediga dagar
   const actualTotalDaysOff = calculateTotalDaysOff(validatedPeriods, filteredHolidays);
   
-  // Beräkna effektivitetskvot
+  // Beräkna effektivitetskvot med den förbättrade metoden
   const efficiencyRatio = calculateEfficiencyRatio(actualTotalDaysOff, vacationDays);
   
-  // Visa beräkningarna i konsolen för felsökning
-  console.log("TOTALT ANTAL UNIKA LEDIGA DAGAR:", actualTotalDaysOff);
+  console.log("--------------------------------");
+  console.log("OPTIMIZATION RESULTS");
+  console.log("--------------------------------");
+  console.log("TOTAL ANTAL UNIKA LEDIGA DAGAR:", actualTotalDaysOff);
   console.log("ANVÄNDA SEMESTERDAGAR:", vacationDays);
   console.log("EFFEKTIVITETSKVOT:", efficiencyRatio);
+  console.log("--------------------------------");
   
   return {
     totalDaysOff: actualTotalDaysOff,

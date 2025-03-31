@@ -17,21 +17,25 @@ export const StatisticCard = ({
   borderColor, 
   textColor 
 }: StatisticCardProps) => {
-  // Säkerställ att vi alltid visar ett giltigt värde
+  // Förbättrad logik för att hantera och visa värden
   const displayValue = (() => {
     if (typeof value === 'number') {
-      // Formatera tal för att hantera decimaler korrekt
       if (label === "Effektivitet") {
-        // För effektivitet, visa alltid med "x" suffix
+        // Garantera 2 decimaler för effektivitet och lägg till "x" som suffix
         return `${value.toFixed(2)}x`;
+      } else if (Number.isInteger(value)) {
+        // För heltal, visa utan decimaler
+        return value.toString();
+      } else {
+        // För decimaltal, visa med 1 decimal
+        return value.toFixed(1);
       }
-      return isNaN(value) ? "0" : value.toString();
     } else if (value === null || value === undefined) {
       return "0";
     } else if (typeof value === 'string') {
-      // Rensa upp NaN-strängar
+      // Hantera fall där värdet redan är en sträng
       if (value.includes('NaN')) {
-        return value.replace('NaN', '0');
+        return "0";
       }
       return value;
     }
