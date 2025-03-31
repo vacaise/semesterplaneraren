@@ -1,3 +1,4 @@
+
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Link } from "react-router-dom";
 const Footer = () => {
@@ -24,6 +25,11 @@ const Footer = () => {
                 <li>
                   <Link to="/sitemap" className="text-gray-600 hover:text-teal-600 transition-colors text-sm" aria-label="Visa sitemap">
                     Sitemap
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/cookie-policy" className="text-gray-600 hover:text-teal-600 transition-colors text-sm" aria-label="Visa cookie policy">
+                    Cookie Policy
                   </Link>
                 </li>
               </ul>

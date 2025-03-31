@@ -62,6 +62,14 @@ const Sitemap = () => {
                       Översikt över alla sidor på webbplatsen.
                     </p>
                   </li>
+                  <li>
+                    <Link to="/cookie-policy" className="text-teal-600 hover:underline">
+                      Cookie Policy
+                    </Link>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Information om hur vi använder cookies på webbplatsen.
+                    </p>
+                  </li>
                 </ul>
               </section>
               
