@@ -65,9 +65,14 @@ const Results = ({ schedule, year, holidays = [] }: ResultsProps) => {
     return <div>Inget schema har genererats än.</div>;
   }
 
-  // Use the totalDaysOff and vacationDaysUsed directly from the schedule
+  // Calculate total days off by summing the days from each period
+  let totalDaysOff = 0;
+  schedule.periods.forEach(period => {
+    totalDaysOff += period.days;
+  });
+  
+  // Use the vacationDaysUsed directly from the schedule
   const totalVacationDays = schedule.vacationDaysUsed || 0;
-  const totalDaysOff = schedule.totalDaysOff || 0;
 
   // Make sure totalDaysOff and totalVacationDays are valid numbers
   const validTotalDaysOff = isNaN(totalDaysOff) ? 0 : totalDaysOff;
