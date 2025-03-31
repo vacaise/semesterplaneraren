@@ -7,14 +7,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Sitemap from "./pages/Sitemap";
 import NotFound from "./pages/NotFound";
-import AnalyticsVerifier from "./components/AnalyticsVerifier";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AnalyticsVerifier />
       <Toaster />
       <Sonner />
       <BrowserRouter>
