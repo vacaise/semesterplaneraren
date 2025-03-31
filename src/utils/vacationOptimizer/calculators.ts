@@ -49,7 +49,7 @@ export const calculatePeriodDays = (start: Date, end: Date) => {
   return differenceInDays(end, start) + 1;
 };
 
-// NEW: Enhanced calculation for efficiency ratio
+// Enhanced calculation for efficiency ratio
 export const calculateEfficiencyRatio = (totalDaysOff: number, vacationDaysUsed: number) => {
   if (vacationDaysUsed <= 0) return 0;
   return totalDaysOff / vacationDaysUsed;
