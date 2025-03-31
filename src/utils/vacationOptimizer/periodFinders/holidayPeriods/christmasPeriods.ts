@@ -61,15 +61,15 @@ export const findChristmasPeriods = (year: number): VacationPeriod[] => {
     type: "holiday"
   };
   
-  // 5. Optimal version Dec 19-Dec 31
-  const optimalChristmasStart = new Date(year, 11, 19);
-  const optimalChristmasEnd = new Date(year, 11, 31); 
+  // 5. Optimal version Dec 22-Jan 1 med 30e december som semesterdag
+  const optimalChristmasStart = new Date(year, 11, 22);
+  const optimalChristmasEnd = new Date(year + 1, 0, 1); 
   
   const optimalChristmasPeriod = {
     start: optimalChristmasStart,
     end: optimalChristmasEnd, 
     days: differenceInDays(optimalChristmasEnd, optimalChristmasStart) + 1,
-    vacationDaysNeeded: 4, // Will be calculated properly later - this includes Dec 30
+    vacationDaysNeeded: 4, // 23, 27, 28, 30 December - detta kommer beräknas korrekt senare
     description: "Optimal julledighet",
     score: 96, // Highest score for this optimal period
     type: "holiday"
