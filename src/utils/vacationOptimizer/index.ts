@@ -34,9 +34,12 @@ export const optimizeVacation = (
     endDate.setHours(0, 0, 0, 0);
     return endDate >= today;
   });
+
+  // Calculate efficiency ratio using the validated periods and original vacation days
+  const actualTotalDaysOff = calculateTotalDaysOff(validatedPeriods, filteredHolidays);
   
   return {
-    totalDaysOff,
+    totalDaysOff: actualTotalDaysOff,
     vacationDaysUsed: vacationDays,
     mode,
     periods: validatedPeriods
