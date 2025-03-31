@@ -69,8 +69,8 @@ export const findOptimalSchedule = (
   // Remove periods with negative scores (invalid periods)
   potentialPeriods = potentialPeriods.filter(period => (period.score || 0) >= 0);
   
-  // Score periods based on mode preference
-  potentialPeriods = scorePeriods(potentialPeriods, mode);
+  // Score periods based on mode preference and pass holidays to consider them in scoring
+  potentialPeriods = scorePeriods(potentialPeriods, mode, holidays);
   
   // Select the optimal periods based on the available vacation days
   const selectedPeriods = selectOptimalPeriods(potentialPeriods, vacationDays, year, holidays, mode);

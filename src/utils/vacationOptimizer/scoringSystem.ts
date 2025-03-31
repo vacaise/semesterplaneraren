@@ -1,8 +1,9 @@
 
 import { VacationPeriod } from './types';
+import { isDayOff } from './helpers';
 
 // Score periods based on optimization mode
-export const scorePeriods = (periods: VacationPeriod[], mode: string): VacationPeriod[] => {
+export const scorePeriods = (periods: VacationPeriod[], mode: string, holidays: Date[]): VacationPeriod[] => {
   const scoredPeriods = [...periods];
   
   // Apply base scores based on period characteristics
@@ -41,6 +42,44 @@ export const scorePeriods = (periods: VacationPeriod[], mode: string): VacationP
     }
     if (mode === "extended" && period.days <= 9) {
       period.score -= period.days <= 6 ? 40 : 30;
+    }
+    
+    // NEW: Score based on holiday inclusion
+    // Count how many holidays are included in the period
+    let holidayCount = 0;
+    let currentDay = new Date(period.start);
+    const endDate = new Date(period.end);
+    
+    while (currentDay <= endDate) {
+      const isHoliday = holidays.some(holiday => 
+        holiday.getDate() === currentDay.getDate() && 
+        holiday.getMonth() === currentDay.getMonth() && 
+        holiday.getFullYear() === currentDay.getFullYear()
+      );
+      
+      if (isHoliday) {
+        holidayCount++;
+      }
+      
+      // Move to next day
+      currentDay.setDate(currentDay.getDate() + 1);
+    }
+    
+    // Give bonus points for periods that include holidays
+    // The more holidays included, the higher the score boost
+    if (holidayCount > 0) {
+      // Base bonus for including any holidays
+      const baseHolidayBonus = 10;
+      
+      // Additional bonus per holiday (higher for extended vacations)
+      const perHolidayBonus = mode === "extended" ? 15 : 8;
+      
+      period.score += baseHolidayBonus + (holidayCount * perHolidayBonus);
+      
+      // For extended vacations, give extra emphasis to periods with multiple holidays
+      if (mode === "extended" && holidayCount >= 2) {
+        period.score += 25;
+      }
     }
   });
   
