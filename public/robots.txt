@@ -18,3 +18,11 @@ Allow: /
 
 User-agent: facebookexternalhit
 Allow: /
+
+# Discourage crawling of non-essential resources
+User-agent: *
+Disallow: /build/
+Disallow: /dist/
+Disallow: /node_modules/
+Disallow: /*.js$
+Disallow: /*.css$

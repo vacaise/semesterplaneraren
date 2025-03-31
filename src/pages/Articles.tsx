@@ -11,6 +11,32 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 const Articles = () => {
   const isMobile = useIsMobile();
+  
+  // JSON-LD data for the articles list page
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Artiklar - vacai | Optimera din semester",
+    "description": "Läs våra artiklar om hur du maximerar din semesterledighet och får ut mest av röda dagar.",
+    "url": "https://vacai.se/articles",
+    "mainEntity": {
+      "@type": "ItemList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "url": "https://vacai.se/articles/maxa-semester-2025",
+          "name": "Maxa din semester 2025 – Så utnyttjar du röda dagar bäst med Vacai.se"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "url": "https://vacai.se/articles/optimera-ledighet-2026",
+          "name": "Optimera din ledighet 2026 med Vacai.se"
+        }
+      ]
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -18,6 +44,9 @@ const Articles = () => {
         <title>Artiklar - vacai | Optimera din semester</title>
         <meta name="description" content="Läs våra artiklar om hur du maximerar din semesterledighet och får ut mest av röda dagar." />
         <link rel="canonical" href="https://vacai.se/articles" />
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
       </Helmet>
       
       <div className="py-6 md:py-12 px-4 sm:px-6 lg:px-8">

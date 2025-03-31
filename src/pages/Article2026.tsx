@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import MainContainer from "@/components/MainContainer";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
+import ArticleStructuredData from "@/components/StructuredData";
 
 const Article2026 = () => {
   return (
@@ -15,6 +16,14 @@ const Article2026 = () => {
         <meta name="description" content="Maximera din ledighet 2026 - planera smart kring röda dagar med hjälp av Vacai.se för att få längre sammanhängande semesterperioder." />
         <link rel="canonical" href="https://vacai.se/articles/optimera-ledighet-2026" />
       </Helmet>
+      
+      <ArticleStructuredData 
+        title="Optimera din ledighet 2026 med Vacai.se"
+        description="Maximera din ledighet 2026 - planera smart kring röda dagar med hjälp av Vacai.se för att få längre sammanhängande semesterperioder."
+        imageUrl="https://vacai.se/lovable-uploads/495120c8-c6de-417b-b374-799cea773fb9.png"
+        datePublished="2024-05-30"
+        url="https://vacai.se/articles/optimera-ledighet-2026"
+      />
       
       <div className="py-6 md:py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
