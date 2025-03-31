@@ -31,12 +31,25 @@ export const findOptimalSchedule = (
   const bridgeDays = findBridgeDays(year);
   potentialPeriods.push(...bridgeDays);
   
-  // Find extended weekends
-  const weekendPeriods = findExtendedWeekends(year);
-  potentialPeriods.push(...weekendPeriods);
+  // Generate additional periods based on mode
+  // For long weekend mode, generate more weekend options
+  if (mode === "longweekends") {
+    const weekendPeriods = findExtendedWeekends(year);
+    // Add more weekend options for this mode
+    potentialPeriods.push(...weekendPeriods);
+    potentialPeriods.push(...weekendPeriods.map(p => ({...p, start: new Date(p.start), end: new Date(p.end)})));
+  } else {
+    // For other modes, just add the regular weekend periods
+    const weekendPeriods = findExtendedWeekends(year);
+    potentialPeriods.push(...weekendPeriods);
+  }
   
-  // Find summer periods
+  // Find summer periods - adjust based on mode
   const summerPeriods = findSummerPeriods(year);
+  if (mode === "extended" || mode === "weeks") {
+    // For extended or weeks modes, prioritize summer periods
+    summerPeriods.forEach(p => p.score = (p.score || 0) + 15);
+  }
   potentialPeriods.push(...summerPeriods);
   
   // Handle periods with dates in the past

@@ -12,15 +12,15 @@ export const scorePeriods = (periods: VacationPeriod[], mode: string): VacationP
       period.score = 0;
     }
     
-    // Apply mode-specific scoring
+    // Apply mode-specific scoring with stronger emphasis
     if (mode === "longweekends" && period.days <= 4) {
-      period.score += 50;
+      period.score += 80; // Increased from 50 to 80
     } else if (mode === "minibreaks" && period.days <= 6 && period.days > 4) {
-      period.score += 50;
+      period.score += 80; // Increased from 50 to 80
     } else if (mode === "weeks" && period.days <= 9 && period.days > 6) {
-      period.score += 50;
+      period.score += 80; // Increased from 50 to 80
     } else if (mode === "extended" && period.days > 9) {
-      period.score += 50;
+      period.score += 80; // Increased from 50 to 80
     } else if (mode === "balanced") {
       // For balanced mode, give even scoring across different period lengths
       if (period.days <= 4) period.score += 30;
@@ -29,18 +29,18 @@ export const scorePeriods = (periods: VacationPeriod[], mode: string): VacationP
       else period.score += 30;
     }
     
-    // Apply penalties to periods that don't match the selected mode
+    // Apply stronger penalties to periods that don't match the selected mode
     if (mode === "longweekends" && period.days > 4) {
-      period.score -= 20;
+      period.score -= (period.days > 6) ? 40 : 30; // Steeper penalty for periods further from the preferred type
     }
     if (mode === "minibreaks" && (period.days <= 4 || period.days > 6)) {
-      period.score -= 20;
+      period.score -= (period.days > 9 || period.days <= 2) ? 40 : 30;
     }
     if (mode === "weeks" && (period.days <= 6 || period.days > 9)) {
-      period.score -= 20;
+      period.score -= (period.days <= 4 || period.days > 12) ? 40 : 30;
     }
     if (mode === "extended" && period.days <= 9) {
-      period.score -= 20;
+      period.score -= period.days <= 6 ? 40 : 30;
     }
   });
   
