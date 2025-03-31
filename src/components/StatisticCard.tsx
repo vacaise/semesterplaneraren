@@ -17,34 +17,14 @@ export const StatisticCard = ({
   borderColor, 
   textColor 
 }: StatisticCardProps) => {
-  // Display value formatting
+  // Make sure the value is valid (not NaN or undefined)
   const displayValue = (() => {
     if (typeof value === 'number') {
-      if (label.toLowerCase().includes("effektivitet")) {
-        // Format efficiency as 2.5x with no trailing zeros
-        // First round to 2 decimals
-        const roundedValue = Math.round(value * 100) / 100;
-        // Then remove trailing zeros (convert to string and use regex)
-        return roundedValue.toFixed(2).replace(/\.?0+$/, '') + 'x';
-      } else if (Number.isInteger(value)) {
-        // For integers, display without decimals
-        return value.toString();
-      } else {
-        // For decimals, display with 1 decimal
-        return value.toFixed(1);
-      }
+      return isNaN(value) ? "0" : value.toString();
     } else if (value === null || value === undefined) {
       return "0";
-    } else if (typeof value === 'string') {
-      // Handle case where value is already a string
-      if (value.includes('NaN')) {
-        return "0";
-      }
-      // If it's already formatted as "Nx", return as is
-      if (value.includes('x')) {
-        return value;
-      }
-      return value;
+    } else if (typeof value === 'string' && value.includes('NaN')) {
+      return value.replace('NaN', '0');
     }
     return value;
   })();

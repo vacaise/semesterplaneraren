@@ -1,9 +1,5 @@
 
-import { findKeyPeriods } from './periodFinders/holidayPeriods';
-import { findBridgeDays } from './periodFinders/bridgeDayPeriods';
-import { findExtendedWeekends } from './periodFinders/weekendPeriods';
-import { findSummerPeriods } from './periodFinders/summerPeriods';
-import { createExtraPeriods } from './periodFinders/extraPeriods';
+import { findKeyPeriods, findBridgeDays, findExtendedWeekends, findSummerPeriods, createExtraPeriods } from './periodFinders/index';
 
 export {
   findKeyPeriods,

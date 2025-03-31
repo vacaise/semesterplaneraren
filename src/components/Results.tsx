@@ -65,21 +65,13 @@ const Results = ({ schedule, year, holidays = [] }: ResultsProps) => {
     return <div>Inget schema har genererats än.</div>;
   }
 
-  // Calculate total days off by summing the days from each period
-  let totalDaysOff = 0;
-  schedule.periods.forEach(period => {
-    totalDaysOff += period.days;
-  });
-  
-  // Use the vacationDaysUsed directly from the schedule
   const totalVacationDays = schedule.vacationDaysUsed || 0;
+  const totalDaysOff = schedule.totalDaysOff || 0;
 
-  // Make sure totalDaysOff and totalVacationDays are valid numbers
-  const validTotalDaysOff = isNaN(totalDaysOff) ? 0 : totalDaysOff;
-  const validTotalVacationDays = (totalVacationDays <= 0 || isNaN(totalVacationDays)) ? 1 : totalVacationDays;
-  
-  // Calculate efficiency with valid numbers and format to 2 decimal places
-  const efficiency = (validTotalDaysOff / validTotalVacationDays).toFixed(2);
+  // Säkerställ att totalDaysOff inte är NaN genom att använda defaults och kontrollera värden
+  const efficiency = totalVacationDays > 0 
+    ? (totalDaysOff / totalVacationDays).toFixed(2)
+    : "0.00";
     
   // Sort periods chronologically by start date
   const sortedPeriods = [...schedule.periods].sort((a, b) => {
@@ -118,7 +110,7 @@ const Results = ({ schedule, year, holidays = [] }: ResultsProps) => {
         />
         
         <StatisticCard 
-          value={validTotalDaysOff} 
+          value={totalDaysOff} 
           label="Totalt lediga dagar" 
           bgColor="bg-green-50" 
           borderColor="border-green-100" 
@@ -163,7 +155,7 @@ const Results = ({ schedule, year, holidays = [] }: ResultsProps) => {
       <div className="bg-blue-50 p-4 rounded-md border border-blue-100">
         <h3 className="font-medium text-blue-800 mb-2">Tips</h3>
         <p className="text-sm text-gray-600">
-          Med {totalVacationDays} semesterdagar får du {validTotalDaysOff} dagar ledigt - det är {efficiency}x mer ledighet än antalet semesterdagar du använder!
+          Med {totalVacationDays} semesterdagar får du {totalDaysOff} dagar ledigt - det är {efficiency}x mer ledighet än antalet semesterdagar du använder!
         </p>
       </div>
     </div>

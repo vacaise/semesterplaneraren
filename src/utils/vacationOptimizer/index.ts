@@ -1,7 +1,7 @@
 
-// Huvudingångspunkt för semesteroptimeraren
+// Main entry point for the vacation optimizer
 import { findOptimalSchedule } from './optimizer';
-import { calculateTotalDaysOff, calculateEfficiencyRatio } from './calculators';
+import { calculateTotalDaysOff } from './calculators';
 import { isDayOff, isDateInPast } from './helpers';
 import { VacationPeriod } from './types';
 
@@ -12,28 +12,29 @@ interface OptimizedSchedule {
   periods: VacationPeriod[];
 }
 
-// Huvudexportfunktion för att optimera semester
+// Main export function for optimizing vacation
 export const optimizeVacation = (
   year: number,
   vacationDays: number,
   holidays: Date[],
   mode: string
 ): OptimizedSchedule => {
-  console.log("--------------------------------");
-  console.log("STARTING VACATION OPTIMIZATION");
-  console.log("--------------------------------");
-  console.log(`Year: ${year}, Vacation Days: ${vacationDays}, Mode: ${mode}`);
-  console.log(`Holidays: ${holidays.length}`);
-  
-  // Filtrera bort helgdagar som redan har passerat
+  // CRITICAL: Filter out holidays that have already passed
   const filteredHolidays = holidays.filter(holiday => !isDateInPast(holiday));
-  console.log(`After filtering past dates: ${filteredHolidays.length} holidays remain`);
   
-  // Hitta optimala perioder baserat på parametrarna
-  const { periods: selectedPeriods } = findOptimalSchedule(year, vacationDays, filteredHolidays, mode);
-  console.log(`Optimal schedule found: ${selectedPeriods.length} periods`);
+  // Find potential periods based on the parameters
+  const selectedPeriods = findOptimalSchedule(year, vacationDays, filteredHolidays, mode);
   
-  // Verifiera att perioder inte innehåller några passerade datum
+  // Calculate the total number of days off
+  let totalDaysOff = calculateTotalDaysOff(selectedPeriods, filteredHolidays);
+  
+  // Ensure totalDaysOff is not NaN
+  if (isNaN(totalDaysOff)) {
+    totalDaysOff = 0;
+    console.error("totalDaysOff was NaN, setting to 0");
+  }
+  
+  // IMPORTANT: verify periods don't contain any past dates
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   
@@ -42,22 +43,6 @@ export const optimizeVacation = (
     endDate.setHours(0, 0, 0, 0);
     return endDate >= today;
   });
-  console.log(`After filtering past periods: ${validatedPeriods.length} periods remain`);
-  
-  // Beräkna totalt antal lediga dagar från de faktiska perioderna
-  // Detta räknar endast dagar som ingår i de valda perioderna
-  const totalDaysOff = calculateTotalDaysOff(validatedPeriods, filteredHolidays);
-  
-  // Beräkna effektivitetskvot
-  const efficiencyRatio = calculateEfficiencyRatio(totalDaysOff, vacationDays);
-  
-  console.log("--------------------------------");
-  console.log("OPTIMIZATION RESULTS");
-  console.log("--------------------------------");
-  console.log("TOTAL ANTAL LEDIGA DAGAR:", totalDaysOff);
-  console.log("ANVÄNDA SEMESTERDAGAR:", vacationDays);
-  console.log("EFFEKTIVITETSKVOT:", efficiencyRatio);
-  console.log("--------------------------------");
   
   return {
     totalDaysOff,

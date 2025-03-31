@@ -24,7 +24,6 @@ export const findExtendedWeekends = (year: number) => {
       // Check that the date is still in the right month
       if (currentDate.getMonth() !== month) continue;
       
-      // Standard Thursday-Monday extended weekend
       const weekendStart = addDays(currentDate, -1); // Thursday
       const weekendEnd = addDays(currentDate, 3); // Monday
       
@@ -40,69 +39,8 @@ export const findExtendedWeekends = (year: number) => {
       
       periods.push(extendedWeekend);
       
-      // Friday-Monday weekend option (4 days off with just 1 vacation day)
-      const efficientWeekendStart = currentDate; // Friday
-      const efficientWeekendEnd = addDays(currentDate, 3); // Monday
-      
-      const efficientWeekend = {
-        start: efficientWeekendStart,
-        end: efficientWeekendEnd,
-        days: 4,
-        vacationDaysNeeded: 1, // Just Monday
-        description: `Effektiv långhelg i ${getMonthName(month)}`,
-        score: 65 - Math.abs(6 - month) * 2, // Higher score for summer/winter
-        type: "efficient-weekend"
-      };
-      
-      periods.push(efficientWeekend);
-      
-      // Thursday-Sunday weekend option (4 days off with just 1 vacation day - Thursday)
-      const thursdayWeekendStart = addDays(currentDate, -1); // Thursday
-      const thursdayWeekendEnd = addDays(currentDate, 2); // Sunday
-      
-      const thursdayWeekend = {
-        start: thursdayWeekendStart,
-        end: thursdayWeekendEnd,
-        days: 4,
-        vacationDaysNeeded: 1, // Just Thursday
-        description: `Effektiv torsdag-söndag i ${getMonthName(month)}`,
-        score: 65 - Math.abs(6 - month) * 2, // Higher score for summer/winter
-        type: "efficient-weekend"
-      };
-      
-      periods.push(thursdayWeekend);
-      
-      // Wednesday-Sunday option for a 5-day break with 2 vacation days
-      const wednesdayWeekendStart = addDays(currentDate, -2); // Wednesday
-      const wednesdayWeekendEnd = addDays(currentDate, 2); // Sunday
-      
-      const wednesdayWeekend = {
-        start: wednesdayWeekendStart,
-        end: wednesdayWeekendEnd,
-        days: 5,
-        vacationDaysNeeded: 2, // Wednesday, Thursday
-        description: `Förlängd helg (ons-sön) i ${getMonthName(month)}`,
-        score: 62 - Math.abs(6 - month) * 2,
-        type: "extended-weekend"
-      };
-      
-      periods.push(wednesdayWeekend);
-      
-      // NEW: Add Tuesday-Sunday option (6 days with 3 vacation days)
-      const tuesdayWeekendStart = addDays(currentDate, -3); // Tuesday
-      const tuesdayWeekendEnd = addDays(currentDate, 2); // Sunday
-      
-      const tuesdayWeekend = {
-        start: tuesdayWeekendStart,
-        end: tuesdayWeekendEnd,
-        days: 6,
-        vacationDaysNeeded: 3, // Tuesday, Wednesday, Thursday
-        description: `Lång helg (tis-sön) i ${getMonthName(month)}`,
-        score: 59 - Math.abs(6 - month) * 2,
-        type: "extended-weekend"
-      };
-      
-      periods.push(tuesdayWeekend);
+      // One long weekend per month is enough
+      break;
     }
   }
   
