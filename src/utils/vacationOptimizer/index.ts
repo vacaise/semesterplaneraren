@@ -35,7 +35,7 @@ export const optimizeVacation = (
     return endDate >= today;
   });
 
-  // Calculate efficiency ratio using the validated periods and original vacation days
+  // Recalculate total days off directly from the validated periods - this is critical for accuracy
   const actualTotalDaysOff = calculateTotalDaysOff(validatedPeriods, filteredHolidays);
   
   return {

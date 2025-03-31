@@ -1,4 +1,3 @@
-
 import { format, addDays, differenceInDays } from "date-fns";
 import { sv } from "date-fns/locale";
 import { Card, CardContent } from "@/components/ui/card";
@@ -64,6 +63,15 @@ const Results = ({ schedule, year, holidays = [] }: ResultsProps) => {
   if (!schedule) {
     return <div>Inget schema har genererats än.</div>;
   }
+
+  // Count total days from all periods to verify
+  let totalDaysFromPeriods = 0;
+  schedule.periods.forEach(period => {
+    totalDaysFromPeriods += period.days;
+  });
+  
+  console.log("Total days counted from periods:", totalDaysFromPeriods);
+  console.log("Total days off reported from schedule:", schedule.totalDaysOff);
 
   const totalVacationDays = schedule.vacationDaysUsed || 0;
   const totalDaysOff = schedule.totalDaysOff || 0;

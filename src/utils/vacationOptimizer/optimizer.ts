@@ -75,7 +75,7 @@ export const findOptimalSchedule = (
   // Select the optimal periods based on the available vacation days
   const selectedPeriods = selectOptimalPeriods(potentialPeriods, vacationDays, year, holidays, mode);
   
-  // Calculate total days off with the selected periods
+  // Calculate total days off with the selected periods (CRITICAL: Calculate here after periods are selected)
   const totalDaysOff = calculateTotalDaysOff(selectedPeriods, holidays);
   
   return {

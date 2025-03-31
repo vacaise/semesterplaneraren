@@ -1,10 +1,11 @@
 
 import { addDays, format, differenceInDays } from 'date-fns';
 import { formatDateToString, isDayOff } from './helpers';
+import { VacationPeriod } from './types';
 
 // Calculate total days off from all selected periods
-export const calculateTotalDaysOff = (periods: any[], holidays: Date[]) => {
-  const allDaysOff = new Set(); // Use Set to avoid counting days twice
+export const calculateTotalDaysOff = (periods: VacationPeriod[], holidays: Date[]) => {
+  const allDaysOff = new Set<string>(); // Use Set to avoid counting days twice
   
   // Add all days from all periods
   periods.forEach(period => {
