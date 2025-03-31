@@ -1,5 +1,5 @@
 
-// Main entry point for the vacation optimizer
+// Huvudingångspunkt för semesteroptimeraren
 import { findOptimalSchedule } from './optimizer';
 import { calculateTotalDaysOff, calculateEfficiencyRatio } from './calculators';
 import { isDayOff, isDateInPast } from './helpers';
@@ -12,20 +12,20 @@ interface OptimizedSchedule {
   periods: VacationPeriod[];
 }
 
-// Main export function for optimizing vacation
+// Huvudexportfunktion för att optimera semester
 export const optimizeVacation = (
   year: number,
   vacationDays: number,
   holidays: Date[],
   mode: string
 ): OptimizedSchedule => {
-  // CRITICAL: Filter out holidays that have already passed
+  // Filtrera bort helgdagar som redan har passerat
   const filteredHolidays = holidays.filter(holiday => !isDateInPast(holiday));
   
-  // Find potential periods based on the parameters
+  // Hitta potentiella perioder baserat på parametrarna
   const { periods: selectedPeriods } = findOptimalSchedule(year, vacationDays, filteredHolidays, mode);
   
-  // IMPORTANT: verify periods don't contain any past dates
+  // Verifiera att perioder inte innehåller några passerade datum
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   
@@ -35,18 +35,16 @@ export const optimizeVacation = (
     return endDate >= today;
   });
 
-  // CRUCIAL: Calculate actual total days off from all periods combined
+  // Beräkna faktiskt totalt antal lediga dagar från alla perioder kombinerade
   const actualTotalDaysOff = calculateTotalDaysOff(validatedPeriods, filteredHolidays);
   
-  // Sum of individual period days (without removing duplicates) for debugging
-  const rawTotalDays = validatedPeriods.reduce((sum, period) => sum + period.days, 0);
-  
-  console.log("RAW SUM (with potential duplicates):", rawTotalDays);
-  console.log("ACTUAL UNIQUE DAYS OFF:", actualTotalDaysOff);
-  
-  // Calculate efficiency ratio
+  // Beräkna effektivitetskvot
   const efficiencyRatio = calculateEfficiencyRatio(actualTotalDaysOff, vacationDays);
-  console.log("EFFICIENCY RATIO:", efficiencyRatio);
+  
+  // Visa beräkningarna i konsolen för felsökning
+  console.log("TOTALT ANTAL UNIKA LEDIGA DAGAR:", actualTotalDaysOff);
+  console.log("ANVÄNDA SEMESTERDAGAR:", vacationDays);
+  console.log("EFFEKTIVITETSKVOT:", efficiencyRatio);
   
   return {
     totalDaysOff: actualTotalDaysOff,

@@ -17,19 +17,19 @@ export const StatisticCard = ({
   borderColor, 
   textColor 
 }: StatisticCardProps) => {
-  // Ensure we always display a valid value
+  // Säkerställ att vi alltid visar ett giltigt värde
   const displayValue = (() => {
     if (typeof value === 'number') {
-      // Format numbers to handle decimal places properly
+      // Formatera tal för att hantera decimaler korrekt
       if (label === "Effektivitet") {
-        // For efficiency, always show with "x" suffix and 2 decimal places
-        return `${value}x`;
+        // För effektivitet, visa alltid med "x" suffix
+        return `${value.toFixed(2)}x`;
       }
       return isNaN(value) ? "0" : value.toString();
     } else if (value === null || value === undefined) {
       return "0";
     } else if (typeof value === 'string') {
-      // Clean up any NaN strings
+      // Rensa upp NaN-strängar
       if (value.includes('NaN')) {
         return value.replace('NaN', '0');
       }

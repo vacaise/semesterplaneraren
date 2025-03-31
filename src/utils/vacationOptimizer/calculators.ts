@@ -3,51 +3,44 @@ import { addDays, format, differenceInDays } from 'date-fns';
 import { formatDateToString, isDayOff } from './helpers';
 import { VacationPeriod } from './types';
 
-// Completely rewritten function to accurately count total unique days off
+// Helt ny implementering för att beräkna det totala antalet lediga dagar
 export const calculateTotalDaysOff = (periods: VacationPeriod[], holidays: Date[]) => {
-  // Create a Set to track all unique days across all periods
+  // Skapa en uppsättning för att spåra alla unika dagar
   const uniqueDaysSet = new Set<string>();
   
-  // Process each period and add all days within it to the Set
+  // Gå igenom varje period och lägg till alla dagar i uppsättningen
   periods.forEach(period => {
     const startDate = new Date(period.start);
     const endDate = new Date(period.end);
     
-    // Iterate through every day in the period
     let currentDate = new Date(startDate);
     while (currentDate <= endDate) {
-      // Format date as string to ensure uniqueness in the Set
-      const dateString = formatDateToString(currentDate);
+      // Formatera datumet som en sträng för att säkerställa unikhet i uppsättningen
+      const dateString = format(currentDate, 'yyyy-MM-dd');
       uniqueDaysSet.add(dateString);
       
-      // Move to next day
+      // Gå till nästa dag
       currentDate = addDays(currentDate, 1);
     }
   });
   
-  // The size of the Set is the count of unique days
-  const totalUniqueDays = uniqueDaysSet.size;
-  
-  // Add debug logging
-  console.log(`ACCURATE COUNT: Found ${totalUniqueDays} unique days off in total`);
-  console.log(`Days: ${Array.from(uniqueDaysSet).join(', ')}`);
-  
-  return totalUniqueDays;
+  // Antal unika dagar är storleken på uppsättningen
+  return uniqueDaysSet.size;
 };
 
-// Calculate required vacation days for a period
+// Beräkna antal semesterdagar som behövs för en period
 export const calculateVacationDaysNeeded = (start: Date, end: Date, holidays: Date[]) => {
   let vacationDaysNeeded = 0;
   let currentDay = new Date(start);
   
   while (currentDay <= end) {
-    // Skip weekends and holidays
     const dayOfWeek = currentDay.getDay();
-    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; // Sunday or Saturday
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; // Söndag eller lördag
     const isHoliday = holidays.some(holiday => 
       format(holiday, 'yyyy-MM-dd') === format(currentDay, 'yyyy-MM-dd')
     );
     
+    // Lägg bara till arbetsdagar (inte helger eller röda dagar)
     if (!isWeekend && !isHoliday) {
       vacationDaysNeeded++;
     }
@@ -58,16 +51,13 @@ export const calculateVacationDaysNeeded = (start: Date, end: Date, holidays: Da
   return vacationDaysNeeded;
 };
 
-// Calculate total days in a period
+// Beräkna totalt antal dagar i en period
 export const calculatePeriodDays = (start: Date, end: Date) => {
   return differenceInDays(end, start) + 1;
 };
 
-// Completely rewritten efficiency calculation that returns a precise number
+// Ny beräkning för effektivitetskvot
 export const calculateEfficiencyRatio = (totalDaysOff: number, vacationDaysUsed: number) => {
   if (vacationDaysUsed <= 0) return 0;
-  
-  // Calculate with 2 decimal places
-  const ratio = totalDaysOff / vacationDaysUsed;
-  return parseFloat(ratio.toFixed(2));
+  return parseFloat((totalDaysOff / vacationDaysUsed).toFixed(2));
 };
