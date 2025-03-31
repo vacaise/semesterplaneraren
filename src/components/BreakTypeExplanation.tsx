@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Calendar, Coffee, Clock } from "lucide-react";
+import { Calendar, Coffee, Clock, PlaneTakeoff } from "lucide-react";
 
 export const BreakTypeExplanation = () => {
   return (
