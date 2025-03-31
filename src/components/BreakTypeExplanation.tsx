@@ -1,6 +1,11 @@
 
 import React from "react";
-import { Calendar, Coffee, Clock, PlaneTakeoff } from "lucide-react";
+import { 
+  Coffee, 
+  Star, 
+  SunsetIcon, 
+  Palmtree
+} from "lucide-react";
 
 export const BreakTypeExplanation = () => {
   return (
@@ -22,7 +27,7 @@ export const BreakTypeExplanation = () => {
         <div className="bg-amber-50 border border-amber-100 rounded-lg p-3">
           <div className="flex items-start gap-2">
             <div className="p-2 bg-white rounded-md">
-              <Calendar className="h-5 w-5 text-amber-600" />
+              <Star className="h-5 w-5 text-amber-600" />
             </div>
             <div>
               <h5 className="font-medium text-amber-800">Miniledighet</h5>
@@ -34,7 +39,7 @@ export const BreakTypeExplanation = () => {
         <div className="bg-blue-50 border border-blue-100 rounded-lg p-3">
           <div className="flex items-start gap-2">
             <div className="p-2 bg-white rounded-md">
-              <Calendar className="h-5 w-5 text-blue-600" />
+              <SunsetIcon className="h-5 w-5 text-blue-600" />
             </div>
             <div>
               <h5 className="font-medium text-blue-800">Veckoledighet</h5>
@@ -46,7 +51,7 @@ export const BreakTypeExplanation = () => {
         <div className="bg-purple-50 border border-purple-100 rounded-lg p-3">
           <div className="flex items-start gap-2">
             <div className="p-2 bg-white rounded-md">
-              <PlaneTakeoff className="h-5 w-5 text-purple-600" />
+              <Palmtree className="h-5 w-5 text-purple-600" />
             </div>
             <div>
               <h5 className="font-medium text-purple-800">Längre ledighet</h5>
