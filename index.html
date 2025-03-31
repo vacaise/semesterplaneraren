@@ -8,7 +8,19 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
+      
+      // Default to denied until user gives consent
+      gtag('consent', 'default', {
+        'analytics_storage': 'denied'
+      });
+      
+      // Check if user has previously given consent
+      if (localStorage.getItem('cookie-consent') === 'accepted') {
+        gtag('consent', 'update', {
+          'analytics_storage': 'granted'
+        });
+      }
+      
       gtag('config', 'G-6YEK9W9KED');
     </script>
     <meta charset="UTF-8" />
