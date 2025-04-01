@@ -8,21 +8,20 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
+
+      gtag('config', 'G-6YEK9W9KED');
       
-      // Default to denied until user gives consent
-      gtag('consent', 'default', {
-        'analytics_storage': 'denied'
-      });
-      
-      // Check if user has previously given consent
+      // Handle consent management after the standard initialization
       const cookiePreference = localStorage.getItem('cookiePreference');
-      if (cookiePreference === 'all') {
+      if (cookiePreference !== 'all') {
+        gtag('consent', 'default', {
+          'analytics_storage': 'denied'
+        });
+      } else {
         gtag('consent', 'update', {
           'analytics_storage': 'granted'
         });
       }
-      
-      gtag('config', 'G-6YEK9W9KED');
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
