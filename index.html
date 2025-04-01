@@ -15,7 +15,8 @@
       });
       
       // Check if user has previously given consent
-      if (localStorage.getItem('cookie-consent') === 'accepted') {
+      const cookiePreference = localStorage.getItem('cookiePreference');
+      if (cookiePreference === 'all') {
         gtag('consent', 'update', {
           'analytics_storage': 'granted'
         });

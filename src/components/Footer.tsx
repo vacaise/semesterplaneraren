@@ -1,6 +1,7 @@
 
 import React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   const isMobile = useIsMobile();
@@ -10,7 +11,14 @@ const Footer = () => {
     <footer className="border-t border-gray-200 py-8 mt-8">
       <div className="max-w-4xl mx-auto px-4">
         <div className={`${isMobile ? 'space-y-4' : 'flex justify-between items-center'}`}>
-          <div>
+          <div className="flex flex-col items-start gap-2">
+            <Link to="/" className="inline-block">
+              <img 
+                src="/lovable-uploads/f65dbaf4-022d-4879-8f21-c099cac057f5.png" 
+                alt="vacai logo" 
+                className="h-8"
+              />
+            </Link>
             <p className="text-sm text-gray-500">
               © {currentYear} vacai • Maximera din ledighet
             </p>

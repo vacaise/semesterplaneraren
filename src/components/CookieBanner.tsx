@@ -8,15 +8,49 @@ const CookieBanner = () => {
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
-    // Check if user has already accepted cookies
-    const cookiesAccepted = localStorage.getItem("cookiesAccepted");
-    if (!cookiesAccepted) {
+    // Check if user has already set cookie preferences
+    const cookiePreference = localStorage.getItem("cookiePreference");
+    if (!cookiePreference) {
       setShowBanner(true);
     }
   }, []);
 
-  const acceptCookies = () => {
-    localStorage.setItem("cookiesAccepted", "true");
+  const acceptAllCookies = () => {
+    localStorage.setItem("cookiePreference", "all");
+    
+    // Update Google Analytics consent
+    if (window.gtag) {
+      window.gtag('consent', 'update', {
+        'analytics_storage': 'granted'
+      });
+    }
+    
+    setShowBanner(false);
+  };
+
+  const acceptEssentialCookies = () => {
+    localStorage.setItem("cookiePreference", "essential");
+    
+    // Update Google Analytics consent
+    if (window.gtag) {
+      window.gtag('consent', 'update', {
+        'analytics_storage': 'denied'
+      });
+    }
+    
+    setShowBanner(false);
+  };
+
+  const rejectAllCookies = () => {
+    localStorage.setItem("cookiePreference", "none");
+    
+    // Update Google Analytics consent
+    if (window.gtag) {
+      window.gtag('consent', 'update', {
+        'analytics_storage': 'denied'
+      });
+    }
+    
     setShowBanner(false);
   };
 
@@ -27,20 +61,25 @@ const CookieBanner = () => {
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between">
         <div className="mb-4 md:mb-0 pr-8">
           <p className="text-sm text-gray-600">
-            Vi använder cookies för att förbättra din upplevelse. Genom att fortsätta använda vår 
-            webbplats godkänner du vår{" "}
+            Vi använder cookies för att analysera trafik och förbättra din upplevelse. Du kan välja vilka cookies du vill tillåta genom att klicka på motsvarande knapp. Läs mer i vår{" "}
             <Link to="/cookie-policy" className="text-blue-600 hover:underline">
               cookie policy
             </Link>.
           </p>
         </div>
-        <div className="flex items-center space-x-4">
-          <Button size="sm" onClick={acceptCookies}>
-            Jag förstår
+        <div className="flex flex-wrap items-center gap-3">
+          <Button size="sm" variant="outline" onClick={rejectAllCookies}>
+            Neka alla
+          </Button>
+          <Button size="sm" variant="outline" onClick={acceptEssentialCookies}>
+            Endast nödvändiga
+          </Button>
+          <Button size="sm" onClick={acceptAllCookies}>
+            Godkänn alla
           </Button>
           <button
-            onClick={acceptCookies}
-            className="text-gray-400 hover:text-gray-600"
+            onClick={rejectAllCookies}
+            className="text-gray-400 hover:text-gray-600 ml-2"
             aria-label="Stäng"
           >
             <X className="h-5 w-5" />
