@@ -1,5 +1,6 @@
 
 import { isSameDay, isWeekend, format, isBefore, startOfDay } from 'date-fns';
+import { sv } from 'date-fns/locale';
 
 // Helper function to determine if a day is a day off (weekend or holiday)
 export const isDayOff = (date: Date, holidays: Date[]): boolean => {
@@ -51,7 +52,7 @@ export const getMonthName = (monthIndex: number): string => {
 
 // Format a date range as a string
 export const formatDateRange = (start: Date, end: Date): string => {
-  const startFormatted = format(start, 'd MMM', { locale: { code: 'sv' } });
-  const endFormatted = format(end, 'd MMM', { locale: { code: 'sv' } });
+  const startFormatted = format(start, 'd MMM', { locale: sv });
+  const endFormatted = format(end, 'd MMM', { locale: sv });
   return `${startFormatted} - ${endFormatted}`;
 };

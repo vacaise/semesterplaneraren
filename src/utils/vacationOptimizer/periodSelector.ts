@@ -85,7 +85,7 @@ export const selectOptimalPeriods = (
   
   // Create extra small periods if there are days left
   if (remainingVacationDays > 0) {
-    const extraPeriods = createExtraPeriods(year, remainingVacationDays);
+    const extraPeriods = createExtraPeriods();
     
     // Filter out past extra periods and adjust start dates if needed
     const validExtraPeriods = extraPeriods.filter(period => {
