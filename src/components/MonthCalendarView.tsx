@@ -2,6 +2,7 @@
 import React from "react";
 import { MonthCard } from "@/components/MonthCard";
 import { CalendarLegend } from "@/components/CalendarLegend";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Period {
   start: Date;
@@ -26,6 +27,8 @@ interface MonthCalendarViewProps {
 }
 
 export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalendarViewProps) => {
+  const isMobile = useIsMobile();
+  
   // Make sure to use the same periods as in the list view
   const sortedPeriods = [...schedule.periods];
   
@@ -72,10 +75,10 @@ export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalend
         <p className="text-gray-600">Se dina optimerade ledigheter för {year}</p>
       </div>
       
-      <div className="p-4 border border-gray-200 rounded-lg bg-white">
+      <div className={`${isMobile ? 'p-2' : 'p-4'} border border-gray-200 rounded-lg bg-white`}>
         <CalendarLegend />
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           {monthsToRender.map(month => (
             <div key={`month-${month}`}>
               <MonthCard 

@@ -158,20 +158,26 @@ const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
           />
         </div>
         
-        <div className="flex gap-4 mb-6">
+        <div className={`flex flex-wrap gap-3 mb-6 ${isMobile ? 'justify-between' : ''}`}>
           <Button onClick={resetToStart} className="flex items-center gap-2">
             <RotateCcw className="h-4 w-4" />
             Börja om
           </Button>
           
-          <Button variant="outline" onClick={resetToStart} className="flex items-center gap-2">
-            <Home className="h-4 w-4" />
-            Tillbaka till start
-          </Button>
+          {!isMobile && (
+            <Button variant="outline" onClick={resetToStart} className="flex items-center gap-2">
+              <Home className="h-4 w-4" />
+              Tillbaka till start
+            </Button>
+          )}
           
-          <Button variant="outline" onClick={exportToICal} className="flex items-center gap-2 ml-auto">
+          <Button 
+            variant="outline" 
+            onClick={exportToICal} 
+            className="flex items-center gap-2"
+          >
             <Download className="h-4 w-4" />
-            Exportera kalender
+            {isMobile ? 'Exportera' : 'Exportera kalender'}
           </Button>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { sv } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CalendarDay } from "@/components/CalendarDay";
 import { getDayType } from "@/utils/calendarDayUtils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Period {
   start: Date;
@@ -27,6 +28,7 @@ export const MonthCard = ({ year, monthIndex, periods, holidays }: MonthCardProp
   const daysInMonth = getDaysInMonth(monthDate);
   const firstDayOfMonth = startOfMonth(monthDate);
   const firstDayWeekday = getDay(firstDayOfMonth); // 0 för söndag, 1 för måndag, etc.
+  const isMobile = useIsMobile();
   
   // Vi använder svenska veckan som börjar med måndag (index 0)
   const adjustedFirstDay = firstDayWeekday === 0 ? 6 : firstDayWeekday - 1;
@@ -59,15 +61,15 @@ export const MonthCard = ({ year, monthIndex, periods, holidays }: MonthCardProp
           {format(monthDate, "MMMM yyyy", { locale: sv })}
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className={isMobile ? "p-2" : ""}>
         <div className="grid grid-cols-7 gap-1">
-          <div className="text-center text-gray-500 font-medium">Mån</div>
-          <div className="text-center text-gray-500 font-medium">Tis</div>
-          <div className="text-center text-gray-500 font-medium">Ons</div>
-          <div className="text-center text-gray-500 font-medium">Tor</div>
-          <div className="text-center text-gray-500 font-medium">Fre</div>
-          <div className="text-center text-gray-500 font-medium">Lör</div>
-          <div className="text-center text-gray-500 font-medium">Sön</div>
+          <div className="text-center text-gray-500 font-medium text-xs md:text-sm">M</div>
+          <div className="text-center text-gray-500 font-medium text-xs md:text-sm">Ti</div>
+          <div className="text-center text-gray-500 font-medium text-xs md:text-sm">O</div>
+          <div className="text-center text-gray-500 font-medium text-xs md:text-sm">To</div>
+          <div className="text-center text-gray-500 font-medium text-xs md:text-sm">F</div>
+          <div className="text-center text-gray-500 font-medium text-xs md:text-sm">L</div>
+          <div className="text-center text-gray-500 font-medium text-xs md:text-sm">S</div>
           {daysArray}
         </div>
       </CardContent>
