@@ -1,24 +1,12 @@
 
 import { addDays, format, differenceInDays } from 'date-fns';
-import { formatDateToString } from './helpers';
+import { formatDateToString, isDayOff } from './helpers';
+import { VacationPeriod } from './types';
 
 // Calculate total days off from all selected periods
-export const calculateTotalDaysOff = (periods: any[], holidays: Date[]) => {
-  const allDaysOff = new Set(); // Use Set to avoid counting days twice
-  
-  // Add all days from all periods
-  periods.forEach(period => {
-    let currentDay = new Date(period.start);
-    const periodEnd = new Date(period.end);
-    
-    while (currentDay <= periodEnd) {
-      // Add date in the format YYYY-MM-DD to avoid counting twice
-      allDaysOff.add(formatDateToString(currentDay));
-      currentDay = addDays(currentDay, 1);
-    }
-  });
-  
-  return allDaysOff.size; // Return number of unique days
+export const calculateTotalDaysOff = (periods: VacationPeriod[], holidays: Date[]) => {
+  // Simple sum of days per period
+  return periods.reduce((total, period) => total + period.days, 0);
 };
 
 // Calculate required vacation days for a period

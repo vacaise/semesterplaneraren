@@ -25,15 +25,6 @@ export const optimizeVacation = (
   // Find potential periods based on the parameters
   const selectedPeriods = findOptimalSchedule(year, vacationDays, filteredHolidays, mode);
   
-  // Calculate the total number of days off
-  let totalDaysOff = calculateTotalDaysOff(selectedPeriods, filteredHolidays);
-  
-  // Ensure totalDaysOff is not NaN
-  if (isNaN(totalDaysOff)) {
-    totalDaysOff = 0;
-    console.error("totalDaysOff was NaN, setting to 0");
-  }
-  
   // IMPORTANT: verify periods don't contain any past dates
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -45,7 +36,7 @@ export const optimizeVacation = (
   });
   
   return {
-    totalDaysOff,
+    totalDaysOff: calculateTotalDaysOff(validatedPeriods, filteredHolidays),
     vacationDaysUsed: vacationDays,
     mode,
     periods: validatedPeriods

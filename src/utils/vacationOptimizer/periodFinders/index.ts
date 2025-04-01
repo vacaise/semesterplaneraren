@@ -1,6 +1,14 @@
 
-export { findKeyPeriods } from './holidayPeriods';
-export { findBridgeDays } from './bridgeDayPeriods';
-export { findExtendedWeekends } from './weekendPeriods';
-export { findSummerPeriods } from './summerPeriods';
-export { createExtraPeriods } from './extraPeriods';
+import { findKeyPeriods } from './holidayPeriods';
+import { findBridgeDays } from './bridgeDayPeriods';
+import { findExtendedWeekends } from './weekendPeriods';
+import { findSummerPeriods } from './summerPeriods';
+import { createExtraPeriods } from './extraPeriods';
+
+export {
+  findKeyPeriods,
+  findBridgeDays,
+  findExtendedWeekends,
+  findSummerPeriods,
+  createExtraPeriods
+};
