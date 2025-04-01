@@ -34,7 +34,7 @@ const generatePossiblePeriods = (year: number, holidays: Date[]): VacationPeriod
   periods.push(...findBridgeDays(year));
   
   // 3. Find extended weekends (Thursday-Sunday or Friday-Monday)
-  periods.push(...findExtendedWeekends(year, holidays));
+  periods.push(...findExtendedWeekends(year));
   
   // 4. Find summer vacation options
   periods.push(...findSummerPeriods(year));
