@@ -20,7 +20,8 @@ export const CalendarDay = ({ date, dayNumber, dayType }: CalendarDayProps) => {
   
   return (
     <div 
-      className={`${isMobile ? 'h-8 w-8 text-xs' : 'h-10 w-10 text-sm'} rounded-full flex items-center justify-center transition ${dayType.className}`}
+      className={`${isMobile ? 'h-6 w-6 text-[10px]' : 'h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 text-xs sm:text-sm'} 
+        rounded-full flex items-center justify-center transition ${dayType.className}`}
       title={`${format(date, 'EEEE d MMMM', { locale: sv })}: ${dayType.type}`}
     >
       {dayNumber}

@@ -75,10 +75,10 @@ export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalend
         <p className="text-gray-600">Se dina optimerade ledigheter för {year}</p>
       </div>
       
-      <div className={`${isMobile ? 'p-2' : 'p-4'} border border-gray-200 rounded-lg bg-white`}>
+      <div className={`${isMobile ? 'p-2' : 'p-3 sm:p-4'} border border-gray-200 rounded-lg bg-white`}>
         <CalendarLegend />
         
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-4">
           {monthsToRender.map(month => (
             <div key={`month-${month}`}>
               <MonthCard 

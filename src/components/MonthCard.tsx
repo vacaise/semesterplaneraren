@@ -36,7 +36,7 @@ export const MonthCard = ({ year, monthIndex, periods, holidays }: MonthCardProp
   const daysArray = [];
   // Lägg till tomma celler för dagar före månadens start
   for (let i = 0; i < adjustedFirstDay; i++) {
-    daysArray.push(<div key={`empty-${i}`} className="h-10 w-10"></div>);
+    daysArray.push(<div key={`empty-${i}`} className={`${isMobile ? 'h-6 w-6' : 'h-8 w-8 md:h-10 md:w-10'}`}></div>);
   }
 
   // Lägg till dagar i månaden
@@ -57,19 +57,19 @@ export const MonthCard = ({ year, monthIndex, periods, holidays }: MonthCardProp
   return (
     <Card className="mb-4">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg">
+        <CardTitle className="text-base sm:text-lg">
           {format(monthDate, "MMMM yyyy", { locale: sv })}
         </CardTitle>
       </CardHeader>
-      <CardContent className={isMobile ? "p-2" : ""}>
-        <div className="grid grid-cols-7 gap-1">
-          <div className="text-center text-gray-500 font-medium text-xs md:text-sm">M</div>
-          <div className="text-center text-gray-500 font-medium text-xs md:text-sm">Ti</div>
-          <div className="text-center text-gray-500 font-medium text-xs md:text-sm">O</div>
-          <div className="text-center text-gray-500 font-medium text-xs md:text-sm">To</div>
-          <div className="text-center text-gray-500 font-medium text-xs md:text-sm">F</div>
-          <div className="text-center text-gray-500 font-medium text-xs md:text-sm">L</div>
-          <div className="text-center text-gray-500 font-medium text-xs md:text-sm">S</div>
+      <CardContent className={isMobile ? "p-1 sm:p-2" : "p-2 sm:p-3 md:p-4"}>
+        <div className="grid grid-cols-7 gap-0 sm:gap-1 md:gap-2 justify-items-center">
+          <div className="text-center text-gray-500 font-medium text-[10px] sm:text-xs md:text-sm">M</div>
+          <div className="text-center text-gray-500 font-medium text-[10px] sm:text-xs md:text-sm">Ti</div>
+          <div className="text-center text-gray-500 font-medium text-[10px] sm:text-xs md:text-sm">O</div>
+          <div className="text-center text-gray-500 font-medium text-[10px] sm:text-xs md:text-sm">To</div>
+          <div className="text-center text-gray-500 font-medium text-[10px] sm:text-xs md:text-sm">F</div>
+          <div className="text-center text-gray-500 font-medium text-[10px] sm:text-xs md:text-sm">L</div>
+          <div className="text-center text-gray-500 font-medium text-[10px] sm:text-xs md:text-sm">S</div>
           {daysArray}
         </div>
       </CardContent>
