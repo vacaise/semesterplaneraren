@@ -32,20 +32,18 @@ const BreakSummaryCard = ({
   // Generate different background colors based on break type
   const getBgColor = () => {
     switch (type) {
-      case "holiday":
-        return "bg-red-50 border-red-100";
-      case "bridge":
-        return "bg-teal-50 border-teal-100";
-      case "weekend":
-        return "bg-yellow-50 border-yellow-100";
-      case "summer":
+      case "balanced":
+        return "bg-purple-50 border-purple-100";
+      case "longweekends":
         return "bg-blue-50 border-blue-100";
-      case "winter":
-        return "bg-indigo-50 border-indigo-100";
-      case "spring":
+      case "minibreaks":
+        return "bg-teal-50 border-teal-100";
+      case "weeks":
+        return "bg-amber-50 border-amber-100";
+      case "extended":
         return "bg-green-50 border-green-100";
-      case "fall":
-        return "bg-orange-50 border-orange-100";
+      case "special":
+        return "bg-indigo-50 border-indigo-100";
       default:
         return "bg-gray-50 border-gray-100";
     }
