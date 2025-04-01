@@ -18,9 +18,10 @@ const CookieBanner = () => {
   const acceptAllCookies = () => {
     localStorage.setItem("cookiePreference", "all");
     
-    // Update Google Analytics consent
-    if (window.gtag) {
-      window.gtag('consent', 'update', {
+    // Update GTM consent if dataLayer exists
+    if (window.dataLayer) {
+      window.dataLayer.push({
+        'event': 'consent_update',
         'analytics_storage': 'granted'
       });
     }
@@ -31,9 +32,10 @@ const CookieBanner = () => {
   const acceptEssentialCookies = () => {
     localStorage.setItem("cookiePreference", "essential");
     
-    // Update Google Analytics consent
-    if (window.gtag) {
-      window.gtag('consent', 'update', {
+    // Update GTM consent if dataLayer exists
+    if (window.dataLayer) {
+      window.dataLayer.push({
+        'event': 'consent_update',
         'analytics_storage': 'denied'
       });
     }
@@ -44,9 +46,10 @@ const CookieBanner = () => {
   const rejectAllCookies = () => {
     localStorage.setItem("cookiePreference", "none");
     
-    // Update Google Analytics consent
-    if (window.gtag) {
-      window.gtag('consent', 'update', {
+    // Update GTM consent if dataLayer exists
+    if (window.dataLayer) {
+      window.dataLayer.push({
+        'event': 'consent_update',
         'analytics_storage': 'denied'
       });
     }
