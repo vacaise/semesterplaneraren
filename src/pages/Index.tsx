@@ -159,7 +159,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Helmet>
-        <title>vacai | Optimera din semester för maximal ledighet</title>
+        <title>vacai | Maxa din ledighet</title>
         <meta name="description" content="Maximera din ledighet med smart semesterplanering. Planera dina semesterdagar optimalt för att få ut mest möjliga ledighet." />
         <link rel="canonical" href="https://vacai.se" />
       </Helmet>

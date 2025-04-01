@@ -9,7 +9,7 @@ interface AMPLayoutProps {
 
 const AMPLayout: React.FC<AMPLayoutProps> = ({ 
   children, 
-  title = "vacai | Optimera din semester för maximal ledighet",
+  title = "vacai | Maxa din ledighet",
   description = "Maximera din ledighet med smart semesterplanering. Planera dina semesterdagar optimalt för att få ut mest möjliga ledighet."
 }) => {
   return (
