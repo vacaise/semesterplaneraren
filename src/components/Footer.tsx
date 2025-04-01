@@ -14,7 +14,7 @@ const Footer = () => {
           <div className="flex flex-col items-start gap-2">
             <Link to="/" className="inline-block">
               <img 
-                src="/lovable-uploads/f65dbaf4-022d-4879-8f21-c099cac057f5.png" 
+                src="/lovable-uploads/ef09cd5d-3465-4f0e-9e46-40a2da0cf965.png" 
                 alt="vacai logo" 
                 className="h-8"
               />
