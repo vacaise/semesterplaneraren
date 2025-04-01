@@ -1,5 +1,4 @@
 
-// Main entry point for the vacation optimizer
 import { findOptimalSchedule } from './optimizer';
 import { calculateTotalDaysOff } from './calculators';
 import { isDayOff, isDateInPast } from './helpers';
