@@ -34,6 +34,16 @@ const Index = () => {
     setHolidays([]);
   }, [year]);
 
+  const resetToStart = () => {
+    setCurrentStep(1);
+    setOptimizedSchedule(null);
+    // Optionally reset other values to defaults
+    // setVacationDays(25);
+    // setSelectedMode("balanced");
+    // setHolidays([]);
+    window.scrollTo(0, 0);
+  };
+
   const handleNextStep = () => {
     if (currentStep === 1) {
       if (vacationDays <= 0) {
@@ -138,6 +148,7 @@ const Index = () => {
             schedule={optimizedSchedule} 
             year={year}
             holidays={holidays}
+            resetToStart={resetToStart}
           />
         );
       default:
@@ -167,6 +178,7 @@ const Index = () => {
             currentStep={currentStep}
             handleNextStep={handleNextStep}
             handlePrevStep={handlePrevStep}
+            resetToStart={resetToStart}
             isLoading={isLoading}
           />
         </div>

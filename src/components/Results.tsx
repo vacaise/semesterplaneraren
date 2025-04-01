@@ -6,7 +6,8 @@ import BreakTypeExplanation from "@/components/BreakTypeExplanation";
 import { MonthCalendarView } from "@/components/MonthCalendarView";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Sparkles, CalendarDays, AlarmClock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sparkles, CalendarDays, AlarmClock, RotateCcw, Home } from "lucide-react";
 import { calculateEfficiency } from "@/utils/vacationOptimizer/calculators";
 import { formatDateRange } from "@/utils/vacationOptimizer/helpers";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -31,9 +32,10 @@ interface ResultsProps {
   schedule: Schedule;
   year: number;
   holidays: Date[];
+  resetToStart: () => void;
 }
 
-const Results = ({ schedule, year, holidays }: ResultsProps) => {
+const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
   const [view, setView] = useState<"list" | "calendar">("list");
   const isMobile = useIsMobile();
   
@@ -92,6 +94,18 @@ const Results = ({ schedule, year, holidays }: ResultsProps) => {
             icon={<CalendarDays />}
           />
         </div>
+        
+        <div className="flex gap-4 mb-6">
+          <Button onClick={resetToStart} className="flex items-center gap-2">
+            <RotateCcw className="h-4 w-4" />
+            Börja om
+          </Button>
+          
+          <Button variant="outline" onClick={resetToStart} className="flex items-center gap-2">
+            <Home className="h-4 w-4" />
+            Tillbaka till start
+          </Button>
+        </div>
       </div>
       
       <Tabs defaultValue="list" className="w-full">
@@ -126,6 +140,7 @@ const Results = ({ schedule, year, holidays }: ResultsProps) => {
                     totalDays={period.days}
                     vacationDaysNeeded={period.vacationDaysNeeded}
                     type={period.type}
+                    holidays={holidays}
                   />
                 ))}
               </div>

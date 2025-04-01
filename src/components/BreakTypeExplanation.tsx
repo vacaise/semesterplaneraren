@@ -1,43 +1,56 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Scale, Calendar, CalendarDays, Sun, Snowflake, Leaf } from "lucide-react";
 
 const BreakTypeExplanation = () => {
   return (
     <Card className="mb-4">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg">Förklaring av ledighetstyper</CardTitle>
+        <CardTitle className="text-lg">Ledighetstyper</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="text-sm">
-            <div className="font-medium text-red-800 mb-1">Helgdagsledigheter</div>
-            <p className="text-gray-600">Ledigheter kring stora högtider som jul, påsk och midsommar.</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div className="flex items-center gap-2">
+            <div className="bg-purple-100 text-purple-800 p-2 rounded-full">
+              <Scale className="h-4 w-4" />
+            </div>
+            <div className="text-sm">Balanserad mix</div>
           </div>
           
-          <div className="text-sm">
-            <div className="font-medium text-teal-800 mb-1">Bryggdagar</div>
-            <p className="text-gray-600">Ledigheter som skapas genom att ta ledigt mellan helgdagar och helger.</p>
+          <div className="flex items-center gap-2">
+            <div className="bg-blue-100 text-blue-800 p-2 rounded-full">
+              <Calendar className="h-4 w-4" />
+            </div>
+            <div className="text-sm">Långhelger</div>
           </div>
           
-          <div className="text-sm">
-            <div className="font-medium text-yellow-800 mb-1">Långhelger</div>
-            <p className="text-gray-600">Förlängda helger med en eller två extra lediga dagar.</p>
+          <div className="flex items-center gap-2">
+            <div className="bg-teal-100 text-teal-800 p-2 rounded-full">
+              <CalendarDays className="h-4 w-4" />
+            </div>
+            <div className="text-sm">Miniledigheter</div>
           </div>
           
-          <div className="text-sm">
-            <div className="font-medium text-blue-800 mb-1">Sommarsemester</div>
-            <p className="text-gray-600">Längre ledigheter under sommarmånaderna.</p>
+          <div className="flex items-center gap-2">
+            <div className="bg-amber-100 text-amber-800 p-2 rounded-full">
+              <Sun className="h-4 w-4" />
+            </div>
+            <div className="text-sm">Veckor</div>
           </div>
           
-          <div className="text-sm">
-            <div className="font-medium text-indigo-800 mb-1">Vintersemester</div>
-            <p className="text-gray-600">Ledigheter under vinterhalvåret, perfekt för sportlov.</p>
+          <div className="flex items-center gap-2">
+            <div className="bg-green-100 text-green-800 p-2 rounded-full">
+              <Leaf className="h-4 w-4" />
+            </div>
+            <div className="text-sm">Långa semestrar</div>
           </div>
           
-          <div className="text-sm">
-            <div className="font-medium text-orange-800 mb-1">Höstsemester</div>
-            <p className="text-gray-600">Ledigheter under hösten, lämpliga för höstlov.</p>
+          <div className="flex items-center gap-2">
+            <div className="bg-indigo-100 text-indigo-800 p-2 rounded-full">
+              <Snowflake className="h-4 w-4" />
+            </div>
+            <div className="text-sm">Specialledigheter</div>
           </div>
         </div>
       </CardContent>
