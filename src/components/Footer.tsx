@@ -2,6 +2,8 @@
 import React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Link } from "react-router-dom";
+import { Mail } from "lucide-react";
+import { FileText } from "lucide-react";
 
 const Footer = () => {
   const isMobile = useIsMobile();
@@ -23,7 +25,21 @@ const Footer = () => {
               © {currentYear} vacai • Maximera din ledighet
             </p>
           </div>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4">
+            <Link
+              to="/articles"
+              className="text-sm text-gray-500 hover:text-gray-800 transition flex items-center gap-1"
+            >
+              <FileText size={16} />
+              Artiklar
+            </Link>
+            <a
+              href="mailto:vacai.se@yahoo.com"
+              className="text-sm text-gray-500 hover:text-gray-800 transition flex items-center gap-1"
+            >
+              <Mail size={16} />
+              Kontakt
+            </a>
             <a
               href="/sitemap"
               className="text-sm text-gray-500 hover:text-gray-800 transition"
