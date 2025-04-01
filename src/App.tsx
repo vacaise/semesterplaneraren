@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
+import AMP from "./pages/AMP";
 import Sitemap from "./pages/Sitemap";
 import NotFound from "./pages/NotFound";
 import CookiePolicy from "./pages/CookiePolicy";
@@ -23,6 +24,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/amp" element={<AMP />} />
           <Route path="/sitemap" element={<Sitemap />} />
           <Route path="/cookie-policy" element={<CookiePolicy />} />
           <Route path="/articles" element={<Articles />} />
