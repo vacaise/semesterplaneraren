@@ -2,7 +2,8 @@
 import { addDays, differenceInDays } from 'date-fns';
 
 // Create extra periods for remaining vacation days
-export const createExtraPeriods = (year: number, remainingDays: number) => {
+export const createExtraPeriods = () => {
+  const year = new Date().getFullYear();
   const extraPeriods = [];
   
   // Find a good period for winter break (February)
@@ -12,13 +13,13 @@ export const createExtraPeriods = (year: number, remainingDays: number) => {
     sportBreakStartDate = addDays(sportBreakStartDate, 1);
   }
   
-  const sportBreakEnd = addDays(sportBreakStartDate, remainingDays >= 5 ? 6 : remainingDays - 1);
+  const sportBreakEnd = addDays(sportBreakStartDate, 6);
   
   const winterPeriod = {
     start: sportBreakStartDate,
     end: sportBreakEnd,
     days: differenceInDays(sportBreakEnd, sportBreakStartDate) + 1,
-    vacationDaysNeeded: Math.min(5, remainingDays),
+    vacationDaysNeeded: 5,
     description: "Sportlov",
     score: 65,
     type: "winter"
@@ -31,24 +32,18 @@ export const createExtraPeriods = (year: number, remainingDays: number) => {
     fallBreakStartDate = addDays(fallBreakStartDate, 1);
   }
   
-  const fallBreakEnd = addDays(fallBreakStartDate, Math.min(4, remainingDays));
+  const fallBreakEnd = addDays(fallBreakStartDate, 4);
   
   const fallPeriod = {
     start: fallBreakStartDate,
     end: fallBreakEnd,
     days: differenceInDays(fallBreakEnd, fallBreakStartDate) + 1,
-    vacationDaysNeeded: Math.min(5, remainingDays),
+    vacationDaysNeeded: 5,
     description: "Höstlov",
     score: 62,
     type: "fall"
   };
   
-  // Add the most suitable period based on remaining days
-  if (remainingDays >= 5) {
-    extraPeriods.push(winterPeriod);
-  } else {
-    extraPeriods.push(fallPeriod);
-  }
-  
+  extraPeriods.push(winterPeriod, fallPeriod);
   return extraPeriods;
 };

@@ -1,109 +1,77 @@
 
-import { useIsMobile } from "@/hooks/use-mobile";
-import Footer from "@/components/Footer";
-import PageHeader from "@/components/PageHeader";
-import { Helmet } from "react-helmet";
+import React from "react";
+import { Link } from "react-router-dom";
+import { ChevronLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const CookiePolicy = () => {
-  const isMobile = useIsMobile();
-
   return (
-    <div className="min-h-screen flex flex-col">
-      <Helmet>
-        <title>Cookie Policy | vacai</title>
-        <meta name="description" content="Cookie policy för vacai - information om hur vi använder cookies." />
-      </Helmet>
-      <PageHeader />
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <Button variant="outline" asChild>
+            <Link to="/" className="inline-flex items-center">
+              <ChevronLeft className="h-4 w-4 mr-2" />
+              Tillbaka till startsidan
+            </Link>
+          </Button>
+        </div>
 
-      <main className={`flex-1 ${isMobile ? 'px-4' : 'px-8'}`}>
-        <div className="max-w-4xl mx-auto py-8">
-          <h1 className="text-3xl font-bold mb-6">Cookie Policy</h1>
-
-          <section className="mb-6">
-            <h2 className="text-xl font-semibold mb-3">Vad är cookies?</h2>
-            <p className="mb-4">
-              Cookies är små textfiler som lagras på din enhet (dator, surfplatta eller mobil) när du besöker en webbplats. 
-              Cookies hjälper webbplatsen att komma ihåg dina inställningar och preferenser för att förbättra din upplevelse.
-            </p>
-          </section>
-
-          <section className="mb-6">
-            <h2 className="text-xl font-semibold mb-3">Vilka cookies använder vi?</h2>
-            <p className="mb-3">
-              På vacai.se använder vi följande typer av cookies:
+        <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+          <h1 className="text-3xl font-bold text-gray-800 mb-6">Cookie Policy</h1>
+          
+          <div className="prose prose-gray max-w-none">
+            <h2>Information om cookies</h2>
+            <p>
+              Vår webbplats använder cookies för att förbättra din upplevelse. Cookies är små textfiler som placeras på din enhet när du besöker vår webbplats.
             </p>
             
-            <h3 className="text-lg font-semibold mt-4 mb-2">Nödvändiga cookies</h3>
-            <p className="mb-3">
-              Dessa cookies är nödvändiga för att webbplatsen ska fungera korrekt och kan inte stängas av i våra system.
-              De lagrar vanligtvis bara information som svarar på dina handlingar, såsom att ställa in sekretesspreferenser, 
-              fylla i formulär eller tillhandahålla säkra inloggningar.
-            </p>
-
-            <h3 className="text-lg font-semibold mt-4 mb-2">Analytiska cookies (Google Analytics)</h3>
-            <p className="mb-3">
-              Vi använder Google Analytics för att samla information om hur besökare använder vår webbplats. Dessa cookies 
-              hjälper oss att förbättra vår webbplats genom att spåra information som antalet besökare, varifrån besökare 
-              har kommit till webbplatsen och vilka sidor de besöker.
-            </p>
-            <p className="mb-3">
-              Google Analytics använder följande primära cookies:
-            </p>
-            <ul className="list-disc pl-6 mb-4">
-              <li><strong>_ga</strong> - Används för att skilja på användare och har en giltighetstid på 2 år</li>
-              <li><strong>_gid</strong> - Används för att skilja på användare och har en giltighetstid på 24 timmar</li>
-              <li><strong>_gat</strong> - Används för att begränsa antalet förfrågningar och har en giltighetstid på 1 minut</li>
+            <h3>Vilka cookies använder vi?</h3>
+            <ul>
+              <li>
+                <strong>Nödvändiga cookies:</strong> Dessa krävs för att webbplatsen ska fungera korrekt. De låter dig navigera på webbplatsen och använda dess funktioner.
+              </li>
+              <li>
+                <strong>Preferenscookies:</strong> Dessa cookies hjälper oss att komma ihåg dina inställningar och preferenser, såsom språkval och andra anpassningsalternativ.
+              </li>
+              <li>
+                <strong>Analytiska cookies:</strong> Vi använder analytiska cookies för att förstå hur besökare interagerar med vår webbplats. Dessa hjälper oss att förbättra vår webbplats och dess innehåll.
+              </li>
             </ul>
-          </section>
-
-          <section className="mb-6">
-            <h2 className="text-xl font-semibold mb-3">Hur länge lagras cookies?</h2>
-            <p className="mb-4">
-              Hur länge cookies lagras på din enhet beror på om det är en "permanent" eller "sessionscookie". 
-              Permanenta cookies kommer att vara kvar på din enhet tills de går ut eller tills du tar bort dem. 
-              Sessionscookies tas bort när du stänger din webbläsare.
+            
+            <h3>Hur länge sparas cookies?</h3>
+            <p>
+              Cookies kan vara antingen "permanenta" eller "sessionscookies". En permanent cookie finns kvar på din enhet under den period som anges i cookien, medan en sessionscookie försvinner när du stänger din webbläsare.
             </p>
-          </section>
-
-          <section className="mb-6">
-            <h2 className="text-xl font-semibold mb-3">Hur du hanterar cookies</h2>
-            <p className="mb-3">
-              De flesta webbläsare tillåter dig att hantera dina cookie-inställningar genom att:
+            
+            <h3>Hantera cookies</h3>
+            <p>
+              De flesta webbläsare låter dig kontrollera cookies genom dina inställningar. Du kan vanligtvis:
             </p>
-            <ul className="list-disc pl-6 mb-4">
-              <li>Blockera alla cookies</li>
-              <li>Ta bort cookies från din enhet</li>
-              <li>Blockera cookies från särskilda webbplatser</li>
+            <ul>
+              <li>Se vilka cookies du har och radera dem individuellt</li>
               <li>Blockera cookies från tredje part</li>
-              <li>Rensa all browserdata när webbläsaren stängs</li>
+              <li>Blockera cookies från specifika webbplatser</li>
+              <li>Blockera alla cookies</li>
+              <li>Radera alla cookies när du stänger din webbläsare</li>
             </ul>
+            
             <p>
-              Om du väljer att blockera cookies kan det påverka din upplevelse av vår webbplats, 
-              eftersom vissa funktioner kanske inte fungerar korrekt.
+              Om du väljer att blockera cookies kan det påverka din upplevelse på vår webbplats, eftersom vissa funktioner kanske inte fungerar som de ska.
             </p>
-          </section>
-
-          <section className="mb-6">
-            <h2 className="text-xl font-semibold mb-3">Ändringar i vår cookie policy</h2>
-            <p className="mb-4">
-              Vi kan uppdatera vår cookie policy från tid till annan. Vi rekommenderar att du regelbundet besöker den här 
-              sidan för att hålla dig informerad om eventuella ändringar.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold mb-3">Kontakta oss</h2>
+            
+            <h3>Ändringar i vår cookie policy</h3>
             <p>
-              Om du har några frågor angående vår cookie policy, vänligen kontakta oss på: 
-              <a href="mailto:vacai.se@yahoo.com" className="text-teal-600 hover:underline ml-1">
-                vacai.se@yahoo.com
-              </a>
+              Vi kan uppdatera vår cookie policy då och då. Om vi gör det, kommer vi att meddela dig genom att publicera den nya policyn på denna sida.
             </p>
-          </section>
+            
+            <h3>Kontakta oss</h3>
+            <p>
+              Om du har några frågor om våra cookies eller denna policy, kontakta oss gärna.
+            </p>
+          </div>
         </div>
-      </main>
-
-      <Footer />
+      </div>
     </div>
   );
 };

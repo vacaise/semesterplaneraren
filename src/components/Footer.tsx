@@ -1,65 +1,38 @@
 
+import React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Link } from "react-router-dom";
 
 const Footer = () => {
   const isMobile = useIsMobile();
-  const year = new Date().getFullYear();
+  const currentYear = new Date().getFullYear();
   
-  return <footer className={`mt-8 py-8 ${isMobile ? 'px-4' : 'px-8'} bg-gray-50 border-t border-gray-200`}>
-      <div className="max-w-4xl mx-auto">
-        <div className={`${isMobile ? 'flex flex-col gap-4' : 'flex justify-between'}`}>
+  return (
+    <footer className="border-t border-gray-200 py-8 mt-8">
+      <div className="max-w-4xl mx-auto px-4">
+        <div className={`${isMobile ? 'space-y-4' : 'flex justify-between items-center'}`}>
           <div>
-            {/* Replace with logo from page header */}
-            <h2 className={`text-lg font-semibold mb-2 ${isMobile ? 'text-center' : ''}`}>
-              <Link to="/" className="hover:text-teal-600 transition-colors" aria-label="Hem">
-                <img 
-                  src="/lovable-uploads/ba846d2b-4df7-4b0e-af89-5d0748a13e5d.png" 
-                  alt="vacai logo" 
-                  className="h-5"
-                />
-              </Link>
-            </h2>
-            <p className={`text-gray-600 text-sm max-w-md ${isMobile ? 'text-center' : ''}`}>Optimera din semester för att maximera din ledighet och röda dagar. vacai hjälper dig att få ut mest möjligt av dina semesterdagar.</p>
+            <p className="text-sm text-gray-500">
+              © {currentYear} vacai • Maximera din ledighet
+            </p>
           </div>
-          
-          <div className={`flex ${isMobile ? 'flex-row justify-center mt-4' : 'flex-col items-end'}`}>
-            <nav aria-label="Sidfot navigation">
-              <ul className={`flex ${isMobile ? 'gap-6' : 'gap-4'}`}>
-                {/* Move Artiklar to the last position */}
-                <li>
-                  <a href="mailto:vacai.se@yahoo.com" className="text-gray-600 hover:text-teal-600 transition-colors text-sm" aria-label="Kontakta oss via e-post">
-                    Kontakt
-                  </a>
-                </li>
-                <li>
-                  <Link to="/sitemap" className="text-gray-600 hover:text-teal-600 transition-colors text-sm" aria-label="Visa sitemap">
-                    Sitemap
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/cookie-policy" className="text-gray-600 hover:text-teal-600 transition-colors text-sm" aria-label="Visa cookie policy">
-                    Cookie Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/articles" className="text-gray-600 hover:text-teal-600 transition-colors text-sm" aria-label="Läs våra artiklar">
-                    Artiklar
-                  </Link>
-                </li>
-              </ul>
-            </nav>
-            {!isMobile && <p className="text-gray-500 text-xs mt-4">
-                &copy; {year} vacai.se. Alla rättigheter förbehållna.
-              </p>}
+          <div className="flex gap-4">
+            <a
+              href="/sitemap"
+              className="text-sm text-gray-500 hover:text-gray-800 transition"
+            >
+              Sitemap
+            </a>
+            <a
+              href="/cookie-policy"
+              className="text-sm text-gray-500 hover:text-gray-800 transition"
+            >
+              Cookies
+            </a>
           </div>
         </div>
-        
-        {isMobile && <p className="text-gray-500 text-xs mt-6 text-center">
-            &copy; {year} vacai.se. Alla rättigheter förbehållna.
-          </p>}
       </div>
-    </footer>;
+    </footer>
+  );
 };
 
 export default Footer;

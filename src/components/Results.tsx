@@ -1,28 +1,14 @@
 
-import { format, addDays, differenceInDays } from "date-fns";
-import { sv } from "date-fns/locale";
-import { Card, CardContent } from "@/components/ui/card";
-import { Calendar as CalendarIcon, PlaneTakeoff, Building2, Clock } from "lucide-react";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { BreakSummaryCard } from "@/components/BreakSummaryCard";
+import React, { useState } from "react";
+import StatisticCard from "@/components/StatisticCard";
+import BreakSummaryCard from "@/components/BreakSummaryCard";
+import BreakTypeExplanation from "@/components/BreakTypeExplanation";
 import { MonthCalendarView } from "@/components/MonthCalendarView";
-import { BreakTypeExplanation } from "@/components/BreakTypeExplanation";
-import { StatisticCard } from "@/components/StatisticCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { Sparkles, CalendarDays, AlarmClock } from "lucide-react";
+import { calculateEfficiency } from "@/utils/vacationOptimizer/calculators";
+import { formatDateRange } from "@/utils/vacationOptimizer/helpers";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Period {
@@ -42,125 +28,119 @@ interface Schedule {
 }
 
 interface ResultsProps {
-  schedule: Schedule | null;
+  schedule: Schedule;
   year: number;
-  holidays?: Date[];
+  holidays: Date[];
 }
 
-const getModeTitle = (mode: string) => {
-  switch (mode) {
-    case "balanced": return "Balanserad mix";
-    case "longweekends": return "Långhelger";
-    case "minibreaks": return "Miniledigheter";
-    case "weeks": return "Veckor";
-    case "extended": return "Långa semestrar";
-    default: return mode;
-  }
-};
-
-const Results = ({ schedule, year, holidays = [] }: ResultsProps) => {
+const Results = ({ schedule, year, holidays }: ResultsProps) => {
+  const [view, setView] = useState<"list" | "calendar">("list");
   const isMobile = useIsMobile();
   
-  if (!schedule) {
-    return <div>Inget schema har genererats än.</div>;
-  }
-
-  // Calculate total days off directly from the periods
-  const totalVacationDays = schedule.vacationDaysUsed || 0;
+  // Calculate efficiency
+  const efficiency = calculateEfficiency(schedule.totalDaysOff, schedule.vacationDaysUsed);
   
-  // Sum up all the days from all periods
-  const totalDaysOff = schedule.periods.reduce((sum, period) => sum + period.days, 0);
-
-  // Calculate efficiency (days off per vacation day used)
-  const efficiency = totalVacationDays > 0 
-    ? (totalDaysOff / totalVacationDays).toFixed(2)
-    : "0.00";
-    
-  // Sort periods chronologically by start date
-  const sortedPeriods = [...schedule.periods].sort((a, b) => {
-    const dateA = new Date(a.start);
-    const dateB = new Date(b.start);
-    return dateA.getTime() - dateB.getTime();
-  });
+  // Get mode display text
+  const getModeDisplayText = (mode: string): string => {
+    switch (mode) {
+      case "balanced": return "Balanserad mix";
+      case "longweekends": return "Långhelger";
+      case "minibreaks": return "Miniledigheter";
+      case "weeks": return "Veckor";
+      case "extended": return "Långa semestrar";
+      default: return "Anpassad";
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-2 mb-4">
-        <div className="bg-purple-100 text-purple-800 h-10 w-10 rounded-full flex items-center justify-center">
-          <Building2 className="h-5 w-5" />
+    <div className="space-y-8">
+      <div>
+        <div className="flex items-center mb-4">
+          <div className="bg-blue-50 text-blue-800 h-8 w-8 rounded-full flex items-center justify-center font-medium">
+            ✓
+          </div>
+          <h2 className="text-xl font-medium ml-2 text-gray-800">Din optimerade semesterplan</h2>
         </div>
-        <h3 className="text-xl font-medium text-gray-800">Ledighetsdetaljer</h3>
-        <div className={`${isMobile ? 'hidden' : 'ml-auto'} bg-purple-100 text-purple-800 px-4 py-1 rounded-full text-sm font-medium`}>
-          {sortedPeriods.length} ledigheter planerade
+        
+        <p className="text-gray-600 mb-6">
+          Baserat på dina val har vi optimerat din ledighet för {year} med {schedule.vacationDaysUsed} semesterdagar 
+          i stil "{getModeDisplayText(schedule.mode)}".
+        </p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <StatisticCard
+            title="Total ledighet"
+            value={`${schedule.totalDaysOff} dagar`}
+            description="Antal dagar du kommer vara ledig totalt"
+            color="purple"
+            icon={<Sparkles />}
+          />
+          
+          <StatisticCard
+            title="Effektivitet"
+            value={`${efficiency}x`}
+            description="Lediga dagar per använd semesterdag"
+            color="teal"
+            icon={<AlarmClock />}
+          />
+          
+          <StatisticCard
+            title="Semesterperioder"
+            value={`${schedule.periods.length}`}
+            description="Antal perioder med sammanhängande ledighet"
+            color="blue"
+            icon={<CalendarDays />}
+          />
         </div>
       </div>
-
-      {isMobile && (
-        <div className="bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-medium text-center">
-          {sortedPeriods.length} ledigheter planerade
-        </div>
-      )}
-
-      <BreakTypeExplanation />
-
-      <div className={`grid grid-cols-1 ${isMobile ? 'gap-3' : 'md:grid-cols-3 gap-4'}`}>
-        <StatisticCard 
-          value={totalVacationDays} 
-          label="Semesterdagar" 
-          bgColor="bg-blue-50" 
-          borderColor="border-blue-100" 
-          textColor="text-blue-800" 
-        />
-        
-        <StatisticCard 
-          value={totalDaysOff} 
-          label="Totalt lediga dagar" 
-          bgColor="bg-green-50" 
-          borderColor="border-green-100" 
-          textColor="text-green-800" 
-        />
-        
-        <StatisticCard 
-          value={`${efficiency}x`} 
-          label="Effektivitet" 
-          bgColor="bg-purple-50" 
-          borderColor="border-purple-100" 
-          textColor="text-purple-800" 
-        />
-      </div>
-
-      <Tabs defaultValue="periods" className="w-full">
-        <TabsList className={`grid w-full grid-cols-2`}>
-          <TabsTrigger value="periods">Ledighetsperioder</TabsTrigger>
+      
+      <Tabs defaultValue="list" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="list">Ledighetsperioder</TabsTrigger>
           <TabsTrigger value="calendar">Kalendervy</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="periods" className="space-y-4">
-          <h3 className="text-lg font-medium mb-3">
-            Dina optimerade ledigheter för {year}
-          </h3>
-          <p className="text-gray-600 mb-4">
-            Baserat på din preferens: {getModeTitle(schedule.mode)}
-          </p>
+        <TabsContent value="list" className="space-y-6">
+          <BreakTypeExplanation />
           
           <div className="space-y-4">
-            {sortedPeriods.map((period, index) => (
-              <BreakSummaryCard key={index} period={period} />
-            ))}
+            <div className="mb-4">
+              <h3 className="text-lg font-medium mb-2">Dina optimerade ledigheter</h3>
+              <p className="text-gray-600">Nedan ser du alla planerade ledighetsperioder för {year}</p>
+            </div>
+            
+            {schedule.periods.length === 0 ? (
+              <Card>
+                <CardContent className="p-8 text-center text-gray-500">
+                  Inga ledighetsperioder hittades för resten av året.
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {schedule.periods.map((period, index) => (
+                  <BreakSummaryCard
+                    key={index}
+                    title={period.description}
+                    startDate={new Date(period.start)}
+                    endDate={new Date(period.end)}
+                    totalDays={period.days}
+                    vacationDaysNeeded={period.vacationDaysNeeded}
+                    type={period.type}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </TabsContent>
         
         <TabsContent value="calendar">
-          <MonthCalendarView schedule={{...schedule, periods: sortedPeriods}} year={year} holidays={holidays} />
+          <MonthCalendarView 
+            schedule={schedule}
+            year={year}
+            holidays={holidays}
+          />
         </TabsContent>
       </Tabs>
-      
-      <div className="bg-blue-50 p-4 rounded-md border border-blue-100">
-        <h3 className="font-medium text-blue-800 mb-2">Tips</h3>
-        <p className="text-sm text-gray-600">
-          Med {totalVacationDays} semesterdagar får du {totalDaysOff} dagar ledigt - det är {efficiency}x mer ledighet än antalet semesterdagar du använder!
-        </p>
-      </div>
     </div>
   );
 };

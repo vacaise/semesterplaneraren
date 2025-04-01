@@ -8,10 +8,6 @@ import Index from "./pages/Index";
 import Sitemap from "./pages/Sitemap";
 import NotFound from "./pages/NotFound";
 import CookiePolicy from "./pages/CookiePolicy";
-import CookieBanner from "./components/CookieBanner";
-import Articles from "./pages/Articles";
-import Article2025 from "./pages/Article2025";
-import Article2026 from "./pages/Article2026";
 
 // Create a new query client instance
 const queryClient = new QueryClient();
@@ -26,13 +22,9 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/sitemap" element={<Sitemap />} />
           <Route path="/cookie-policy" element={<CookiePolicy />} />
-          <Route path="/articles" element={<Articles />} />
-          <Route path="/articles/maxa-semester-2025" element={<Article2025 />} />
-          <Route path="/articles/optimera-ledighet-2026" element={<Article2026 />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-        <CookieBanner />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

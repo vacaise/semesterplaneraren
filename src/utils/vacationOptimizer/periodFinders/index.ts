@@ -1,8 +1,14 @@
 
-// This file is kept for backwards compatibility
-// The actual period finding logic is now in optimizer.ts
-export const findKeyPeriods = () => [];
-export const findBridgeDays = () => [];
-export const findExtendedWeekends = () => [];
-export const findSummerPeriods = () => [];
-export const createExtraPeriods = () => [];
+import { findKeyPeriods } from './holidayPeriods';
+import { findBridgeDays } from './bridgeDayPeriods';
+import { findExtendedWeekends } from './weekendPeriods';
+import { findSummerPeriods } from './summerPeriods';
+import { createExtraPeriods } from './extraPeriods';
+
+export {
+  findKeyPeriods,
+  findBridgeDays,
+  findExtendedWeekends,
+  findSummerPeriods,
+  createExtraPeriods
+};

@@ -1,65 +1,48 @@
 
 import React from "react";
-import { 
-  Coffee, 
-  Star, 
-  SunsetIcon, 
-  Palmtree
-} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export const BreakTypeExplanation = () => {
+const BreakTypeExplanation = () => {
   return (
-    <div className="p-4 border border-purple-100 rounded-lg bg-purple-50/50">
-      <h4 className="text-gray-800 font-medium mb-3">Förstå dina ledighetstyper</h4>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-green-50 border border-green-100 rounded-lg p-3">
-          <div className="flex items-start gap-2">
-            <div className="p-2 bg-white rounded-md">
-              <Coffee className="h-5 w-5 text-green-600" />
-            </div>
-            <div>
-              <h5 className="font-medium text-green-800">Långhelg</h5>
-              <p className="text-sm text-gray-600">3-4 dagar ledigt runt en helg</p>
-            </div>
+    <Card className="mb-4">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg">Förklaring av ledighetstyper</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="text-sm">
+            <div className="font-medium text-red-800 mb-1">Helgdagsledigheter</div>
+            <p className="text-gray-600">Ledigheter kring stora högtider som jul, påsk och midsommar.</p>
+          </div>
+          
+          <div className="text-sm">
+            <div className="font-medium text-teal-800 mb-1">Bryggdagar</div>
+            <p className="text-gray-600">Ledigheter som skapas genom att ta ledigt mellan helgdagar och helger.</p>
+          </div>
+          
+          <div className="text-sm">
+            <div className="font-medium text-yellow-800 mb-1">Långhelger</div>
+            <p className="text-gray-600">Förlängda helger med en eller två extra lediga dagar.</p>
+          </div>
+          
+          <div className="text-sm">
+            <div className="font-medium text-blue-800 mb-1">Sommarsemester</div>
+            <p className="text-gray-600">Längre ledigheter under sommarmånaderna.</p>
+          </div>
+          
+          <div className="text-sm">
+            <div className="font-medium text-indigo-800 mb-1">Vintersemester</div>
+            <p className="text-gray-600">Ledigheter under vinterhalvåret, perfekt för sportlov.</p>
+          </div>
+          
+          <div className="text-sm">
+            <div className="font-medium text-orange-800 mb-1">Höstsemester</div>
+            <p className="text-gray-600">Ledigheter under hösten, lämpliga för höstlov.</p>
           </div>
         </div>
-        
-        <div className="bg-amber-50 border border-amber-100 rounded-lg p-3">
-          <div className="flex items-start gap-2">
-            <div className="p-2 bg-white rounded-md">
-              <Star className="h-5 w-5 text-amber-600" />
-            </div>
-            <div>
-              <h5 className="font-medium text-amber-800">Miniledighet</h5>
-              <p className="text-sm text-gray-600">5-6 dagar för en snabb getaway</p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-blue-50 border border-blue-100 rounded-lg p-3">
-          <div className="flex items-start gap-2">
-            <div className="p-2 bg-white rounded-md">
-              <SunsetIcon className="h-5 w-5 text-blue-600" />
-            </div>
-            <div>
-              <h5 className="font-medium text-blue-800">Veckoledighet</h5>
-              <p className="text-sm text-gray-600">7-9 dagar för en ordentlig semester</p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-purple-50 border border-purple-100 rounded-lg p-3">
-          <div className="flex items-start gap-2">
-            <div className="p-2 bg-white rounded-md">
-              <Palmtree className="h-5 w-5 text-purple-600" />
-            </div>
-            <div>
-              <h5 className="font-medium text-purple-800">Längre ledighet</h5>
-              <p className="text-sm text-gray-600">10-15 dagar för en utökad semester</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
+
+export default BreakTypeExplanation;
