@@ -15,7 +15,7 @@ const PageHeader = () => {
           className={`${isMobile ? 'h-12' : 'h-16'} mx-auto`}
         />
       </Link>
-      <p className="text-gray-600 max-w-2xl mx-auto">
+      <p className="text-gray-600 max-w-2xl mx-auto px-4">
         Maximera din ledighet genom att optimalt fördela semesterdagar runt helger och röda dagar
       </p>
     </div>
