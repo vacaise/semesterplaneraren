@@ -36,12 +36,12 @@ export const selectOptimalPeriods = (
   });
   
   // Define maximum number of periods to select based on mode
-  let maxPeriods = 10; // Default
+  let maxPeriods = 20; // Increased from 10
   
   if (mode === "longweekends") {
-    maxPeriods = 15; // More shorter periods
+    maxPeriods = 30; // Increased from 15
   } else if (mode === "extended") {
-    maxPeriods = 5; // Fewer longer periods
+    maxPeriods = 10; // Increased from 5
   }
   
   // First pass: try to select periods with extremely high efficiency
@@ -71,8 +71,8 @@ export const selectOptimalPeriods = (
       selectedPeriods.push(period);
       remainingVacationDays -= period.vacationDaysNeeded;
       
-      // If we've hit our target or run out of vacation days, break
-      if (selectedPeriods.length >= maxPeriods || remainingVacationDays <= 0) {
+      // Only check max periods, don't break on remaining days
+      if (selectedPeriods.length >= maxPeriods) {
         break;
       }
     }
@@ -94,8 +94,8 @@ export const selectOptimalPeriods = (
         remainingVacationDays -= period.vacationDaysNeeded;
       }
       
-      // If we've hit our target or run out of vacation days, break
-      if (selectedPeriods.length >= maxPeriods || remainingVacationDays <= 0) {
+      // Only check max periods, don't break on remaining days
+      if (selectedPeriods.length >= maxPeriods) {
         break;
       }
     }
@@ -104,6 +104,13 @@ export const selectOptimalPeriods = (
   // Final attempt: if we still have vacation days, add extra small periods
   if (remainingVacationDays > 0) {
     const extraPeriods = createExtraPeriods(year, holidays);
+    
+    // Sort extra periods by efficiency (days per vacation day)
+    extraPeriods.sort((a, b) => {
+      const aEfficiency = a.days / Math.max(a.vacationDaysNeeded, 1);
+      const bEfficiency = b.days / Math.max(b.vacationDaysNeeded, 1);
+      return bEfficiency - aEfficiency;
+    });
     
     for (const period of extraPeriods) {
       if (period.vacationDaysNeeded <= remainingVacationDays) {
@@ -121,9 +128,14 @@ export const selectOptimalPeriods = (
           remainingVacationDays -= period.vacationDaysNeeded;
         }
       }
-      
-      if (remainingVacationDays <= 0) break;
     }
+  }
+  
+  // Last resort: If we STILL have vacation days, create single day periods
+  if (remainingVacationDays > 0) {
+    const singleDayPeriods = createSingleDayPeriods(year, holidays, remainingVacationDays, selectedPeriods);
+    selectedPeriods.push(...singleDayPeriods);
+    remainingVacationDays -= singleDayPeriods.length;
   }
   
   // Sort the final selected periods by date (chronologically)
@@ -132,4 +144,110 @@ export const selectOptimalPeriods = (
   });
   
   return selectedPeriods;
+};
+
+// Create individual single-day vacation periods to use up any remaining days
+const createSingleDayPeriods = (
+  year: number, 
+  holidays: Date[],
+  remainingDays: number,
+  existingPeriods: VacationPeriod[]
+): VacationPeriod[] => {
+  const singleDayPeriods: VacationPeriod[] = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  // Try to create Monday or Friday periods to extend weekends
+  for (let month = 0; month < 12 && remainingDays > 0; month++) {
+    for (let day = 1; day <= 31 && remainingDays > 0; day++) {
+      try {
+        const date = new Date(year, month, day);
+        // Skip if not valid date, is in the past, is a weekend or holiday
+        if (
+          date.getMonth() !== month || 
+          date < today || 
+          date.getDay() === 0 || // Sunday
+          date.getDay() === 6 || // Saturday
+          holidays.some(h => h.getDate() === date.getDate() && h.getMonth() === date.getMonth())
+        ) {
+          continue;
+        }
+        
+        // Prioritize Mondays and Fridays for long weekends
+        if (date.getDay() === 1 || date.getDay() === 5) {
+          // Check for overlap with existing periods
+          const hasOverlap = existingPeriods.some(period => 
+            date >= period.start && date <= period.end
+          );
+          
+          if (!hasOverlap) {
+            singleDayPeriods.push({
+              start: new Date(date),
+              end: new Date(date),
+              days: 1,
+              vacationDaysNeeded: 1,
+              description: `Extra ledig dag: ${date.getDate()}/${date.getMonth() + 1}`,
+              type: "single",
+              score: 30
+            });
+            remainingDays--;
+          }
+        }
+      } catch (e) {
+        // Skip invalid dates
+      }
+    }
+  }
+  
+  // If we still have days, add any weekday (not just Mon/Fri)
+  if (remainingDays > 0) {
+    for (let month = 0; month < 12 && remainingDays > 0; month++) {
+      for (let day = 1; day <= 31 && remainingDays > 0; day++) {
+        try {
+          const date = new Date(year, month, day);
+          // Skip if not valid date, is in the past, is a weekend or holiday
+          if (
+            date.getMonth() !== month || 
+            date < today || 
+            date.getDay() === 0 || // Sunday
+            date.getDay() === 6 || // Saturday
+            holidays.some(h => h.getDate() === date.getDate() && h.getMonth() === date.getMonth())
+          ) {
+            continue;
+          }
+          
+          // Check for overlap with existing periods
+          const hasOverlap = existingPeriods.some(period => 
+            date >= period.start && date <= period.end
+          );
+          
+          const alreadyAdded = singleDayPeriods.some(period => 
+            period.start.getDate() === date.getDate() && 
+            period.start.getMonth() === date.getMonth()
+          );
+          
+          if (!hasOverlap && !alreadyAdded) {
+            singleDayPeriods.push({
+              start: new Date(date),
+              end: new Date(date),
+              days: 1,
+              vacationDaysNeeded: 1,
+              description: `Extra ledig dag: ${date.getDate()}/${date.getMonth() + 1}`,
+              type: "single",
+              score: 20
+            });
+            remainingDays--;
+          }
+          
+          if (remainingDays <= 0) {
+            break;
+          }
+        } catch (e) {
+          // Skip invalid dates
+        }
+      }
+    }
+  }
+  
+  return singleDayPeriods;
 };
