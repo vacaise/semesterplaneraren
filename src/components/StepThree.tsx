@@ -1,9 +1,11 @@
 
 import { useState, useEffect } from "react";
-import { format, isPast } from "date-fns";
+import { format, isPast, isWeekend } from "date-fns";
 import { sv } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { 
   Table, 
   TableBody, 
@@ -18,7 +20,8 @@ import {
   MapPin, 
   ChevronLeft, 
   ChevronRight,
-  Info
+  Info,
+  Plus
 } from "lucide-react";
 import { 
   Tooltip,
@@ -26,6 +29,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface StepThreeProps {
@@ -44,7 +57,10 @@ const StepThree = ({
   isLoading 
 }: StepThreeProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [customHolidayName, setCustomHolidayName] = useState("");
+  const [showAddDialog, setShowAddDialog] = useState(false);
   const isMobile = useIsMobile();
+  const { toast } = useToast();
   const today = new Date();
 
   const addHoliday = () => {
@@ -57,10 +73,59 @@ const StepThree = ({
       if (!exists && !isPast(selectedDate)) {
         setHolidays([...holidays, selectedDate]);
         setSelectedDate(undefined);
+        toast({
+          title: "Röd dag tillagd",
+          description: `${format(selectedDate, "d MMMM yyyy", { locale: sv })} har lagts till som röd dag.`,
+        });
       } else if (isPast(selectedDate)) {
         // Don't allow adding past dates
+        toast({
+          title: "Ogiltigt datum",
+          description: "Du kan inte lägga till datum i det förflutna.",
+          variant: "destructive",
+        });
+        setSelectedDate(undefined);
+      } else {
+        toast({
+          title: "Datum finns redan",
+          description: "Detta datum är redan markerat som röd dag.",
+          variant: "destructive",
+        });
         setSelectedDate(undefined);
       }
+    }
+  };
+
+  const addCustomHoliday = () => {
+    if (selectedDate && customHolidayName.trim()) {
+      // Check if date already exists or is in the past
+      const exists = holidays.some(
+        (date) => format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
+      );
+      
+      if (!exists && !isPast(selectedDate)) {
+        setHolidays([...holidays, selectedDate]);
+        toast({
+          title: "Klämdag tillagd",
+          description: `${customHolidayName} (${format(selectedDate, "d MMMM yyyy", { locale: sv })}) har lagts till.`,
+        });
+      } else if (exists) {
+        toast({
+          title: "Datum finns redan",
+          description: "Detta datum är redan markerat som röd dag.",
+          variant: "destructive",
+        });
+      } else if (isPast(selectedDate)) {
+        toast({
+          title: "Ogiltigt datum",
+          description: "Du kan inte lägga till datum i det förflutna.",
+          variant: "destructive",
+        });
+      }
+      
+      setSelectedDate(undefined);
+      setCustomHolidayName("");
+      setShowAddDialog(false);
     }
   };
 
@@ -70,18 +135,21 @@ const StepThree = ({
         (date) => format(date, "yyyy-MM-dd") !== format(dateToRemove, "yyyy-MM-dd")
       )
     );
+    
+    toast({
+      title: "Röd dag borttagen",
+      description: `${format(dateToRemove, "d MMMM yyyy", { locale: sv })} har tagits bort.`,
+    });
   };
 
   const handleFetchHolidays = () => {
     fetchHolidays();
-    
-    // Scroll to navigation buttons after a short delay to allow for holidays to be fetched
-    setTimeout(() => {
-      const navButtons = document.querySelector("#main-container + div");
-      if (navButtons) {
-        navButtons.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }, 500);
+  };
+
+  const isDayHighlighted = (day: Date) => {
+    return holidays.some(holiday => 
+      format(holiday, "yyyy-MM-dd") === format(day, "yyyy-MM-dd")
+    );
   };
 
   return (
@@ -117,6 +185,61 @@ const StepThree = ({
         <div className="border rounded-lg overflow-hidden bg-white p-4">
           <div className="flex items-center justify-between mb-4">
             <h4 className="font-medium text-gray-800">Välj datum</h4>
+            
+            <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Plus className="h-4 w-4 mr-1" /> Lägg till klämdag
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Lägg till klämdag eller speciell dag</DialogTitle>
+                  <DialogDescription>
+                    Välj ett datum och ange ett namn för denna speciella dag.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="flex justify-center">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={setSelectedDate}
+                      className="rounded-md"
+                      locale={sv}
+                      defaultMonth={new Date(year, 0)}
+                      modifiers={{
+                        highlighted: isDayHighlighted
+                      }}
+                      modifiersClassNames={{
+                        highlighted: "bg-red-100 text-red-800 font-semibold"
+                      }}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="holidayName">Namn på dagen</Label>
+                    <Input
+                      id="holidayName"
+                      value={customHolidayName}
+                      onChange={(e) => setCustomHolidayName(e.target.value)}
+                      placeholder="t.ex. Klämdag, Företagsdag etc."
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowAddDialog(false)}>
+                    Avbryt
+                  </Button>
+                  <Button 
+                    onClick={addCustomHoliday} 
+                    disabled={!selectedDate || !customHolidayName.trim()}
+                  >
+                    Lägg till
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
           <div className={`${isMobile ? 'flex justify-center' : ''}`}>
             <Calendar
@@ -126,6 +249,12 @@ const StepThree = ({
               className="rounded-md"
               locale={sv}
               defaultMonth={new Date(year, 0)}
+              modifiers={{
+                highlighted: isDayHighlighted
+              }}
+              modifiersClassNames={{
+                highlighted: "bg-red-100 text-red-800 font-semibold"
+              }}
               classNames={{
                 head_cell: "text-xs font-medium text-gray-500",
                 day: "h-9 w-9 text-sm p-0 font-normal aria-selected:opacity-100 aria-selected:bg-red-100 aria-selected:text-red-800 aria-selected:font-medium",

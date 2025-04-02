@@ -30,8 +30,8 @@ const StepOne = ({
   
   // Handle vacation days input with validation
   const handleVacationDaysChange = (value: number) => {
-    // Ensure the value is within valid range (1-40)
-    const validatedValue = Math.max(1, Math.min(40, value));
+    // Ensure the value is within valid range (1-50)
+    const validatedValue = Math.max(1, Math.min(50, value));
     setVacationDays(validatedValue);
   };
   
@@ -83,7 +83,7 @@ const StepOne = ({
             <Slider 
               id="vacationDays" 
               defaultValue={[vacationDays]} 
-              max={40} 
+              max={50} 
               min={1} 
               step={1} 
               onValueChange={val => handleVacationDaysChange(val[0])} 
@@ -97,7 +97,7 @@ const StepOne = ({
               onChange={e => handleVacationDaysChange(Number(e.target.value))} 
               className={`${isMobile ? 'w-full' : 'w-24'}`} 
               min={1} 
-              max={40} 
+              max={50} 
               placeholder="Ange dagar"
               aria-label="Ange antal semesterdagar" 
             />

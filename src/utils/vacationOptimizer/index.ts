@@ -1,5 +1,5 @@
 
-import { VacationPeriod } from './types';
+import { VacationPeriod, OptimizationMode } from './types';
 import { isDayOff, isDateInPast, formatDateRange } from './helpers';
 
 interface OptimizedSchedule {
@@ -499,7 +499,14 @@ const selectOptimalPeriods = (
  * Beräkna totala lediga dagar från alla valda perioder
  */
 const calculateTotalDaysOff = (periods: VacationPeriod[]): number => {
-  return periods.reduce((total, period) => total + period.days, 0);
+  // Endast räkna dagar som är en del av en ledighetsperiod
+  let totalDays = 0;
+  
+  periods.forEach(period => {
+    totalDays += period.days;
+  });
+  
+  return totalDays;
 };
 
 /**

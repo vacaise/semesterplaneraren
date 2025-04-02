@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import StepOne from "@/components/StepOne";
 import StepTwo from "@/components/StepTwo";
@@ -94,6 +95,7 @@ const Index = () => {
     try {
       console.log("Genererar schema med röda dagar:", holidays);
       console.log("Använder exakt", vacationDays, "semesterdagar");
+      console.log("Vald stil:", selectedMode);
       
       const optimizedScheduleData = optimizeVacation(year, vacationDays, holidays, selectedMode);
       
@@ -101,6 +103,11 @@ const Index = () => {
       
       setOptimizedSchedule(optimizedScheduleData);
       setCurrentStep(4);
+      
+      toast({
+        title: "Ditt schema är klart!",
+        description: `Din optimala ledighetsplan baserad på ${vacationDays} semesterdagar är nu klar.`,
+      });
     } catch (error) {
       toast({
         title: "Fel vid generering av schema",

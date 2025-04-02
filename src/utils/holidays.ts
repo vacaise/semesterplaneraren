@@ -1,8 +1,74 @@
 
-import { addDays } from 'date-fns';
+/**
+ * Get Swedish holidays for a specific year
+ */
+export const getHolidays = (year: number): Date[] => {
+  const holidays: Date[] = [];
 
-// Calculate Easter Sunday based on Butcher's algorithm
-export const calculateEaster = (year: number): Date => {
+  // Nyårsdagen - New Year's Day (January 1)
+  holidays.push(new Date(year, 0, 1));
+
+  // Get Easter Sunday (which we need to calculate many other holidays)
+  const easter = getEasterSunday(year);
+  
+  // Trettondagen - Epiphany (January 6)
+  holidays.push(new Date(year, 0, 6));
+
+  // Långfredagen - Good Friday (Easter - 2 days)
+  const goodFriday = new Date(easter);
+  goodFriday.setDate(easter.getDate() - 2);
+  holidays.push(goodFriday);
+
+  // Påskdagen - Easter Sunday
+  holidays.push(new Date(easter));
+
+  // Annandag påsk - Easter Monday (Easter + 1 day)
+  const easterMonday = new Date(easter);
+  easterMonday.setDate(easter.getDate() + 1);
+  holidays.push(easterMonday);
+
+  // Första maj - May Day (May 1)
+  holidays.push(new Date(year, 4, 1));
+
+  // Kristi Himmelsfärdsdag - Ascension Day (Easter + 39 days, always a Thursday)
+  const ascensionDay = new Date(easter);
+  ascensionDay.setDate(easter.getDate() + 39);
+  holidays.push(ascensionDay);
+
+  // Pingstdagen - Whit Sunday (Easter + 49 days)
+  const whitSunday = new Date(easter);
+  whitSunday.setDate(easter.getDate() + 49);
+  holidays.push(whitSunday);
+
+  // Annandag pingst - removed as public holiday from 2005
+
+  // Sveriges nationaldag - Sweden's National Day (June 6)
+  // (This became a public holiday in 2005)
+  holidays.push(new Date(year, 5, 6));
+
+  // Midsommardagen - Midsummer's Day (Saturday between June 20-26)
+  const midsummerDay = getMidsummerDay(year);
+  holidays.push(midsummerDay);
+
+  // Alla helgons dag - All Saints' Day (Saturday between October 31 and November 6)
+  const allSaintsDay = getAllSaintsDay(year);
+  holidays.push(allSaintsDay);
+
+  // Juldagen - Christmas Day (December 25)
+  holidays.push(new Date(year, 11, 25));
+
+  // Annandag jul - Boxing Day (December 26)
+  holidays.push(new Date(year, 11, 26));
+
+  // Return sorted holidays
+  return holidays.sort((a, b) => a.getTime() - b.getTime());
+};
+
+/**
+ * Calculate Easter Sunday for a given year
+ * Using the Butcher's algorithm
+ */
+const getEasterSunday = (year: number): Date => {
   const a = year % 19;
   const b = Math.floor(year / 100);
   const c = year % 100;
@@ -15,69 +81,40 @@ export const calculateEaster = (year: number): Date => {
   const k = c % 4;
   const l = (32 + 2 * e + 2 * i - h - k) % 7;
   const m = Math.floor((a + 11 * h + 22 * l) / 451);
-  const month = Math.floor((h + l - 7 * m + 114) / 31) - 1; // 0-indexed month
+  const month = Math.floor((h + l - 7 * m + 114) / 31) - 1;
   const day = ((h + l - 7 * m + 114) % 31) + 1;
   
   return new Date(year, month, day);
 };
 
-// Get all Swedish holidays for a given year
-export const getSwedishHolidays = (year: number): Date[] => {
-  const holidays: Date[] = [];
+/**
+ * Get Midsummer's Day for a given year
+ * Midsummer's Day is the Saturday that falls between June 20-26
+ */
+const getMidsummerDay = (year: number): Date => {
+  // Start with June 20
+  const date = new Date(year, 5, 20);
   
-  // Fixed holidays
-  holidays.push(new Date(year, 0, 1));  // Nyårsdagen
-  holidays.push(new Date(year, 0, 6));  // Trettondedag jul
-  holidays.push(new Date(year, 4, 1));  // Första maj
-  holidays.push(new Date(year, 5, 6));  // Sveriges nationaldag
-  holidays.push(new Date(year, 11, 24)); // Julafton
-  holidays.push(new Date(year, 11, 25)); // Juldagen
-  holidays.push(new Date(year, 11, 26)); // Annandag jul
-  holidays.push(new Date(year, 11, 31)); // Nyårsafton
-  
-  // Movable holidays based on Easter
-  const easter = calculateEaster(year);
-  
-  // Långfredagen (Good Friday) - 2 days before Easter
-  holidays.push(addDays(easter, -2));
-  
-  // Påskdagen (Easter Sunday)
-  holidays.push(easter);
-  
-  // Annandag påsk (Easter Monday)
-  holidays.push(addDays(easter, 1));
-  
-  // Kristi himmelsfärdsdag (Ascension Day) - 39 days after Easter
-  holidays.push(addDays(easter, 39));
-  
-  // Pingstdagen (Pentecost) - 49 days after Easter
-  holidays.push(addDays(easter, 49));
-  
-  // Midsommardagen (Saturday between June 20-26)
-  const midsummerDay = new Date(year, 5, 20);
-  const dayOfWeek = midsummerDay.getDay();
-  const daysToAdd = (dayOfWeek === 6) ? 0 : ((6 - dayOfWeek + 7) % 7);
-  holidays.push(addDays(midsummerDay, daysToAdd));
-  
-  // Midsommarafton (Friday before Midsummer)
-  holidays.push(addDays(midsummerDay, daysToAdd - 1));
-  
-  // Alla helgons dag (All Saints' Day) - First Saturday in November
-  const allSaintsDay = new Date(year, 10, 1);
-  const allSaintsDayOfWeek = allSaintsDay.getDay();
-  const allSaintsDaysToAdd = (allSaintsDayOfWeek === 6) ? 0 : ((6 - allSaintsDayOfWeek + 7) % 7);
-  holidays.push(addDays(allSaintsDay, allSaintsDaysToAdd));
-  
-  // Filter out past dates if we're in the current year
-  const currentYear = new Date().getFullYear();
-  const today = new Date();
-  
-  if (year === currentYear) {
-    return holidays.filter(date => date >= today);
+  // Find the next Saturday (day 6)
+  while (date.getDay() !== 6) {
+    date.setDate(date.getDate() + 1);
   }
   
-  return holidays;
+  return date;
 };
 
-// Create an alias for getSwedishHolidays to match the reference in Index.tsx
-export const getHolidays = getSwedishHolidays;
+/**
+ * Get All Saints' Day for a given year
+ * All Saints' Day is the Saturday that falls between October 31 and November 6
+ */
+const getAllSaintsDay = (year: number): Date => {
+  // Start with October 31
+  const date = new Date(year, 9, 31);
+  
+  // Find the next Saturday (day 6)
+  while (date.getDay() !== 6) {
+    date.setDate(date.getDate() + 1);
+  }
+  
+  return date;
+};
