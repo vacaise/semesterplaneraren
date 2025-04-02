@@ -1,8 +1,8 @@
 
-import { parse, format, isPast, isAfter } from "date-fns";
+import { addDays } from 'date-fns';
 
-// Funktion för att beräkna påskdagen baserat på år
-const calculateEaster = (year: number): Date => {
+// Calculate Easter Sunday based on Butcher's algorithm
+export const calculateEaster = (year: number): Date => {
   const a = year % 19;
   const b = Math.floor(year / 100);
   const c = year % 100;
@@ -15,75 +15,66 @@ const calculateEaster = (year: number): Date => {
   const k = c % 4;
   const l = (32 + 2 * e + 2 * i - h - k) % 7;
   const m = Math.floor((a + 11 * h + 22 * l) / 451);
-  const month = Math.floor((h + l - 7 * m + 114) / 31);
+  const month = Math.floor((h + l - 7 * m + 114) / 31) - 1; // 0-indexed month
   const day = ((h + l - 7 * m + 114) % 31) + 1;
-  return new Date(year, month - 1, day);
+  
+  return new Date(year, month, day);
 };
 
-export const getHolidays = (year: number): Date[] => {
-  // Fasta helgdagar
-  const fixedHolidays = [
-    { month: 0, day: 1, name: "Nyårsdagen" },
-    { month: 0, day: 6, name: "Trettondedag jul" },
-    { month: 4, day: 1, name: "Första maj" },
-    { month: 5, day: 6, name: "Sveriges nationaldag" },
-    { month: 11, day: 24, name: "Julafton" },
-    { month: 11, day: 25, name: "Juldagen" },
-    { month: 11, day: 26, name: "Annandag jul" },
-    { month: 11, day: 31, name: "Nyårsafton" },
-  ];
-
-  // Rörliga helgdagar baserade på påsk
-  const easterSunday = calculateEaster(year);
-  const easterFriday = new Date(easterSunday);
-  easterFriday.setDate(easterSunday.getDate() - 2);
+// Get all Swedish holidays for a given year
+export const getSwedishHolidays = (year: number): Date[] => {
+  const holidays: Date[] = [];
   
-  const easterMonday = new Date(easterSunday);
-  easterMonday.setDate(easterSunday.getDate() + 1);
+  // Fixed holidays
+  holidays.push(new Date(year, 0, 1));  // Nyårsdagen
+  holidays.push(new Date(year, 0, 6));  // Trettondedag jul
+  holidays.push(new Date(year, 4, 1));  // Första maj
+  holidays.push(new Date(year, 5, 6));  // Sveriges nationaldag
+  holidays.push(new Date(year, 11, 24)); // Julafton
+  holidays.push(new Date(year, 11, 25)); // Juldagen
+  holidays.push(new Date(year, 11, 26)); // Annandag jul
+  holidays.push(new Date(year, 11, 31)); // Nyårsafton
   
-  const ascensionDay = new Date(easterSunday);
-  ascensionDay.setDate(easterSunday.getDate() + 39);
+  // Movable holidays based on Easter
+  const easter = calculateEaster(year);
   
-  const pentecostSunday = new Date(easterSunday);
-  pentecostSunday.setDate(easterSunday.getDate() + 49);
+  // Långfredagen (Good Friday) - 2 days before Easter
+  holidays.push(addDays(easter, -2));
   
-  // Midsommardagen (lördag efter 20 juni)
+  // Påskdagen (Easter Sunday)
+  holidays.push(easter);
+  
+  // Annandag påsk (Easter Monday)
+  holidays.push(addDays(easter, 1));
+  
+  // Kristi himmelsfärdsdag (Ascension Day) - 39 days after Easter
+  holidays.push(addDays(easter, 39));
+  
+  // Pingstdagen (Pentecost) - 49 days after Easter
+  holidays.push(addDays(easter, 49));
+  
+  // Midsommardagen (Saturday between June 20-26)
   const midsummerDay = new Date(year, 5, 20);
-  // Justera till nästa lördag
   const dayOfWeek = midsummerDay.getDay();
-  const daysToAdd = dayOfWeek === 6 ? 7 : 6 - dayOfWeek;
-  midsummerDay.setDate(midsummerDay.getDate() + daysToAdd);
+  const daysToAdd = (dayOfWeek === 6) ? 0 : ((6 - dayOfWeek + 7) % 7);
+  holidays.push(addDays(midsummerDay, daysToAdd));
   
-  // Midsommarafton (fredag före midsommardagen)
-  const midsummerEve = new Date(midsummerDay);
-  midsummerEve.setDate(midsummerDay.getDate() - 1);
+  // Midsommarafton (Friday before Midsummer)
+  holidays.push(addDays(midsummerDay, daysToAdd - 1));
   
-  // Alla helgons dag (lördag mellan 31 oktober och 6 november)
-  const allSaintsDay = new Date(year, 9, 31);
-  // Justera till nästa lördag
+  // Alla helgons dag (All Saints' Day) - First Saturday in November
+  const allSaintsDay = new Date(year, 10, 1);
   const allSaintsDayOfWeek = allSaintsDay.getDay();
-  const allSaintsDaysToAdd = allSaintsDayOfWeek === 6 ? 7 : 6 - allSaintsDayOfWeek;
-  allSaintsDay.setDate(allSaintsDay.getDate() + allSaintsDaysToAdd);
-
-  // Skapa en lista med alla helgdagar
-  const holidays = [
-    ...fixedHolidays.map(holiday => new Date(year, holiday.month, holiday.day)),
-    easterFriday,
-    easterSunday,
-    easterMonday,
-    ascensionDay,
-    pentecostSunday,
-    midsummerEve,
-    midsummerDay,
-    allSaintsDay
-  ];
-
-  // Filter out holidays that have already passed
+  const allSaintsDaysToAdd = (allSaintsDayOfWeek === 6) ? 0 : ((6 - allSaintsDayOfWeek + 7) % 7);
+  holidays.push(addDays(allSaintsDay, allSaintsDaysToAdd));
+  
+  // Filter out past dates if we're in the current year
+  const currentYear = new Date().getFullYear();
   const today = new Date();
-  return holidays.filter(holiday => {
-    // Set time to 00:00:00 for comparison
-    const holidayDate = new Date(holiday.getFullYear(), holiday.getMonth(), holiday.getDate());
-    const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    return !isPast(holidayDate) || holidayDate.getTime() === todayDate.getTime();
-  });
+  
+  if (year === currentYear) {
+    return holidays.filter(date => date >= today);
+  }
+  
+  return holidays;
 };
