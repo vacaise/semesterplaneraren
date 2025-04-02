@@ -12,6 +12,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { DatePickerCalendar } from "@/components/holidays/DatePickerCalendar";
 import { HolidaySelector } from "@/components/holidays/HolidaySelector";
 import { CompanyDaysSelector } from "@/components/holidays/CompanyDaysSelector";
+import { Button } from "@/components/ui/button";
+import { MapPin } from "lucide-react";
 
 interface StepThreeProps {
   holidays: Date[];
@@ -38,7 +40,6 @@ const StepThree = ({
 
   const handleAddHoliday = () => {
     if (selectedDate) {
-      // Delegate to the HolidaySelector component
       const exists = holidays.some(
         date => format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
       );
@@ -54,7 +55,6 @@ const StepThree = ({
 
   const handleAddCompanyDay = () => {
     if (selectedDate) {
-      // Delegate to the CompanyDaysSelector component
       const exists = companyDays.some(
         date => format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
       );
@@ -70,6 +70,18 @@ const StepThree = ({
         setSelectedDate(undefined);
       }
     }
+  };
+
+  const handleFetchHolidays = () => {
+    fetchHolidays();
+    
+    // Scroll to navigation buttons after a short delay to allow for holidays to be fetched
+    setTimeout(() => {
+      const navButtons = document.querySelector("#main-container + div");
+      if (navButtons) {
+        navButtons.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 500);
   };
 
   return (
@@ -91,18 +103,20 @@ const StepThree = ({
         </TooltipProvider>
       </div>
 
-      {/* Röda dagar först */}
-      <HolidaySelector
-        holidays={holidays}
-        setHolidays={setHolidays}
-        fetchHolidays={fetchHolidays}
-        year={year}
-        isLoading={isLoading}
-        selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
-      />
+      {/* Knapp för att identifiera röda dagar automatiskt */}
+      <Button
+        onClick={handleFetchHolidays}
+        disabled={isLoading}
+        variant="outline"
+        className="w-full py-6 border-red-200 bg-red-50/50 hover:bg-red-50 text-red-800"
+      >
+        <MapPin className="h-5 w-5 mr-2" />
+        {isLoading ? "Hämtar..." : "Identifiera röda dagar automatiskt"}
+      </Button>
 
+      {/* Datumväljare och röda dagar sida vid sida */}
       <div className={`grid grid-cols-1 ${isMobile ? 'gap-4' : 'md:grid-cols-2 gap-6'}`}>
+        {/* Datumväljare till vänster */}
         <DatePickerCalendar
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
@@ -112,15 +126,30 @@ const StepThree = ({
           addingCompanyDay={addingCompanyDay}
         />
 
-        {/* Klämdagar som ett collapsible element */}
-        <CompanyDaysSelector
-          companyDays={companyDays}
-          setCompanyDays={setCompanyDays}
-          holidays={holidays}
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-        />
+        {/* Röda dagar till höger */}
+        <div className="border rounded-lg overflow-hidden bg-white p-4">
+          <h4 className="font-medium text-gray-800 mb-4">Röda dagar ({holidays.length})</h4>
+          <HolidaySelector
+            holidays={holidays}
+            setHolidays={setHolidays}
+            fetchHolidays={fetchHolidays}
+            year={year}
+            isLoading={isLoading}
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            hideAutoButton={true} // Hide the auto button since we've moved it to the top
+          />
+        </div>
       </div>
+
+      {/* Klämdagar som ett collapsible element */}
+      <CompanyDaysSelector
+        companyDays={companyDays}
+        setCompanyDays={setCompanyDays}
+        holidays={holidays}
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+      />
 
       <div className="bg-red-50 p-4 rounded-md border border-red-100">
         <h3 className="font-medium text-red-800 mb-2">Observera</h3>

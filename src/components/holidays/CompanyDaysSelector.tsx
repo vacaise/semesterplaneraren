@@ -19,6 +19,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger
 } from "@/components/ui/collapsible";
+import { DatePickerCalendar } from "./DatePickerCalendar";
 
 interface CompanyDaysSelectorProps {
   companyDays: Date[];
@@ -36,7 +37,6 @@ export const CompanyDaysSelector = ({
   setSelectedDate
 }: CompanyDaysSelectorProps) => {
   const [isCompanyDaysOpen, setIsCompanyDaysOpen] = useState(false);
-  const [addingCompanyDay, setAddingCompanyDay] = useState(false);
   const isMobile = useIsMobile();
 
   const addCompanyDay = () => {
@@ -92,57 +92,61 @@ export const CompanyDaysSelector = ({
           Dessa dagar kommer behandlas som helgdagar när semesterperioder beräknas.
         </p>
         
-        <div className="flex mb-4">
-          <Button
-            variant="outline"
-            onClick={() => setAddingCompanyDay(!addingCompanyDay)}
-            className={`w-full py-2 border-purple-200 ${addingCompanyDay ? 'bg-purple-100' : 'bg-purple-50/50'} hover:bg-purple-50 text-purple-800`}
-          >
-            {addingCompanyDay ? "Stäng datumväljare" : "Lägg till klämdag"}
-          </Button>
-        </div>
+        {/* Datumväljare och klämdagar sida vid sida */}
+        <div className={`grid grid-cols-1 ${isMobile ? 'gap-4' : 'md:grid-cols-2 gap-6'}`}>
+          {/* Datumväljare till vänster */}
+          <DatePickerCalendar
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            year={new Date().getFullYear()}
+            onAddHoliday={() => {}}
+            onAddCompanyDay={addCompanyDay}
+            addingCompanyDay={true}
+          />
 
-        <div className="bg-white">
-          <h4 className="font-medium text-gray-800 mb-4">Klämdagar ({companyDays.length})</h4>
-          {companyDays.length > 0 ? (
-            <ScrollArea className="h-[200px]">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Datum</TableHead>
-                    <TableHead>Dag</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {[...companyDays].sort((a, b) => a.getTime() - b.getTime()).map((date, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">
-                        {isMobile 
-                          ? format(date, "d MMM yyyy", { locale: sv }) 
-                          : format(date, "d MMMM yyyy", { locale: sv })}
-                      </TableCell>
-                      <TableCell>{format(date, "EEEE", { locale: sv })}</TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeCompanyDay(date)}
-                          className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
-                        >
-                          &times;
-                        </Button>
-                      </TableCell>
+          {/* Klämdagar till höger */}
+          <div className="border rounded-lg overflow-hidden bg-white p-4">
+            <h4 className="font-medium text-gray-800 mb-4">Klämdagar ({companyDays.length})</h4>
+            {companyDays.length > 0 ? (
+              <ScrollArea className="h-[200px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Datum</TableHead>
+                      <TableHead>Dag</TableHead>
+                      <TableHead></TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </ScrollArea>
-          ) : (
-            <div className={`flex items-center justify-center h-[200px] bg-gray-50 rounded-md`}>
-              <p className="text-gray-500">Inga klämdagar tillagda än</p>
-            </div>
-          )}
+                  </TableHeader>
+                  <TableBody>
+                    {[...companyDays].sort((a, b) => a.getTime() - b.getTime()).map((date, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-medium">
+                          {isMobile 
+                            ? format(date, "d MMM yyyy", { locale: sv }) 
+                            : format(date, "d MMMM yyyy", { locale: sv })}
+                        </TableCell>
+                        <TableCell>{format(date, "EEEE", { locale: sv })}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeCompanyDay(date)}
+                            className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
+                          >
+                            &times;
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+            ) : (
+              <div className={`flex items-center justify-center h-[200px] bg-gray-50 rounded-md`}>
+                <p className="text-gray-500">Inga klämdagar tillagda än</p>
+              </div>
+            )}
+          </div>
         </div>
       </CollapsibleContent>
     </Collapsible>
