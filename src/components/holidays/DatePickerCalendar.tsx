@@ -73,7 +73,8 @@ export const DatePickerCalendar = ({
         selected={selectedDate}
         onSelect={handleDayClick}
         year={year}
-        month={new Date(year, 0).getMonth()}
+        // Fix: Use a proper Date object for the month instead of a number
+        month={new Date(year, 0)}
         showOutsideDays={false}
         className="rounded-md"
         classNames={{
