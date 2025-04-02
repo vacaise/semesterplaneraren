@@ -1,58 +1,55 @@
-import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-import { PossibleColors } from '@/types';
 
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
+ 
+/**
+ * Combines multiple class names using clsx and tailwind-merge
+ */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export const isProd = () => process.env.NODE_ENV === 'production';
+/**
+ * Common container styles for page content
+ */
+export const containerStyles = "max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-8 xl:px-12"
 
-// Utility function to get day type colors
-export type DayType = 'pto' | 'publicHoliday' | 'companyDayOff' | 'weekend' | 'extendedWeekend' | 'default';
-
-// Mapping from day types to color schemes
-export const dayTypeToColorScheme: Record<DayType, PossibleColors> = {
-  pto: 'fuchsia',
-  publicHoliday: 'amber',
-  companyDayOff: 'violet',
-  weekend: 'orange',
-  extendedWeekend: 'red',
-  default: 'transparent'
-};
-
-// Custom utility functions for common Tailwind patterns
-export const linkStyles = (variant: 'primary' | 'secondary' | 'ghost') => {
-  const baseStyles = "inline-flex items-center transition-colors"
-  
-  const variantStyles = {
-    primary: "text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300",
-    secondary: "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200",
-    ghost: "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+/**
+ * Format a date to a localized string format
+ */
+export function formatDate(date: Date | string): string {
+  if (typeof date === 'string') {
+    date = new Date(date)
   }
-  
-  return cn(baseStyles, variantStyles[variant])
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
 }
 
-export const containerStyles = "mx-auto max-w-7xl px-3 sm:px-4 lg:px-6"
-
-// Text size utilities with responsive variants
-export const textSize = (variant: 'heading' | 'subheading' | 'body' | 'small' | 'tiny') => {
-  const variants = {
-    heading: "text-xl sm:text-2xl md:text-3xl font-bold",
-    subheading: "text-lg sm:text-xl font-semibold",
-    body: "text-sm sm:text-base",
-    small: "text-xs sm:text-sm",
-    tiny: "text-xs"
+/**
+ * Format a date range as a string (e.g., "Jan 1 - Jan 7, 2023")
+ */
+export function formatDateRange(startDate: Date | string, endDate: Date | string): string {
+  if (typeof startDate === 'string') {
+    startDate = new Date(startDate)
+  }
+  if (typeof endDate === 'string') {
+    endDate = new Date(endDate)
   }
   
-  return variants[variant]
+  // If same year, only show year once
+  if (startDate.getFullYear() === endDate.getFullYear()) {
+    return `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+  }
+  
+  return `${formatDate(startDate)} - ${formatDate(endDate)}`
 }
 
-// Spacing utilities
-export const spacing = {
-  section: "py-6 sm:py-8 md:py-12",
-  container: "px-3 sm:px-4 lg:px-6",
-  stack: "space-y-4 sm:space-y-6",
-  inline: "space-x-2 sm:space-x-4"
+/**
+ * Format a number of days in a readable format (e.g., "5 days" or "1 day")
+ */
+export function formatDaysCount(count: number): string {
+  return count === 1 ? `${count} day` : `${count} days`
 }

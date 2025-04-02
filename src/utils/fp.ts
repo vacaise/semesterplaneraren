@@ -1,3 +1,4 @@
+
 /**
  * Functional programming utility to compose functions from left to right.
  * Each function takes the output of the previous function as its input.
@@ -38,4 +39,22 @@ export const some = <T>(predicate: (value: T) => boolean) =>
  * This is a curried version of Array.prototype.every.
  */
 export const every = <T>(predicate: (value: T) => boolean) =>
-  (array: T[]): boolean => array.every(predicate) 
+  (array: T[]): boolean => array.every(predicate)
+
+/**
+ * Composes functions from right to left.
+ */
+export const compose = <T>(...fns: Array<(arg: T) => T>) =>
+  (value: T): T => fns.reduceRight((acc, fn) => fn(acc), value)
+
+/**
+ * Creates a function that returns the result of invoking the provided functions,
+ * where each successive invocation is supplied the return value of the previous.
+ */
+export const flow = pipe
+
+/**
+ * Creates a function that returns the negation of the predicate function.
+ */
+export const negate = <T>(predicate: (value: T) => boolean) =>
+  (value: T): boolean => !predicate(value)
