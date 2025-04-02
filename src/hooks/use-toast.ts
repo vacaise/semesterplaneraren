@@ -2,6 +2,7 @@
 import * as React from "react"
 
 import type {
+  ToastActionElement,
   ToasterToast
 } from "@/components/ui/toast"
 
@@ -51,7 +52,7 @@ export interface Toast {
   id?: string
   title?: React.ReactNode
   description?: React.ReactNode
-  action?: React.ReactNode
+  action?: ToastActionElement
   variant?: "default" | "destructive"
   className?: string
 }
@@ -89,7 +90,7 @@ export function useToast(opts: UseToastOptions = {}) {
           onOpenChange: (open: boolean) => {
             if (!open) dismiss()
           },
-        }
+        } as ToasterToast
 
         dispatchToasts("add", t)
 
@@ -100,7 +101,7 @@ export function useToast(opts: UseToastOptions = {}) {
         }
       },
       dismiss: (toastId: string) => {
-        dispatchToasts("dismiss", { id: toastId })
+        dispatchToasts("dismiss", { id: toastId } as ToasterToast)
       },
       update: (props: ToasterToast) => {
         dispatchToasts("update", props)
