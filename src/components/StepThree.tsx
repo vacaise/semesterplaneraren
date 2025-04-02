@@ -19,7 +19,9 @@ import {
   ChevronLeft, 
   ChevronRight,
   Info,
-  Building2
+  Building2,
+  ChevronUp,
+  ChevronDown
 } from "lucide-react";
 import { 
   Tooltip,

@@ -20,6 +20,10 @@ export const CalendarLegend = () => {
         <span className="text-xs sm:text-sm text-gray-600">Semesterdag</span>
       </div>
       <div className="flex items-center">
+        <div className="h-3 w-3 sm:h-4 sm:w-4 rounded bg-purple-200 mr-1 sm:mr-2"></div>
+        <span className="text-xs sm:text-sm text-gray-600">Företagsdag</span>
+      </div>
+      <div className="flex items-center">
         <div className="h-3 w-3 sm:h-4 sm:w-4 rounded bg-white border border-gray-200 mr-1 sm:mr-2"></div>
         <span className="text-xs sm:text-sm text-gray-600">Vardag</span>
       </div>
