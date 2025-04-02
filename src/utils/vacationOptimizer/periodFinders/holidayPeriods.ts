@@ -3,7 +3,7 @@ import { addDays, differenceInDays } from 'date-fns';
 import { calculateEaster, calculateMidsummer } from '../dateCalculators';
 
 // Find important holiday periods
-export const findKeyPeriods = (year: number, holidays: Date[]) => {
+export const findKeyPeriods = (year: number, holidays: Date[], companyDays: Date[] = []) => {
   const periods = [];
   
   // Calculate important dates for the specific year

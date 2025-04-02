@@ -2,7 +2,7 @@
 import { addDays, differenceInDays } from 'date-fns';
 
 // Find summer vacation periods
-export const findSummerPeriods = (year: number) => {
+export const findSummerPeriods = (year: number, holidays: Date[] = [], companyDays: Date[] = []) => {
   const periods = [];
   
   // July vacation (3 weeks)
