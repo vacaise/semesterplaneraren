@@ -11,47 +11,56 @@ export const findOptimalSchedule = (
   year: number,
   vacationDays: number,
   holidays: Date[],
-  mode: string
+  mode: string,
+  companyDays: Date[] = []
 ): VacationPeriod[] => {
   // Generate all possible periods by scanning the year
-  const allPossiblePeriods = generatePossiblePeriods(year, holidays);
+  const allPossiblePeriods = generatePossiblePeriods(year, holidays, companyDays);
   
   // Score and prioritize periods based on the selected mode
   const scoredPeriods = scorePeriods(allPossiblePeriods, mode);
   
   // Generate additional periods to fill in gaps and maximize total time off
-  const extraPeriods = createExtraPeriods(year, holidays);
+  const extraPeriods = createExtraPeriods(year, holidays, companyDays);
   const allPeriods = [...scoredPeriods, ...extraPeriods];
   
   // Select the optimal combination of periods
-  return selectOptimalPeriods(allPeriods, vacationDays, year, holidays, mode);
+  return selectOptimalPeriods(allPeriods, vacationDays, year, holidays, mode, companyDays);
 };
 
 // Generate all possible vacation periods around holidays and weekends
-const generatePossiblePeriods = (year: number, holidays: Date[]): VacationPeriod[] => {
+const generatePossiblePeriods = (
+  year: number, 
+  holidays: Date[], 
+  companyDays: Date[] = []
+): VacationPeriod[] => {
   const periods: VacationPeriod[] = [];
   
   // 1. Find periods around major holidays (Easter, Christmas, Midsummer, etc.)
-  periods.push(...findKeyPeriods(year, holidays));
+  periods.push(...findKeyPeriods(year, holidays, companyDays));
   
   // 2. Find bridge days between holidays and weekends
-  periods.push(...findBridgeDays(year));
+  periods.push(...findBridgeDays(year, holidays, companyDays));
   
   // 3. Find extended weekends (Thursday-Sunday or Friday-Monday)
-  periods.push(...findExtendedWeekends(year));
+  periods.push(...findExtendedWeekends(year, holidays, companyDays));
   
   // 4. Find summer vacation options
-  periods.push(...findSummerPeriods(year));
+  periods.push(...findSummerPeriods(year, holidays, companyDays));
   
   // 5. Generate more possible combinations to increase efficiency
-  const additionalPeriods = generateAdditionalPeriods(year, holidays);
+  const additionalPeriods = generateAdditionalPeriods(year, holidays, companyDays);
   periods.push(...additionalPeriods);
   
   return periods;
 };
 
 // Generate additional vacation period options to maximize efficiency
-const generateAdditionalPeriods = (year: number, holidays: Date[]): VacationPeriod[] => {
+const generateAdditionalPeriods = (
+  year: number, 
+  holidays: Date[], 
+  companyDays: Date[] = []
+): VacationPeriod[] => {
   const additionalPeriods: VacationPeriod[] = [];
   
   // Add week-long options focusing on months with higher holiday density
@@ -69,12 +78,12 @@ const generateAdditionalPeriods = (year: number, holidays: Date[]): VacationPeri
     const endDay = new Date(startDay);
     endDay.setDate(startDay.getDate() + 6); // Sunday
     
-    // Calculate vacation days needed (excluding weekends and holidays)
+    // Calculate vacation days needed (excluding weekends, holidays, and company days)
     let vacationDaysNeeded = 0;
     const currentDay = new Date(startDay);
     
     while (currentDay <= endDay) {
-      if (!isDayOff(currentDay, holidays)) {
+      if (!isDayOff(currentDay, holidays, companyDays)) {
         vacationDaysNeeded++;
       }
       currentDay.setDate(currentDay.getDate() + 1);
@@ -109,12 +118,12 @@ const generateAdditionalPeriods = (year: number, holidays: Date[]): VacationPeri
       const today = new Date();
       if (thurEnd < today) continue;
       
-      // Calculate vacation days needed
+      // Calculate vacation days needed (excluding company days)
       let miniBreakDaysNeeded = 0;
       const currentMiniDay = new Date(thurStart);
       
       while (currentMiniDay <= thurEnd) {
-        if (!isDayOff(currentMiniDay, holidays)) {
+        if (!isDayOff(currentMiniDay, holidays, companyDays)) {
           miniBreakDaysNeeded++;
         }
         currentMiniDay.setDate(currentMiniDay.getDate() + 1);

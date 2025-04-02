@@ -102,9 +102,9 @@ const Index = () => {
     try {
       console.log("Generating schedule with holidays:", holidays);
       console.log("Company days:", companyDays);
-      // Combine holidays and company days for optimization
-      const allDaysOff = [...holidays, ...companyDays];
-      const optimizedScheduleData = optimizeVacation(year, vacationDays, allDaysOff, selectedMode);
+      
+      // Now we pass company days separately to the optimizer
+      const optimizedScheduleData = optimizeVacation(year, vacationDays, holidays, selectedMode, companyDays);
       console.log("Generated schedule:", optimizedScheduleData);
       setOptimizedSchedule(optimizedScheduleData);
       setCurrentStep(4);
