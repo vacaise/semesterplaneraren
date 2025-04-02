@@ -28,9 +28,11 @@ const StepOne = ({
   }, (_, i) => currentYear + i);
   const isMobile = useIsMobile();
   
-  // Ensure vacationDays is never less than 1
+  // Ensure vacationDays is never less than 1 or more than 50
   const handleVacationDaysChange = (value: number) => {
-    setVacationDays(Math.max(1, value));
+    // Enforce minimum 1 and maximum 50 days
+    const validatedValue = Math.min(50, Math.max(1, value));
+    setVacationDays(validatedValue);
   };
   
   return <div className="space-y-6">
