@@ -39,10 +39,11 @@ const Index = () => {
   const resetToStart = () => {
     setCurrentStep(1);
     setOptimizedSchedule(null);
-    // Optionally reset other values to defaults
-    // setVacationDays(25);
-    // setSelectedMode("balanced");
-    // setHolidays([]);
+    setVacationDays(25);
+    setSelectedMode("balanced");
+    setHolidays([]);
+    setCompanyDays([]);
+    setYear(new Date().getFullYear());
     window.scrollTo(0, 0);
   };
 

@@ -41,7 +41,7 @@ export const getDayType = (
     return { className: "bg-orange-100 text-orange-800", type: "Helg" };
   }
   
-  // Semesterdag (om inom en period och varken röd dag eller helg)
+  // Semesterdag (om inom en period och varken röd dag, företagsdag eller helg)
   if (isInPeriod(date, periods)) {
     return { className: "bg-green-200 text-green-800 border-2 border-green-300", type: "Semesterdag" };
   }
