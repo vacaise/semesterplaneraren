@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Coffee, Palmtree, Shuffle, Star, Sunrise } from 'lucide-react';
@@ -8,6 +9,7 @@ import { StepHeader } from './components/StepHeader';
 import { FormSection } from './components/FormSection';
 import { useStrategySelection } from '@/hooks/useOptimizer';
 import { StepTitleWithInfo } from './components/StepTitleWithInfo';
+import { StrategyOption } from '@/lib/utils';
 
 // Map strategy IDs to their respective icons
 const STRATEGY_ICONS = {
@@ -49,7 +51,7 @@ export function StrategySelectionStep() {
         role="radiogroup"
       >
         <legend className="sr-only">Select optimization strategy</legend>
-        {OPTIMIZATION_STRATEGIES.map((strategyOption) => {
+        {OPTIMIZATION_STRATEGIES.map((strategyOption: StrategyOption) => {
           const Icon = STRATEGY_ICONS[strategyOption.id as OptimizationStrategy];
           const isSelected = strategy === strategyOption.id;
 
@@ -115,4 +117,4 @@ export function StrategySelectionStep() {
       </fieldset>
     </FormSection>
   );
-} 
+}

@@ -1,3 +1,4 @@
+
 import { OptimizationStats, OptimizedDay } from '@/types';
 import { CalendarLegend } from '@/components/features/components/CalendarLegend';
 import { MONTHS } from '@/constants';
@@ -62,7 +63,7 @@ export const CalendarView = ({ stats, optimizedDays, selectedYear }: CalendarVie
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
-        {MONTHS.map((_, index) => (
+        {MONTHS.map((_: string, index: number) => (
           <MonthCalendar
             key={index}
             month={index}

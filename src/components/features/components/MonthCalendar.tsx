@@ -1,3 +1,4 @@
+
 import {
   eachDayOfInterval,
   endOfMonth,
@@ -262,14 +263,14 @@ export function MonthCalendar({ month, year, days }: MonthCalendarProps) {
       <div className="p-2">
         <div className="grid grid-cols-7 gap-0.5">
           {/* Weekday Headers */}
-          {WEEKDAYS.map(day => (
+          {WEEKDAYS.map((day: string) => (
             <div key={day} className="text-center text-xs font-medium text-gray-600 dark:text-gray-400 py-1">
               {day}
             </div>
           ))}
 
           {/* Calendar Days */}
-          {calendarDays.map((day, index) => (
+          {calendarDays.map((day: OptimizedDay | null, index: number) => (
             <div
               key={index}
               className={cn(
