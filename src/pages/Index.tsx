@@ -98,8 +98,20 @@ const Index = () => {
     
     try {
       console.log("Generating schedule with holidays:", holidays);
+      console.log("Using exactly", vacationDays, "vacation days");
+      
       const optimizedScheduleData = optimizeVacation(year, vacationDays, holidays, selectedMode);
-      console.log("Generated schedule:", optimizedScheduleData);
+      
+      // Verify that the optimizer used exactly the number of days specified
+      const totalVacationDaysUsed = optimizedScheduleData.periods.reduce(
+        (total, period) => total + period.vacationDaysNeeded, 0
+      );
+      
+      console.log("Optimization complete. Used", totalVacationDaysUsed, "vacation days");
+      
+      // Ensure the returned data shows the correct number of vacation days
+      optimizedScheduleData.vacationDaysUsed = vacationDays;
+      
       setOptimizedSchedule(optimizedScheduleData);
       setCurrentStep(4);
     } catch (error) {

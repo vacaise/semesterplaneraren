@@ -46,6 +46,12 @@ const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
   // Calculate efficiency
   const efficiency = calculateEfficiency(schedule.totalDaysOff, schedule.vacationDaysUsed);
   
+  // Calculate total vacation days used from periods to double-check
+  const actualVacationDaysUsed = schedule.periods.reduce(
+    (total, period) => total + period.vacationDaysNeeded, 
+    0
+  );
+  
   // Get mode display text
   const getModeDisplayText = (mode: string): string => {
     switch (mode) {

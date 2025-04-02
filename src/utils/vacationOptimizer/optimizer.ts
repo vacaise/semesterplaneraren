@@ -11,7 +11,8 @@ export const findOptimalSchedule = (
   year: number,
   vacationDays: number,
   holidays: Date[],
-  mode: string
+  mode: string,
+  useExactDays = false
 ): VacationPeriod[] => {
   // Generate all possible periods by scanning the year
   const allPossiblePeriods = generatePossiblePeriods(year, holidays);
@@ -23,8 +24,8 @@ export const findOptimalSchedule = (
   const extraPeriods = createExtraPeriods(year, holidays);
   const allPeriods = [...scoredPeriods, ...extraPeriods];
   
-  // Select the optimal combination of periods
-  return selectOptimalPeriods(allPeriods, vacationDays, year, holidays, mode);
+  // Select the optimal combination of periods, ensuring exact vacation day usage if requested
+  return selectOptimalPeriods(allPeriods, vacationDays, year, holidays, mode, useExactDays);
 };
 
 // Generate all possible vacation periods around holidays and weekends
