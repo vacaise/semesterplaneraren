@@ -71,8 +71,8 @@ export const selectOptimalPeriods = (
       selectedPeriods.push(period);
       remainingVacationDays -= period.vacationDaysNeeded;
       
-      // If we've run out of vacation days, break
-      if (remainingVacationDays <= 0) {
+      // If we've hit our target or run out of vacation days, break
+      if (selectedPeriods.length >= maxPeriods || remainingVacationDays <= 0) {
         break;
       }
     }
@@ -94,8 +94,8 @@ export const selectOptimalPeriods = (
         remainingVacationDays -= period.vacationDaysNeeded;
       }
       
-      // If we've run out of vacation days, break
-      if (remainingVacationDays <= 0) {
+      // If we've hit our target or run out of vacation days, break
+      if (selectedPeriods.length >= maxPeriods || remainingVacationDays <= 0) {
         break;
       }
     }
@@ -126,61 +126,10 @@ export const selectOptimalPeriods = (
     }
   }
   
-  // If we STILL have vacation days left, create single-day periods
-  // to ensure we use EXACTLY the requested number of days
-  if (remainingVacationDays > 0) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    // Start from a month from now to give some planning time
-    const startDate = new Date(today);
-    startDate.setMonth(startDate.getMonth() + 1);
-    
-    // Try to find valid weekdays to take off
-    for (let i = 0; i < 365 && remainingVacationDays > 0; i++) {
-      const currentDate = new Date(startDate);
-      currentDate.setDate(currentDate.getDate() + i);
-      
-      // Skip weekends and holidays
-      if (isDayOff(currentDate, holidays)) continue;
-      
-      // Skip if the day overlaps with existing periods
-      const hasOverlap = selectedPeriods.some(selected => 
-        currentDate >= selected.start && currentDate <= selected.end
-      );
-      
-      if (!hasOverlap) {
-        const month = currentDate.getMonth();
-        const monthName = getMonthName(month);
-        
-        selectedPeriods.push({
-          start: new Date(currentDate),
-          end: new Date(currentDate),
-          days: 1,
-          vacationDaysNeeded: 1,
-          description: `Extra ledig dag i ${monthName}`,
-          type: "extra",
-          score: 10
-        });
-        
-        remainingVacationDays--;
-      }
-    }
-  }
-  
   // Sort the final selected periods by date (chronologically)
   selectedPeriods.sort((a, b) => {
     return a.start.getTime() - b.start.getTime();
   });
   
   return selectedPeriods;
-};
-
-// Helper function to get month name
-const getMonthName = (monthIndex: number): string => {
-  const months = [
-    "januari", "februari", "mars", "april", "maj", "juni",
-    "juli", "augusti", "september", "oktober", "november", "december"
-  ];
-  return months[monthIndex];
 };

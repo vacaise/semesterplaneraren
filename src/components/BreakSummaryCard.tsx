@@ -68,17 +68,17 @@ const BreakSummaryCard = ({
         
         <div className="grid grid-cols-3 gap-4 mt-4">
           <div className="flex flex-col items-center">
-            <div className="text-green-800 font-bold text-lg">{vacationDaysNeeded}</div>
+            <div className="text-purple-700 font-bold text-lg">{vacationDaysNeeded}</div>
             <div className="text-xs text-gray-600">Semesterdagar</div>
           </div>
           
           <div className="flex flex-col items-center">
-            <div className="text-red-800 font-bold text-lg">{publicHolidays}</div>
+            <div className="text-amber-700 font-bold text-lg">{publicHolidays}</div>
             <div className="text-xs text-gray-600">Röda dagar</div>
           </div>
           
           <div className="flex flex-col items-center">
-            <div className="text-orange-800 font-bold text-lg">{weekends}</div>
+            <div className="text-blue-700 font-bold text-lg">{weekends}</div>
             <div className="text-xs text-gray-600">Helgdagar</div>
           </div>
         </div>
@@ -137,12 +137,12 @@ const generateColoredDayIndicators = (start: Date, end: Date, holidays: Date[]) 
       holiday.getFullYear() === currentDay.getFullYear()
     );
     
-    let bgColor = "bg-green-200"; // Vacation day - now green to match calendar view
+    let bgColor = "bg-purple-200"; // Default: PTO/Vacation day
     
     if (isHoliday) {
-      bgColor = "bg-red-200"; // Public holiday - red
+      bgColor = "bg-amber-200"; // Public holiday
     } else if (isWeekend) {
-      bgColor = "bg-orange-100"; // Weekend - orange/yellow
+      bgColor = "bg-blue-200"; // Weekend
     }
     
     days.push(
