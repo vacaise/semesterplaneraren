@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Helmet } from "react-helmet";
 import VacationForm from "@/components/VacationForm";
 import VacationResults from "@/components/VacationResults";
-import { getSwedishHolidays } from "@/utils/holidays";
+import { getHolidays } from "@/utils/holidays";
 import { optimizeVacation } from "@/utils/optimizer";
 import { OptimizationResult } from "@/utils/calculators";
 
@@ -19,7 +19,7 @@ const HomePage = () => {
   const loadHolidays = () => {
     setIsLoading(true);
     try {
-      const swedishHolidays = getSwedishHolidays(year);
+      const swedishHolidays = getHolidays(year);
       setHolidays(swedishHolidays);
       setIsLoading(false);
     } catch (error) {
