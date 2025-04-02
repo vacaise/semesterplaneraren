@@ -99,8 +99,20 @@ const Index = () => {
     
     try {
       console.log("Generating schedule with holidays:", holidays);
+      console.log("Requested vacation days:", vacationDays);
       const optimizedScheduleData = optimizeVacation(year, vacationDays, holidays, selectedMode);
       console.log("Generated schedule:", optimizedScheduleData);
+      
+      // Verify the exact number of vacation days were allocated
+      const usedVacationDays = optimizedScheduleData.periods.reduce(
+        (total: number, period: any) => total + period.vacationDaysNeeded, 0
+      );
+      console.log("Total vacation days used:", usedVacationDays);
+      
+      if (usedVacationDays !== vacationDays) {
+        console.warn(`Warning: Allocated ${usedVacationDays} vacation days but requested ${vacationDays}`);
+      }
+      
       setOptimizedSchedule(optimizedScheduleData);
       setCurrentStep(4);
     } catch (error) {

@@ -94,8 +94,8 @@ export const selectOptimalPeriods = (
         remainingVacationDays -= period.vacationDaysNeeded;
       }
       
-      // If we've hit our target or run out of vacation days, break
-      if (selectedPeriods.length >= maxPeriods || remainingVacationDays <= 0) {
+      // If we have used all vacation days, break
+      if (remainingVacationDays <= 0) {
         break;
       }
     }
@@ -126,10 +126,145 @@ export const selectOptimalPeriods = (
     }
   }
   
+  // If we STILL have vacation days, create single-day periods
+  if (remainingVacationDays > 0) {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    
+    // Try to distribute remaining days throughout the year
+    // Start from April (after most spring holidays)
+    const startMonth = now.getMonth() >= 3 ? now.getMonth() : 3;  // April
+    
+    for (let month = startMonth; month < 12 && remainingVacationDays > 0; month++) {
+      // Try Fridays first (for long weekends)
+      for (let day = 15; day <= 28 && remainingVacationDays > 0; day += 7) {
+        const testDate = new Date(year, month, day);
+        // Find the next Friday
+        while (testDate.getDay() !== 5 && testDate.getDate() < 28) {
+          testDate.setDate(testDate.getDate() + 1);
+        }
+        
+        // Skip if date is in past or is already a holiday/weekend
+        if (testDate < now || isDayOff(testDate, holidays)) {
+          continue;
+        }
+        
+        // Check for overlap with existing periods
+        const hasOverlap = selectedPeriods.some(selected => 
+          testDate >= selected.start && testDate <= selected.end
+        );
+        
+        if (!hasOverlap) {
+          const singleDayPeriod: VacationPeriod = {
+            start: new Date(testDate),
+            end: new Date(testDate),
+            days: 1,
+            vacationDaysNeeded: 1,
+            description: `Ledig dag i ${getMonthName(month)}`,
+            type: "single",
+            score: 30
+          };
+          
+          selectedPeriods.push(singleDayPeriod);
+          remainingVacationDays--;
+        }
+      }
+      
+      // If still have days, try Mondays (for long weekends)
+      if (remainingVacationDays > 0) {
+        for (let day = 1; day <= 14 && remainingVacationDays > 0; day += 7) {
+          const testDate = new Date(year, month, day);
+          // Find the next Monday
+          while (testDate.getDay() !== 1 && testDate.getDate() < 14) {
+            testDate.setDate(testDate.getDate() + 1);
+          }
+          
+          // Skip if date is in past or is already a holiday/weekend
+          if (testDate < now || isDayOff(testDate, holidays)) {
+            continue;
+          }
+          
+          // Check for overlap with existing periods
+          const hasOverlap = selectedPeriods.some(selected => 
+            testDate >= selected.start && testDate <= selected.end
+          );
+          
+          if (!hasOverlap) {
+            const singleDayPeriod: VacationPeriod = {
+              start: new Date(testDate),
+              end: new Date(testDate),
+              days: 1,
+              vacationDaysNeeded: 1,
+              description: `Ledig dag i ${getMonthName(month)}`,
+              type: "single",
+              score: 30
+            };
+            
+            selectedPeriods.push(singleDayPeriod);
+            remainingVacationDays--;
+          }
+        }
+      }
+    }
+  }
+  
+  // As a last resort, if we STILL have vacation days, add them on any available weekdays
+  if (remainingVacationDays > 0) {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    
+    // Start from current month and go through the year
+    const currentMonth = now.getMonth();
+    let dayCounter = 1;
+    
+    for (let month = currentMonth; month < 12 && remainingVacationDays > 0; month++) {
+      for (let day = dayCounter; day <= 28 && remainingVacationDays > 0; day++) {
+        const testDate = new Date(year, month, day);
+        
+        // Skip if date is in past, is a weekend or holiday
+        if (testDate < now || isDayOff(testDate, holidays)) {
+          continue;
+        }
+        
+        // Check for overlap with existing periods
+        const hasOverlap = selectedPeriods.some(selected => 
+          testDate >= selected.start && testDate <= selected.end
+        );
+        
+        if (!hasOverlap) {
+          const singleDayPeriod: VacationPeriod = {
+            start: new Date(testDate),
+            end: new Date(testDate),
+            days: 1,
+            vacationDaysNeeded: 1,
+            description: `Extra ledig dag ${testDate.getDate()}/${testDate.getMonth() + 1}`,
+            type: "extra",
+            score: 20
+          };
+          
+          selectedPeriods.push(singleDayPeriod);
+          remainingVacationDays--;
+        }
+      }
+      
+      // Reset day counter for next months
+      dayCounter = 1;
+    }
+  }
+  
   // Sort the final selected periods by date (chronologically)
   selectedPeriods.sort((a, b) => {
     return a.start.getTime() - b.start.getTime();
   });
   
   return selectedPeriods;
+};
+
+// Helper function to get month name
+const getMonthName = (monthIndex: number): string => {
+  const months = [
+    "januari", "februari", "mars", "april", "maj", "juni",
+    "juli", "augusti", "september", "oktober", "november", "december"
+  ];
+  return months[monthIndex];
 };
