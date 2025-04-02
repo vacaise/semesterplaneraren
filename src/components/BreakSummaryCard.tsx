@@ -25,9 +25,10 @@ const BreakSummaryCard = ({
   type,
   holidays,
 }: BreakSummaryCardProps) => {
-  // Calculate weekends and holidays within the period
-  const weekends = calculateWeekends(startDate, endDate);
+  // Calculate weekends and holidays within the period, ensuring no double counting
   const publicHolidays = calculatePublicHolidays(startDate, endDate, holidays);
+  // Count weekends that are NOT also holidays
+  const weekends = calculateWeekends(startDate, endDate, holidays);
 
   // Generate different background colors based on break type
   const getBgColor = () => {
@@ -93,15 +94,26 @@ const BreakSummaryCard = ({
   );
 };
 
-// Calculate number of weekend days in a period
-const calculateWeekends = (start: Date, end: Date): number => {
+// Calculate number of weekend days in a period, excluding those that are also holidays
+const calculateWeekends = (start: Date, end: Date, holidays: Date[]): number => {
   let count = 0;
   const current = new Date(start);
   
   while (current <= end) {
     const day = current.getDay();
-    if (day === 0 || day === 6) { // Sunday or Saturday
-      count++;
+    // Check if it's a weekend (Saturday or Sunday)
+    if (day === 0 || day === 6) {
+      // Check if this day is also a holiday
+      const isAlsoHoliday = holidays.some(holiday => 
+        holiday.getDate() === current.getDate() && 
+        holiday.getMonth() === current.getMonth() && 
+        holiday.getFullYear() === current.getFullYear()
+      );
+      
+      // Only count as weekend if it's not also a holiday
+      if (!isAlsoHoliday) {
+        count++;
+      }
     }
     current.setDate(current.getDate() + 1);
   }
@@ -129,18 +141,19 @@ const generateColoredDayIndicators = (start: Date, end: Date, holidays: Date[]) 
     const currentDay = new Date(start);
     currentDay.setDate(start.getDate() + i);
     
-    // Determine day type
-    const isWeekend = currentDay.getDay() === 0 || currentDay.getDay() === 6;
+    // Determine day type - prioritize holidays over weekends
     const isHoliday = holidays.some(holiday => 
       holiday.getDate() === currentDay.getDate() && 
       holiday.getMonth() === currentDay.getMonth() && 
       holiday.getFullYear() === currentDay.getFullYear()
     );
     
+    const isWeekend = currentDay.getDay() === 0 || currentDay.getDay() === 6;
+    
     let bgColor = "bg-green-200"; // Vacation day - now green to match calendar view
     
     if (isHoliday) {
-      bgColor = "bg-red-200"; // Public holiday - red
+      bgColor = "bg-red-200"; // Public holiday - red (takes precedence over weekend)
     } else if (isWeekend) {
       bgColor = "bg-orange-100"; // Weekend - orange/yellow
     }
