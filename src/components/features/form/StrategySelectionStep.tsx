@@ -51,12 +51,14 @@ export function StrategySelectionStep({
         aria-labelledby="strategy-selection-step"
       >
         {OPTIMIZATION_STRATEGIES.map((strategyOption) => {
-          const isSelected = selectedStrategy === strategyOption.id;
+          // Extract id with explicit type to ensure it's a valid OptimizationStrategy
+          const id = strategyOption.id as OptimizationStrategy;
+          const isSelected = selectedStrategy === id;
 
           return (
             <div
-              key={strategyOption.id}
-              onClick={() => handleStrategyChange(strategyOption.id)}
+              key={id}
+              onClick={() => handleStrategyChange(id)}
               className={cn(
                 "relative cursor-pointer rounded-lg px-4 py-3",
                 "transition-all border duration-150",
@@ -69,11 +71,11 @@ export function StrategySelectionStep({
               role="radio"
               aria-checked={isSelected}
               tabIndex={0}
-              data-strategy={strategyOption.id}
+              data-strategy={id}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
-                  handleStrategyChange(strategyOption.id);
+                  handleStrategyChange(id);
                 }
               }}
             >

@@ -60,7 +60,9 @@ const StatTooltipContent = React.forwardRef<
 >(({ className, sideOffset = 4, colorScheme, ...props }, ref) => {
   // Use our safe getter function
   const colorSchemeData = getColorScheme(colorScheme);
-  const tooltipBg = colorSchemeData.tooltip.bg.replace(/\/\d+/g, '') || 'bg-gray-100 dark:bg-gray-800';
+  
+  // Provide a default if tooltip property doesn't exist
+  const tooltipBg = colorSchemeData?.tooltip?.bg?.replace(/\/\d+/g, '') || 'bg-gray-100 dark:bg-gray-800';
 
   return (
     <TooltipPrimitive.Portal>

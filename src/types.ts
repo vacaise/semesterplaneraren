@@ -75,7 +75,8 @@ export type AppColorScheme =
   | 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info'
   | 'purple' | 'orange' | 'indigo'
   | 'pto' | 'publicHoliday' | 'companyDayOff' | 'weekend' | 'extendedWeekend'
-  | 'default' | 'today' | 'past';
+  | 'default' | 'today' | 'past'
+  | 'blue' | 'green' | 'amber' | 'teal' | 'violet'; // Add the missing color schemes
 
 // Possible colors - this is what we use as input to our components
 export type PossibleColors = AppColorScheme;

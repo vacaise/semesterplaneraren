@@ -1,3 +1,4 @@
+
 'use client';
 
 import { FormEvent, useRef } from 'react';
@@ -14,6 +15,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { TooltipProvider } from './ui/tooltip';
 import { useYearSelection } from '@/hooks/useOptimizer';
 import { HelpButton, OnboardingContainer } from './features/onboarding';
+import { useStrategySelection } from '@/hooks/useOptimizer';
 
 // Update to use dynamic calculation based on current year
 const AVAILABLE_YEARS = Array.from({ length: 5 }, (_, index) => new Date().getFullYear() + index);
@@ -35,6 +37,7 @@ export function OptimizerForm({ onSubmitAction, isLoading = false }: OptimizerFo
   const { state } = useOptimizer();
   const { days, strategy, companyDaysOff, holidays, selectedYear } = state;
   const { setSelectedYear } = useYearSelection();
+  const { strategy: selectedStrategy, setStrategy: onStrategyChange } = useStrategySelection();
 
   // Reference to manage focus flow - moved to dedicated refs for better semantic structure
   const daysInputRef = useRef<HTMLFieldSetElement>(null);
@@ -150,7 +153,10 @@ export function OptimizerForm({ onSubmitAction, isLoading = false }: OptimizerFo
                 id="strategy-selection-container"
                 data-onboarding-target="strategy-selection"
               >
-                <StrategySelectionStep />
+                <StrategySelectionStep 
+                  selectedStrategy={selectedStrategy} 
+                  onStrategyChange={onStrategyChange} 
+                />
               </fieldset>
               <fieldset
                 className="border-0 m-0 p-0"

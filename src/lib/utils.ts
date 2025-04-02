@@ -74,11 +74,50 @@ export const dayTypeToColorScheme: Record<DayType, PossibleColors> = {
 };
 
 /**
+ * Default color scheme for fallback
+ */
+const defaultColorScheme = {
+  icon: {
+    bg: "bg-gray-100 dark:bg-gray-800",
+    text: "text-gray-600 dark:text-gray-300",
+    ring: "ring-gray-400/20 dark:ring-gray-300/20"
+  },
+  tooltip: {
+    icon: "text-gray-500",
+    bg: "bg-gray-100 dark:bg-gray-800"
+  },
+  card: {
+    hover: "hover:bg-gray-50 dark:hover:bg-gray-800",
+    ring: "ring-gray-200 dark:ring-gray-700"
+  },
+  calendar: {
+    bg: "bg-gray-50 dark:bg-gray-800",
+    text: "text-gray-800 dark:text-gray-200"
+  }
+};
+
+/**
  * Safe access function for COLOR_SCHEMES to prevent TypeScript errors
  * Returns the color scheme or a default one if not found
  */
 export function getColorScheme(colorScheme: PossibleColors) {
-  return COLOR_SCHEMES[colorScheme] || COLOR_SCHEMES.default;
+  // If we don't have a direct match in COLOR_SCHEMES, try to find a sensible fallback
+  if (!COLOR_SCHEMES[colorScheme]) {
+    // Map our new color names to similar ones that might exist
+    const fallbackMap: Record<string, PossibleColors> = {
+      'blue': 'primary',
+      'green': 'success',
+      'amber': 'warning',
+      'violet': 'purple',
+      'teal': 'info'
+    };
+    
+    // Use fallback if available, otherwise default
+    const fallback = fallbackMap[colorScheme];
+    return COLOR_SCHEMES[fallback] || defaultColorScheme;
+  }
+  
+  return COLOR_SCHEMES[colorScheme];
 }
 
 /**

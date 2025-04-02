@@ -1,5 +1,6 @@
+
 import { FC } from 'react';
-import { OptimizationStats } from '@/types';
+import { OptimizationStats, AppColorScheme } from '@/types';
 import StatCard from './components/StatCard';
 import { BarChart2, Building2, Calendar, CalendarDays, Sun, Umbrella } from 'lucide-react';
 import { SectionCard } from '@/components/ui/section-card';
@@ -22,7 +23,7 @@ const OptimizationStatsComponent: FC<OptimizationStatsComponentProps> = ({ stats
           value={stats.totalDaysOff}
           label="Total Days Off"
           tooltip="Total number of days off including weekends, holidays, and PTO days"
-          colorScheme="blue"
+          colorScheme="primary"
         />
 
         {/* PTO Days */}
@@ -31,7 +32,7 @@ const OptimizationStatsComponent: FC<OptimizationStatsComponentProps> = ({ stats
           value={stats.totalPTODays}
           label="PTO Days"
           tooltip="Number of PTO days used in the optimization"
-          colorScheme="green"
+          colorScheme="success"
         />
 
         {/* Public Holidays */}
@@ -40,7 +41,7 @@ const OptimizationStatsComponent: FC<OptimizationStatsComponentProps> = ({ stats
           value={stats.totalPublicHolidays}
           label="Public Holidays"
           tooltip="Number of public holidays that are part of a longer break"
-          colorScheme="amber"
+          colorScheme="warning"
         />
 
         {/* Extended Weekends */}
@@ -49,7 +50,7 @@ const OptimizationStatsComponent: FC<OptimizationStatsComponentProps> = ({ stats
           value={stats.totalExtendedWeekends}
           label="Extended Weekends"
           tooltip="Number of weekends that are part of a longer break"
-          colorScheme="teal"
+          colorScheme="info"
         />
 
         {/* Company Days Off */}
@@ -58,7 +59,7 @@ const OptimizationStatsComponent: FC<OptimizationStatsComponentProps> = ({ stats
           value={stats.totalCompanyDaysOff}
           label="Company Days Off"
           tooltip="Number of company-wide days off (e.g., Christmas closure) that part of a longer break"
-          colorScheme="violet"
+          colorScheme="purple"
         />
       </div>
     </SectionCard>
