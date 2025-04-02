@@ -94,21 +94,21 @@ export interface TailwindColorStyles {
   ring: string;  // Ring/outline classes (e.g., "ring-blue-400/20 dark:ring-blue-300/20")
 }
 
-interface TooltipStyles {
+export interface TooltipStyles {
   icon: string;  // Icon color classes
   bg: string;    // Background color classes
 }
 
-interface CardStyles {
+export interface CardStyles {
   hover: string; // Hover state classes
   ring?: string; // Optional ring/outline classes
 }
 
 // The complete structure of a color scheme definition
-interface ColorSchemeDefinition {
+export interface ColorSchemeDefinition {
   icon: TailwindColorStyles;
   tooltip: TooltipStyles;
-  card: CardStyles;
+  card?: CardStyles;
   calendar: TailwindColorStyles;
 }
 
