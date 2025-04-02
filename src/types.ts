@@ -71,12 +71,18 @@ export interface StrategyOption {
 }
 
 // Application-specific color schemes - these should match COLOR_SCHEMES keys exactly
-export type AppColorScheme = 
+export type BaseColorScheme = 
   | 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info'
   | 'purple' | 'orange' | 'indigo'
   | 'pto' | 'publicHoliday' | 'companyDayOff' | 'weekend' | 'extendedWeekend'
-  | 'default' | 'today' | 'past'
-  | 'blue' | 'green' | 'amber' | 'teal' | 'violet'; // Add the missing color schemes
+  | 'default' | 'today' | 'past';
+
+// Additional color schemes that map to base color schemes
+export type ExtendedColorScheme =
+  | 'blue' | 'green' | 'amber' | 'teal' | 'violet' | 'slate';
+
+// Combined color scheme type
+export type AppColorScheme = BaseColorScheme | ExtendedColorScheme;
 
 // Possible colors - this is what we use as input to our components
 export type PossibleColors = AppColorScheme;

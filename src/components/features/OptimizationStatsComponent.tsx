@@ -1,6 +1,6 @@
 
 import { FC } from 'react';
-import { OptimizationStats, AppColorScheme } from '@/types';
+import { OptimizationStats } from '@/types';
 import StatCard from './components/StatCard';
 import { BarChart2, Building2, Calendar, CalendarDays, Sun, Umbrella } from 'lucide-react';
 import { SectionCard } from '@/components/ui/section-card';

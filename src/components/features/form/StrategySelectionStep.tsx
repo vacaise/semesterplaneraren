@@ -51,7 +51,7 @@ export function StrategySelectionStep({
         aria-labelledby="strategy-selection-step"
       >
         {OPTIMIZATION_STRATEGIES.map((strategyOption) => {
-          // Extract id with explicit type to ensure it's a valid OptimizationStrategy
+          // Extract id and ensure it's a valid OptimizationStrategy
           const id = strategyOption.id as OptimizationStrategy;
           const isSelected = selectedStrategy === id;
 

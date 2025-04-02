@@ -61,7 +61,7 @@ const StatTooltipContent = React.forwardRef<
   // Use our safe getter function
   const colorSchemeData = getColorScheme(colorScheme);
   
-  // Provide a default if tooltip property doesn't exist
+  // Default tooltip background if the tooltip property doesn't exist
   const tooltipBg = colorSchemeData?.tooltip?.bg?.replace(/\/\d+/g, '') || 'bg-gray-100 dark:bg-gray-800';
 
   return (

@@ -97,27 +97,35 @@ const defaultColorScheme = {
 };
 
 /**
+ * Map of new color schemes to existing ones in COLOR_SCHEMES
+ */
+const colorSchemeMap: Record<string, keyof typeof COLOR_SCHEMES> = {
+  'blue': 'primary',
+  'green': 'success',
+  'amber': 'warning', 
+  'teal': 'info',
+  'violet': 'purple',
+  'slate': 'secondary'
+};
+
+/**
  * Safe access function for COLOR_SCHEMES to prevent TypeScript errors
  * Returns the color scheme or a default one if not found
  */
 export function getColorScheme(colorScheme: PossibleColors) {
-  // If we don't have a direct match in COLOR_SCHEMES, try to find a sensible fallback
-  if (!COLOR_SCHEMES[colorScheme]) {
-    // Map our new color names to similar ones that might exist
-    const fallbackMap: Record<string, PossibleColors> = {
-      'blue': 'primary',
-      'green': 'success',
-      'amber': 'warning',
-      'violet': 'purple',
-      'teal': 'info'
-    };
-    
-    // Use fallback if available, otherwise default
-    const fallback = fallbackMap[colorScheme];
-    return COLOR_SCHEMES[fallback] || defaultColorScheme;
+  // First check if the color scheme exists directly in COLOR_SCHEMES
+  if (COLOR_SCHEMES[colorScheme as keyof typeof COLOR_SCHEMES]) {
+    return COLOR_SCHEMES[colorScheme as keyof typeof COLOR_SCHEMES];
   }
   
-  return COLOR_SCHEMES[colorScheme];
+  // If not, try to map to a similar existing color scheme
+  const mappedScheme = colorSchemeMap[colorScheme as string];
+  if (mappedScheme && COLOR_SCHEMES[mappedScheme]) {
+    return COLOR_SCHEMES[mappedScheme];
+  }
+  
+  // If all else fails, return the default color scheme
+  return defaultColorScheme;
 }
 
 /**
