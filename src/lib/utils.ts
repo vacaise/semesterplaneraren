@@ -92,7 +92,7 @@ const defaultColorScheme = {
   },
   calendar: {
     bg: "bg-gray-50 dark:bg-gray-800",
-    text: "text-gray-800 dark:text-gray-200"
+    text: "text-gray-400 dark:text-gray-600"
   }
 };
 
