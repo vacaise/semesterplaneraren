@@ -24,9 +24,15 @@ interface MonthCalendarViewProps {
   schedule: Schedule;
   year: number;
   holidays: Date[];
+  companyDays?: Date[];
 }
 
-export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalendarViewProps) => {
+export const MonthCalendarView = ({ 
+  schedule, 
+  year, 
+  holidays = [], 
+  companyDays = [] 
+}: MonthCalendarViewProps) => {
   const isMobile = useIsMobile();
   
   // Make sure to use the same periods as in the list view
@@ -47,6 +53,11 @@ export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalend
     } else {
       relevantMonths.add(startMonth);
     }
+  });
+
+  // Also add months with company days
+  companyDays.forEach(day => {
+    relevantMonths.add(new Date(day).getMonth());
   });
 
   // Konvertera Set till Array och sortera
@@ -76,7 +87,7 @@ export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalend
       </div>
       
       <div className={`${isMobile ? 'p-2' : 'p-3 sm:p-4'} border border-gray-200 rounded-lg bg-white`}>
-        <CalendarLegend />
+        <CalendarLegend showCompanyDays={companyDays.length > 0} />
         
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-4">
           {monthsToRender.map(month => (
@@ -86,6 +97,7 @@ export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalend
                 monthIndex={month}
                 periods={sortedPeriods}
                 holidays={holidays}
+                companyDays={companyDays}
               />
             </div>
           ))}

@@ -17,3 +17,5 @@ export type OptimizationMode =
   | "minibreaks"   // Short breaks (4-6 days)
   | "weeks"        // Full week breaks
   | "extended";    // Long vacation periods
+
+export type DayType = "holiday" | "weekend" | "vacation" | "company" | "workday";

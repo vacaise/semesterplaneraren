@@ -21,9 +21,16 @@ interface MonthCardProps {
   monthIndex: number;
   periods: Period[];
   holidays: Date[];
+  companyDays?: Date[];
 }
 
-export const MonthCard = ({ year, monthIndex, periods, holidays }: MonthCardProps) => {
+export const MonthCard = ({ 
+  year, 
+  monthIndex, 
+  periods, 
+  holidays,
+  companyDays = [] 
+}: MonthCardProps) => {
   const monthDate = new Date(year, monthIndex, 1);
   const daysInMonth = getDaysInMonth(monthDate);
   const firstDayOfMonth = startOfMonth(monthDate);
@@ -42,7 +49,7 @@ export const MonthCard = ({ year, monthIndex, periods, holidays }: MonthCardProp
   // Lägg till dagar i månaden
   for (let day = 1; day <= daysInMonth; day++) {
     const date = new Date(year, monthIndex, day);
-    const dayType = getDayType(date, holidays, periods);
+    const dayType = getDayType(date, holidays, companyDays, periods);
     
     daysArray.push(
       <CalendarDay 
