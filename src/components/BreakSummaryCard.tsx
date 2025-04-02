@@ -14,6 +14,7 @@ interface BreakSummaryCardProps {
   vacationDaysNeeded: number;
   type: string;
   holidays: Date[];
+  companyDays?: Date[];
 }
 
 const BreakSummaryCard = ({
@@ -24,10 +25,12 @@ const BreakSummaryCard = ({
   vacationDaysNeeded,
   type,
   holidays,
+  companyDays = [],
 }: BreakSummaryCardProps) => {
-  // Calculate weekends and holidays within the period
+  // Calculate weekends, holidays, and company days within the period
   const weekends = calculateWeekends(startDate, endDate);
   const publicHolidays = calculatePublicHolidays(startDate, endDate, holidays);
+  const companyHolidays = calculatePublicHolidays(startDate, endDate, companyDays);
 
   // Generate different background colors based on break type
   const getBgColor = () => {
@@ -66,7 +69,7 @@ const BreakSummaryCard = ({
           </div>
         </div>
         
-        <div className="grid grid-cols-3 gap-4 mt-4">
+        <div className="grid grid-cols-4 gap-2 mt-4">
           <div className="flex flex-col items-center">
             <div className="text-green-800 font-bold text-lg">{vacationDaysNeeded}</div>
             <div className="text-xs text-gray-600">Semesterdagar</div>
@@ -81,11 +84,18 @@ const BreakSummaryCard = ({
             <div className="text-orange-800 font-bold text-lg">{weekends}</div>
             <div className="text-xs text-gray-600">Helgdagar</div>
           </div>
+          
+          {companyDays.length > 0 && (
+            <div className="flex flex-col items-center">
+              <div className="text-purple-800 font-bold text-lg">{companyHolidays}</div>
+              <div className="text-xs text-gray-600">Företagsdagar</div>
+            </div>
+          )}
         </div>
         
         <div className="mt-4">
           <div className="flex space-x-1">
-            {generateColoredDayIndicators(startDate, endDate, holidays)}
+            {generateColoredDayIndicators(startDate, endDate, holidays, companyDays)}
           </div>
         </div>
       </CardContent>
@@ -118,7 +128,7 @@ const calculatePublicHolidays = (start: Date, end: Date, holidays: Date[]): numb
 };
 
 // Generate colored day indicators for the period
-const generateColoredDayIndicators = (start: Date, end: Date, holidays: Date[]) => {
+const generateColoredDayIndicators = (start: Date, end: Date, holidays: Date[], companyDays: Date[] = []) => {
   const dayCount = differenceInDays(end, start) + 1;
   const days = [];
   
@@ -136,11 +146,18 @@ const generateColoredDayIndicators = (start: Date, end: Date, holidays: Date[]) 
       holiday.getMonth() === currentDay.getMonth() && 
       holiday.getFullYear() === currentDay.getFullYear()
     );
+    const isCompanyDay = companyDays.some(companyDay => 
+      companyDay.getDate() === currentDay.getDate() && 
+      companyDay.getMonth() === currentDay.getMonth() && 
+      companyDay.getFullYear() === currentDay.getFullYear()
+    );
     
     let bgColor = "bg-green-200"; // Vacation day - now green to match calendar view
     
     if (isHoliday) {
       bgColor = "bg-red-200"; // Public holiday - red
+    } else if (isCompanyDay) {
+      bgColor = "bg-purple-200"; // Company day - purple
     } else if (isWeekend) {
       bgColor = "bg-orange-100"; // Weekend - orange/yellow
     }
