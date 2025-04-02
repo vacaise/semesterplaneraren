@@ -118,6 +118,12 @@ const StepThree = ({
           <div className="flex items-center justify-between mb-4">
             <h4 className="font-medium text-gray-800">Välj datum</h4>
           </div>
+          
+          {/* Added informational text about klämdagar */}
+          <p className="mb-3 text-sm text-gray-600">
+            Du kan även manuellt lägga till förväntade klämdagar som röda dagar.
+          </p>
+          
           <div className={`${isMobile ? 'flex justify-center' : ''}`}>
             <Calendar
               mode="single"
