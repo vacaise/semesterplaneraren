@@ -1,3 +1,4 @@
+
 import { addDays, differenceInDays, format, isSameDay } from 'date-fns';
 import { VacationPeriod, OptimizationMode } from './types';
 import { isDayOff } from './helpers';
@@ -45,10 +46,6 @@ const generatePossiblePeriods = (year: number, holidays: Date[]): VacationPeriod
   // 5. Generate more possible combinations to increase efficiency
   const additionalPeriods = generateAdditionalPeriods(year, holidays);
   periods.push(...additionalPeriods);
-  
-  // 6. Generate single-day options to ensure all vacation days are used
-  const singleDayOptions = generateSingleDayOptions(year, holidays);
-  periods.push(...singleDayOptions);
   
   return periods;
 };
@@ -136,79 +133,6 @@ const generateAdditionalPeriods = (year: number, holidays: Date[]): VacationPeri
   });
   
   return additionalPeriods;
-};
-
-// Generate single-day vacation options to use up remaining days
-const generateSingleDayOptions = (year: number, holidays: Date[]): VacationPeriod[] => {
-  const singleDayPeriods: VacationPeriod[] = [];
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  
-  // Create potential single day options for each month
-  for (let month = 0; month < 12; month++) {
-    // Find strategic days (next to weekends or holidays)
-    for (let day = 1; day <= 31; day++) {
-      try {
-        const date = new Date(year, month, day);
-        
-        // Skip if not a valid date or is in the past
-        if (date.getMonth() !== month || date < today) {
-          continue;
-        }
-        
-        // Skip weekends and holidays
-        if (date.getDay() === 0 || date.getDay() === 6 || isDayOff(date, holidays)) {
-          continue;
-        }
-        
-        // Check if day is adjacent to weekend or holiday
-        const prevDay = new Date(date);
-        prevDay.setDate(date.getDate() - 1);
-        
-        const nextDay = new Date(date);
-        nextDay.setDate(date.getDate() + 1);
-        
-        const isNextToWeekendOrHoliday = 
-          prevDay.getDay() === 0 || // Sunday
-          prevDay.getDay() === 6 || // Saturday 
-          nextDay.getDay() === 0 || // Sunday
-          nextDay.getDay() === 6 || // Saturday
-          holidays.some(h => 
-            h.getDate() === prevDay.getDate() && 
-            h.getMonth() === prevDay.getMonth() || 
-            h.getDate() === nextDay.getDate() && 
-            h.getMonth() === nextDay.getMonth()
-          );
-        
-        if (isNextToWeekendOrHoliday) {
-          singleDayPeriods.push({
-            start: new Date(date),
-            end: new Date(date),
-            days: 1,
-            vacationDaysNeeded: 1,
-            description: `Extra dag: ${date.getDate()}/${date.getMonth() + 1}`,
-            type: "single",
-            score: 40 // Higher score for strategic days
-          });
-        } else {
-          // Regular weekday, lower score
-          singleDayPeriods.push({
-            start: new Date(date),
-            end: new Date(date),
-            days: 1,
-            vacationDaysNeeded: 1,
-            description: `Ledig vardag: ${date.getDate()}/${date.getMonth() + 1}`,
-            type: "single",
-            score: 20
-          });
-        }
-      } catch (e) {
-        // Skip invalid dates
-      }
-    }
-  }
-  
-  return singleDayPeriods;
 };
 
 // Helper function to get month name

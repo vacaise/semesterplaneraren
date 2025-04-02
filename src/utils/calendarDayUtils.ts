@@ -19,19 +19,18 @@ export const isInPeriod = (date: Date, periods: Array<{ start: Date; end: Date }
 
 /**
  * Returns styling and type information for a calendar day
- * Prioritizes holidays over weekends to avoid double counting
  */
 export const getDayType = (
   date: Date, 
   holidays: Date[], 
   periods: Array<{ start: Date; end: Date }>
 ): DayTypeInfo => {
-  // Röd dag (helgdag) - check this first as it has highest priority
+  // Röd dag (helgdag)
   if (holidays.some(holiday => isSameDay(holiday, date))) {
     return { className: "bg-red-200 text-red-800", type: "Röd dag" };
   }
   
-  // Helg - only if not already counted as holiday
+  // Helg
   if (isWeekend(date)) {
     return { className: "bg-orange-100 text-orange-800", type: "Helg" };
   }
