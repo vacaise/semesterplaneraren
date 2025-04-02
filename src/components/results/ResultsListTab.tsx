@@ -21,10 +21,9 @@ interface ResultsListTabProps {
   schedule: Schedule;
   year: number;
   holidays: Date[];
-  companyDays?: Date[];
 }
 
-export const ResultsListTab = ({ schedule, year, holidays, companyDays = [] }: ResultsListTabProps) => {
+export const ResultsListTab = ({ schedule, year, holidays }: ResultsListTabProps) => {
   return (
     <div className="space-y-6">
       <BreakTypeExplanation />
@@ -53,7 +52,6 @@ export const ResultsListTab = ({ schedule, year, holidays, companyDays = [] }: R
                 vacationDaysNeeded={period.vacationDaysNeeded}
                 type={period.type}
                 holidays={holidays}
-                companyDays={companyDays}
               />
             ))}
           </div>

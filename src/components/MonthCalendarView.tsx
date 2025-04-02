@@ -24,10 +24,9 @@ interface MonthCalendarViewProps {
   schedule: Schedule;
   year: number;
   holidays: Date[];
-  companyDays?: Date[];
 }
 
-export const MonthCalendarView = ({ schedule, year, holidays = [], companyDays = [] }: MonthCalendarViewProps) => {
+export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalendarViewProps) => {
   const isMobile = useIsMobile();
   
   // Make sure to use the same periods as in the list view
@@ -52,9 +51,6 @@ export const MonthCalendarView = ({ schedule, year, holidays = [], companyDays =
 
   // Konvertera Set till Array och sortera
   const monthsToRender = Array.from(relevantMonths).sort((a, b) => a - b);
-  
-  // Check if we have any company days to show
-  const hasCompanyDays = companyDays && companyDays.length > 0;
 
   // If no relevant months found, show message
   if (monthsToRender.length === 0) {
@@ -80,7 +76,7 @@ export const MonthCalendarView = ({ schedule, year, holidays = [], companyDays =
       </div>
       
       <div className={`${isMobile ? 'p-2' : 'p-3 sm:p-4'} border border-gray-200 rounded-lg bg-white`}>
-        <CalendarLegend showCompanyDays={hasCompanyDays} />
+        <CalendarLegend />
         
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-4">
           {monthsToRender.map(month => (
@@ -90,7 +86,6 @@ export const MonthCalendarView = ({ schedule, year, holidays = [], companyDays =
                 monthIndex={month}
                 periods={sortedPeriods}
                 holidays={holidays}
-                companyDays={companyDays}
               />
             </div>
           ))}

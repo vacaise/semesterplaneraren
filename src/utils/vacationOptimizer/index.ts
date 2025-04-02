@@ -16,15 +16,13 @@ export const optimizeVacation = (
   year: number,
   vacationDays: number,
   holidays: Date[],
-  mode: string,
-  companyDays: Date[] = []
+  mode: string
 ): OptimizedSchedule => {
-  // Filter out holidays and company days that have already passed
+  // Filter out holidays that have already passed
   const filteredHolidays = holidays.filter(holiday => !isDateInPast(holiday));
-  const filteredCompanyDays = companyDays.filter(day => !isDateInPast(day));
   
   // Find potential periods based on the parameters
-  const selectedPeriods = findOptimalSchedule(year, vacationDays, filteredHolidays, mode, filteredCompanyDays);
+  const selectedPeriods = findOptimalSchedule(year, vacationDays, filteredHolidays, mode);
   
   // Verify periods don't contain any past dates
   const today = new Date();
@@ -37,7 +35,7 @@ export const optimizeVacation = (
   });
   
   // Calculate the total days off
-  const totalDaysOff = calculateTotalDaysOff(validatedPeriods, [...filteredHolidays, ...filteredCompanyDays]);
+  const totalDaysOff = calculateTotalDaysOff(validatedPeriods, filteredHolidays);
   
   return {
     totalDaysOff: totalDaysOff,

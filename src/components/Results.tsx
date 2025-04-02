@@ -26,11 +26,10 @@ interface ResultsProps {
   schedule: Schedule;
   year: number;
   holidays: Date[];
-  companyDays?: Date[];
   resetToStart: () => void;
 }
 
-const Results = ({ schedule, year, holidays, companyDays = [], resetToStart }: ResultsProps) => {
+const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
   const { exportToICal } = useICalExporter();
   
   const handleExportCalendar = () => {
@@ -57,7 +56,6 @@ const Results = ({ schedule, year, holidays, companyDays = [], resetToStart }: R
             schedule={schedule}
             year={year}
             holidays={holidays}
-            companyDays={companyDays}
           />
         </TabsContent>
         
@@ -66,7 +64,6 @@ const Results = ({ schedule, year, holidays, companyDays = [], resetToStart }: R
             schedule={schedule}
             year={year}
             holidays={holidays}
-            companyDays={companyDays}
           />
         </TabsContent>
       </Tabs>
