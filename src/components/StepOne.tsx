@@ -28,12 +28,6 @@ const StepOne = ({
   }, (_, i) => currentYear + i);
   const isMobile = useIsMobile();
   
-  const handleVacationDaysChange = (value: number) => {
-    // Ensure the value is between 1 and 50 and is a whole number
-    const clampedValue = Math.max(1, Math.min(50, Math.round(value)));
-    setVacationDays(clampedValue);
-  };
-  
   return <div className="space-y-6">
       <div className="flex items-center gap-2 mb-4">
         <div className="bg-teal-50 text-teal-800 h-8 w-8 rounded-full flex items-center justify-center font-medium">1</div>
@@ -79,24 +73,15 @@ const StepOne = ({
         <div className="space-y-4">
           <Label htmlFor="vacationDays" className="text-gray-700 text-base">Antal semesterdagar</Label>
           <div className={`${isMobile ? 'flex flex-col gap-3' : 'flex items-center space-x-4'}`}>
-            <Slider 
-              id="vacationDays" 
-              defaultValue={[vacationDays]} 
-              max={50} 
-              min={1} 
-              step={1} 
-              onValueChange={val => handleVacationDaysChange(val[0])} 
-              className="flex-1" 
-              aria-label="Välj antal semesterdagar" 
-            />
+            <Slider id="vacationDays" defaultValue={[vacationDays]} max={40} min={1} step={1} onValueChange={val => setVacationDays(val[0])} className="flex-1" aria-label="Välj antal semesterdagar" />
             <Input 
               type="number" 
               id="vacationDaysInput" 
               value={vacationDays} 
-              onChange={e => handleVacationDaysChange(Number(e.target.value))} 
+              onChange={e => setVacationDays(Number(e.target.value))} 
               className={`${isMobile ? 'w-full' : 'w-24'}`} 
               min={1} 
-              max={50} 
+              max={40} 
               placeholder="Ange dagar"
               aria-label="Ange antal semesterdagar" 
             />

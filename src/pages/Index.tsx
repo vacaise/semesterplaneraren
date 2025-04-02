@@ -37,11 +37,10 @@ const Index = () => {
   const resetToStart = () => {
     setCurrentStep(1);
     setOptimizedSchedule(null);
-    // Återställ alla val till standardvärden
-    setYear(new Date().getFullYear());
-    setVacationDays(25);
-    setSelectedMode("balanced");
-    setHolidays([]);
+    // Optionally reset other values to defaults
+    // setVacationDays(25);
+    // setSelectedMode("balanced");
+    // setHolidays([]);
     window.scrollTo(0, 0);
   };
 
@@ -99,20 +98,8 @@ const Index = () => {
     
     try {
       console.log("Generating schedule with holidays:", holidays);
-      console.log("Requested vacation days:", vacationDays);
       const optimizedScheduleData = optimizeVacation(year, vacationDays, holidays, selectedMode);
       console.log("Generated schedule:", optimizedScheduleData);
-      
-      // Verify the exact number of vacation days were allocated
-      const usedVacationDays = optimizedScheduleData.periods.reduce(
-        (total: number, period: any) => total + period.vacationDaysNeeded, 0
-      );
-      console.log("Total vacation days used:", usedVacationDays);
-      
-      if (usedVacationDays !== vacationDays) {
-        console.warn(`Warning: Allocated ${usedVacationDays} vacation days but requested ${vacationDays}`);
-      }
-      
       setOptimizedSchedule(optimizedScheduleData);
       setCurrentStep(4);
     } catch (error) {
