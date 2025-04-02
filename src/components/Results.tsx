@@ -182,11 +182,19 @@ const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
         </div>
       </div>
       
-      <Tabs defaultValue="list" className="w-full">
+      <Tabs defaultValue="calendar" className="w-full">
         <TabsList className="mb-4">
-          <TabsTrigger value="list">Ledighetsperioder</TabsTrigger>
           <TabsTrigger value="calendar">Kalendervy</TabsTrigger>
+          <TabsTrigger value="list">Ledighetsperioder</TabsTrigger>
         </TabsList>
+        
+        <TabsContent value="calendar">
+          <MonthCalendarView 
+            schedule={schedule}
+            year={year}
+            holidays={holidays}
+          />
+        </TabsContent>
         
         <TabsContent value="list" className="space-y-6">
           <BreakTypeExplanation />
@@ -220,14 +228,6 @@ const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
               </div>
             )}
           </div>
-        </TabsContent>
-        
-        <TabsContent value="calendar">
-          <MonthCalendarView 
-            schedule={schedule}
-            year={year}
-            holidays={holidays}
-          />
         </TabsContent>
       </Tabs>
     </div>
