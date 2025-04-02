@@ -2,7 +2,7 @@
 import { addDays, differenceInDays } from 'date-fns';
 
 // Find bridge days between holidays and weekends
-export const findBridgeDays = (year: number) => {
+export const findBridgeDays = (year: number, holidays: Date[], companyDays: Date[] = []) => {
   const periods = [];
   
   // May Day (May 1)
