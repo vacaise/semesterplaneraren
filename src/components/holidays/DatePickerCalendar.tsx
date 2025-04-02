@@ -66,15 +66,16 @@ export const DatePickerCalendar = ({
     companyDay: "bg-purple-200 text-purple-800"
   };
 
+  // Create a default date for the calendar at the beginning of the specified year
+  const defaultMonth = new Date(year, 0); // January of the specified year
+
   return (
     <div className="border rounded-lg overflow-hidden bg-white p-4">
       <Calendar
         mode="single"
         selected={selectedDate}
         onSelect={handleDayClick}
-        year={year}
-        // Fix: Use a proper Date object for the month instead of a number
-        month={new Date(year, 0)}
+        defaultMonth={defaultMonth}
         showOutsideDays={false}
         className="rounded-md"
         classNames={{
