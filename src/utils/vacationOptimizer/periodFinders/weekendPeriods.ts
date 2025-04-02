@@ -3,7 +3,7 @@ import { addDays, differenceInDays } from 'date-fns';
 import { getMonthName } from '../helpers';
 
 // Find extended weekends around regular weekends
-export const findExtendedWeekends = (year: number) => {
+export const findExtendedWeekends = (year: number, holidays: Date[], companyDays: Date[] = []) => {
   const periods = [];
   
   // Create long weekends for each month
