@@ -21,6 +21,7 @@ const Index = () => {
   const [vacationDays, setVacationDays] = useState(25);
   const [selectedMode, setSelectedMode] = useState("balanced");
   const [holidays, setHolidays] = useState<Date[]>([]);
+  const [companyDays, setCompanyDays] = useState<Date[]>([]);
   const [optimizedSchedule, setOptimizedSchedule] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -32,6 +33,7 @@ const Index = () => {
 
   useEffect(() => {
     setHolidays([]);
+    setCompanyDays([]);
   }, [year]);
 
   const resetToStart = () => {
@@ -42,6 +44,7 @@ const Index = () => {
     setVacationDays(25);
     setSelectedMode("balanced");
     setHolidays([]);
+    setCompanyDays([]);
     window.scrollTo(0, 0);
   };
 
@@ -99,7 +102,8 @@ const Index = () => {
     
     try {
       console.log("Generating schedule with holidays:", holidays);
-      const optimizedScheduleData = optimizeVacation(year, vacationDays, holidays, selectedMode);
+      console.log("Company days:", companyDays);
+      const optimizedScheduleData = optimizeVacation(year, vacationDays, holidays, selectedMode, companyDays);
       console.log("Generated schedule:", optimizedScheduleData);
       setOptimizedSchedule(optimizedScheduleData);
       setCurrentStep(4);
@@ -137,7 +141,9 @@ const Index = () => {
         return (
           <StepThree 
             holidays={holidays} 
-            setHolidays={setHolidays} 
+            setHolidays={setHolidays}
+            companyDays={companyDays}
+            setCompanyDays={setCompanyDays}
             fetchHolidays={fetchHolidays} 
             year={year}
             isLoading={isLoading}
@@ -149,6 +155,7 @@ const Index = () => {
             schedule={optimizedSchedule} 
             year={year}
             holidays={holidays}
+            companyDays={companyDays}
             resetToStart={resetToStart}
           />
         );

@@ -3,12 +3,15 @@ import { isSameDay, isWeekend, format, isBefore, startOfDay } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
 // Helper function to determine if a day is a day off (weekend or holiday)
-export const isDayOff = (date: Date, holidays: Date[]): boolean => {
+export const isDayOff = (date: Date, holidays: Date[], companyDays: Date[] = []): boolean => {
   // Check if the day is a weekend (Saturday or Sunday)
   if (isWeekend(date)) return true;
   
   // Check if the day is a holiday
-  return holidays.some(holiday => isSameDay(holiday, date));
+  if (holidays.some(holiday => isSameDay(holiday, date))) return true;
+  
+  // Check if the day is a company day
+  return companyDays.some(companyDay => isSameDay(companyDay, date));
 };
 
 // Format date to a string for set operations
@@ -24,13 +27,13 @@ export const isDateInPast = (date: Date): boolean => {
 };
 
 // Get the number of work days between two dates
-export const getWorkDays = (startDate: Date, endDate: Date, holidays: Date[]): number => {
+export const getWorkDays = (startDate: Date, endDate: Date, holidays: Date[], companyDays: Date[] = []): number => {
   let workDays = 0;
   const currentDate = new Date(startDate);
   
   while (currentDate <= endDate) {
-    // Check if it's a weekday (not Saturday or Sunday) and not a holiday
-    if (!isDayOff(currentDate, holidays)) {
+    // Check if it's a weekday (not Saturday or Sunday) and not a holiday or company day
+    if (!isDayOff(currentDate, holidays, companyDays)) {
       workDays++;
     }
     

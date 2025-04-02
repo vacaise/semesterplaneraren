@@ -22,14 +22,16 @@ interface ResultsCalendarTabProps {
   schedule: Schedule;
   year: number;
   holidays: Date[];
+  companyDays: Date[];
 }
 
-export const ResultsCalendarTab = ({ schedule, year, holidays }: ResultsCalendarTabProps) => {
+export const ResultsCalendarTab = ({ schedule, year, holidays, companyDays }: ResultsCalendarTabProps) => {
   return (
     <MonthCalendarView 
       schedule={schedule}
       year={year}
       holidays={holidays}
+      companyDays={companyDays}
     />
   );
 };
