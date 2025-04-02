@@ -52,6 +52,20 @@ export const DatePickerCalendar = ({
     }
   };
 
+  // Create custom modifiers
+  const modifiers = {
+    weekend: (date: Date) => isWeekend(date),
+    holiday: (date: Date) => holidays.some(holiday => isSameDay(holiday, date)),
+    companyDay: (date: Date) => companyDays.some(companyDay => isSameDay(companyDay, date))
+  };
+
+  // Custom className functions for each day type
+  const modifiersStyles = {
+    weekend: "bg-orange-100 text-orange-800",
+    holiday: "bg-red-200 text-red-800",
+    companyDay: "bg-purple-200 text-purple-800"
+  };
+
   return (
     <div className="border rounded-lg overflow-hidden bg-white p-4">
       <Calendar
@@ -67,20 +81,9 @@ export const DatePickerCalendar = ({
           day_disabled: "text-gray-300 hover:bg-transparent",
           day_outside: "hidden"
         }}
-        modifiers={{
-          disabled: isDateDisabled
-        }}
-        modifiersClassNames={{
-          weekend: (day) => cn(
-            isWeekend(day) && !isDateDisabled(day) ? "bg-orange-100 text-orange-800" : "",
-          ),
-          holiday: (day) => cn(
-            holidays.some(holiday => isSameDay(holiday, day)) ? "bg-red-200 text-red-800" : ""
-          ),
-          companyDay: (day) => cn(
-            companyDays.some(companyDay => isSameDay(companyDay, day)) ? "bg-purple-200 text-purple-800" : ""
-          )
-        }}
+        modifiers={modifiers}
+        modifiersClassNames={modifiersStyles}
+        disabled={isDateDisabled}
       />
       {selectedDate && (
         <div className="mt-4">
