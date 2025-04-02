@@ -36,13 +36,13 @@ const generatePossiblePeriods = (year: number, holidays: Date[]): VacationPeriod
   periods.push(...findKeyPeriods(year, holidays));
   
   // 2. Find bridge days between holidays and weekends
-  periods.push(...findBridgeDays(year));
+  periods.push(...findBridgeDays(year, holidays));
   
   // 3. Find extended weekends (Thursday-Sunday or Friday-Monday)
-  periods.push(...findExtendedWeekends(year));
+  periods.push(...findExtendedWeekends(year, holidays));
   
   // 4. Find summer vacation options
-  periods.push(...findSummerPeriods(year));
+  periods.push(...findSummerPeriods(year, holidays));
   
   // 5. Generate more possible combinations to increase efficiency
   const additionalPeriods = generateAdditionalPeriods(year, holidays);
@@ -54,6 +54,8 @@ const generatePossiblePeriods = (year: number, holidays: Date[]): VacationPeriod
 // Generate additional vacation period options to maximize efficiency
 const generateAdditionalPeriods = (year: number, holidays: Date[]): VacationPeriod[] => {
   const additionalPeriods: VacationPeriod[] = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   
   // Add week-long options focusing on months with higher holiday density
   const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
@@ -61,6 +63,11 @@ const generateAdditionalPeriods = (year: number, holidays: Date[]): VacationPeri
   months.forEach(month => {
     // Create a week-long period in the middle of each month
     const startDay = new Date(year, month - 1, 15);
+    
+    // Skip months that are in the past
+    if (startDay < today && startDay.getFullYear() === today.getFullYear()) {
+      return;
+    }
     
     // Find the next Monday
     while (startDay.getDay() !== 1) {
@@ -81,6 +88,13 @@ const generateAdditionalPeriods = (year: number, holidays: Date[]): VacationPeri
       currentDay.setDate(currentDay.getDate() + 1);
     }
     
+    // Calculate efficiency score: total days / vacation days needed
+    const efficiencyScore = 7 / Math.max(vacationDaysNeeded, 1);
+    const baseScore = 50;
+    
+    // Increase score for periods with good efficiency
+    const efficiencyBonus = Math.floor((efficiencyScore - 1) * 20);
+    
     additionalPeriods.push({
       start: new Date(startDay),
       end: new Date(endDay),
@@ -88,7 +102,7 @@ const generateAdditionalPeriods = (year: number, holidays: Date[]): VacationPeri
       vacationDaysNeeded,
       description: `${month}-veckan`,
       type: "week",
-      score: 50
+      score: baseScore + efficiencyBonus
     });
     
     // Also add mini-breaks (Thursday-Sunday)
@@ -98,17 +112,18 @@ const generateAdditionalPeriods = (year: number, holidays: Date[]): VacationPeri
       thursdayDate.setDate(thursdayDate.getDate() + 1);
     }
     
-    // Add 2 Thursday-Sunday mini-breaks per month
-    for (let i = 0; i < 2; i++) {
+    // Add 3 Thursday-Sunday mini-breaks per month for better coverage
+    for (let i = 0; i < 3; i++) {
       const thurStart = new Date(thursdayDate);
-      thurStart.setDate(thursdayDate.getDate() + (i * 14)); // Every other Thursday
+      thurStart.setDate(thursdayDate.getDate() + (i * 7)); // Every Thursday
+      
+      // Skip if in the past
+      if (thurStart < today && thurStart.getFullYear() === today.getFullYear()) {
+        continue;
+      }
       
       const thurEnd = new Date(thurStart);
       thurEnd.setDate(thurStart.getDate() + 3); // Sunday
-      
-      // Skip if in the past
-      const today = new Date();
-      if (thurEnd < today) continue;
       
       // Calculate vacation days needed
       let miniBreakDaysNeeded = 0;
@@ -121,6 +136,10 @@ const generateAdditionalPeriods = (year: number, holidays: Date[]): VacationPeri
         currentMiniDay.setDate(currentMiniDay.getDate() + 1);
       }
       
+      // Calculate efficiency for this mini-break
+      const miniBreakEfficiency = 4 / Math.max(miniBreakDaysNeeded, 1);
+      const miniBreakBonus = Math.floor((miniBreakEfficiency - 1) * 15);
+      
       additionalPeriods.push({
         start: thurStart,
         end: thurEnd,
@@ -128,7 +147,49 @@ const generateAdditionalPeriods = (year: number, holidays: Date[]): VacationPeri
         vacationDaysNeeded: miniBreakDaysNeeded,
         description: `Långhelg i ${getMonthName(month - 1)}`,
         type: "weekend",
-        score: 45
+        score: 45 + miniBreakBonus
+      });
+    }
+    
+    // Add Monday-Wednesday mini-breaks for more options
+    const mondayDate = new Date(year, month - 1, 1);
+    // Find the first Monday of the month
+    while (mondayDate.getDay() !== 1) {
+      mondayDate.setDate(mondayDate.getDate() + 1);
+    }
+    
+    // Add Monday-Wednesday mini-breaks
+    for (let i = 0; i < 2; i++) {
+      const monStart = new Date(mondayDate);
+      monStart.setDate(mondayDate.getDate() + (i * 14)); // Every other Monday
+      
+      // Skip if in the past
+      if (monStart < today && monStart.getFullYear() === today.getFullYear()) {
+        continue;
+      }
+      
+      const monEnd = new Date(monStart);
+      monEnd.setDate(monStart.getDate() + 2); // Wednesday
+      
+      // Calculate vacation days needed
+      let monWedDaysNeeded = 0;
+      const currentMonDay = new Date(monStart);
+      
+      while (currentMonDay <= monEnd) {
+        if (!isDayOff(currentMonDay, holidays)) {
+          monWedDaysNeeded++;
+        }
+        currentMonDay.setDate(currentMonDay.getDate() + 1);
+      }
+      
+      additionalPeriods.push({
+        start: monStart,
+        end: monEnd,
+        days: 3,
+        vacationDaysNeeded: monWedDaysNeeded,
+        description: `Minisemester i ${getMonthName(month - 1)}`,
+        type: "mini",
+        score: 40
       });
     }
   });

@@ -1,16 +1,22 @@
 
 import { VacationPeriod } from './types';
 
-// Score periods based on optimization mode
+// Score periods based on optimization mode and efficiency
 export const scorePeriods = (periods: VacationPeriod[], mode: string): VacationPeriod[] => {
   const scoredPeriods = [...periods];
   
-  // Apply base scores based on period characteristics
+  // Apply base scores based on period characteristics and mode preference
   scoredPeriods.forEach(period => {
     // Default base score if not set
     if (period.score === undefined) {
       period.score = 0;
     }
+    
+    // Calculate efficiency (days per vacation day)
+    const efficiency = period.days / Math.max(period.vacationDaysNeeded, 1);
+    
+    // Bonus score for high efficiency
+    period.score += Math.floor((efficiency - 1) * 15);
     
     // Apply mode-specific scoring
     if (mode === "longweekends" && period.days <= 4) {
@@ -42,19 +48,26 @@ export const scorePeriods = (periods: VacationPeriod[], mode: string): VacationP
     if (mode === "extended" && period.days <= 9) {
       period.score -= 20;
     }
+    
+    // Bonus for special period types
+    switch(period.type) {
+      case "bridge":
+        period.score += 10; // Bridge days are efficient
+        break;
+      case "summer": 
+        if (mode === "extended") {
+          period.score += 15; // Summer periods are good for extended mode
+        }
+        break;
+      case "holiday":
+        period.score += 8; // Holiday periods are culturally important
+        break;
+    }
   });
   
-  // Sort periods based on mode preference and chronologically (starting with nearest date)
+  // Sort periods based on mode preference and score
   scoredPeriods.sort((a, b) => {
-    // First sort by start date (chronologically)
-    const aStartTime = new Date(a.start).getTime();
-    const bStartTime = new Date(b.start).getTime();
-    
-    if (aStartTime !== bStartTime) {
-      return aStartTime - bStartTime; // Earlier periods first
-    }
-    
-    // If dates are the same, sort by score (higher score first)
+    // Sort by score (higher score first)
     return (b.score || 0) - (a.score || 0);
   });
   

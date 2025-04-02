@@ -23,89 +23,60 @@ export const selectOptimalPeriods = (
     return endDate >= now;
   });
   
-  // Sort by efficiency (days off per vacation day needed)
+  // Primary Sort: Sort by score (mode preference and efficiency)
   validPeriods.sort((a, b) => {
-    const aEfficiency = a.days / Math.max(a.vacationDaysNeeded, 1);
-    const bEfficiency = b.days / Math.max(b.vacationDaysNeeded, 1);
-    
-    // If efficiency is the same, prioritize by mode preference
-    if (aEfficiency === bEfficiency) {
-      return (b.score || 0) - (a.score || 0);
-    }
-    
-    return bEfficiency - aEfficiency;
+    return (b.score || 0) - (a.score || 0);
   });
   
   // Define maximum number of periods to select based on mode
   let maxPeriods = 10; // Default
   
   if (mode === "longweekends") {
-    maxPeriods = 15; // More shorter periods
+    maxPeriods = 20; // More shorter periods for long weekends
+  } else if (mode === "minibreaks") {
+    maxPeriods = 15; // Moderate number for mini-breaks
+  } else if (mode === "weeks") {
+    maxPeriods = 8; // Fewer, week-long breaks
   } else if (mode === "extended") {
-    maxPeriods = 5; // Fewer longer periods
+    maxPeriods = 5; // Very few long periods
   }
   
-  // First pass: try to select periods with extremely high efficiency
+  // First pass: select periods that match the mode with high score
   const selectedPeriods: VacationPeriod[] = [];
   let remainingVacationDays = vacationDays;
   
-  // First select periods that match the requested mode
+  // First select high-priority periods that match the requested mode
   for (const period of validPeriods) {
-    let isPreferredType = false;
-    
-    if (mode === "longweekends" && period.days <= 4) {
-      isPreferredType = true;
-    } else if (mode === "minibreaks" && period.days <= 6 && period.days > 4) {
-      isPreferredType = true;
-    } else if (mode === "weeks" && period.days <= 9 && period.days > 6) {
-      isPreferredType = true;
-    } else if (mode === "extended" && period.days > 9) {
-      isPreferredType = true;
-    } else if (mode === "balanced") {
-      isPreferredType = true;
+    // Skip if period uses more days than we have left
+    if (period.vacationDaysNeeded > remainingVacationDays) {
+      continue;
     }
     
-    const efficiency = period.days / Math.max(period.vacationDaysNeeded, 1);
+    // Check if this period overlaps with already selected periods
+    const hasOverlap = selectedPeriods.some(selected => {
+      return (
+        (period.start >= selected.start && period.start <= selected.end) ||
+        (period.end >= selected.start && period.end <= selected.end) ||
+        (selected.start >= period.start && selected.start <= period.end) ||
+        (selected.end >= period.start && selected.end <= period.end)
+      );
+    });
     
-    // Only select high-efficiency periods that match the mode
-    if (isPreferredType && efficiency >= 1.5 && period.vacationDaysNeeded <= remainingVacationDays) {
+    if (!hasOverlap) {
       selectedPeriods.push(period);
       remainingVacationDays -= period.vacationDaysNeeded;
       
-      // If we've hit our target or run out of vacation days, break
+      // Break if we've hit our target or run out of vacation days
       if (selectedPeriods.length >= maxPeriods || remainingVacationDays <= 0) {
         break;
       }
     }
   }
   
-  // Second pass: fill in remaining vacation days with efficient periods
-  if (remainingVacationDays > 0) {
-    for (const period of validPeriods) {
-      // Skip already selected periods
-      if (selectedPeriods.some(p => 
-        p.start.getTime() === period.start.getTime() && 
-        p.end.getTime() === period.end.getTime()
-      )) {
-        continue;
-      }
-      
-      if (period.vacationDaysNeeded <= remainingVacationDays) {
-        selectedPeriods.push(period);
-        remainingVacationDays -= period.vacationDaysNeeded;
-      }
-      
-      // If we've hit our target or run out of vacation days, break
-      if (selectedPeriods.length >= maxPeriods || remainingVacationDays <= 0) {
-        break;
-      }
-    }
-  }
-  
-  // Final attempt: if we still have vacation days and need to use all days
+  // Second pass: try to add individual days to exactly match the vacation day count
   if (remainingVacationDays > 0 && useExactDays) {
-    // Try to add individual days to use up all vacation days
-    const singleDays = createSingleDayPeriods(year, holidays, remainingVacationDays);
+    // First try to add strategic individual days (bridge days, etc.)
+    const singleDays = createSingleDayPeriods(year, holidays, remainingVacationDays, selectedPeriods);
     
     for (const singleDay of singleDays) {
       // Check that there's no overlap with existing periods
@@ -141,44 +112,79 @@ export const selectOptimalPeriods = (
   return selectedPeriods;
 };
 
-// Create single-day periods to use up any remaining vacation days
-const createSingleDayPeriods = (year: number, holidays: Date[], daysNeeded: number): VacationPeriod[] => {
+// Create single-day periods with strategic value
+const createSingleDayPeriods = (
+  year: number, 
+  holidays: Date[], 
+  daysNeeded: number,
+  existingPeriods: VacationPeriod[]
+): VacationPeriod[] => {
   const singleDays: VacationPeriod[] = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   
-  // Start from today and go forward
-  const startDate = new Date(today);
+  // Array of dates to check for strategic importance
+  const allDates = [];
+  for (let month = today.getMonth(); month < 12; month++) {
+    for (let day = 1; day <= 31; day++) {
+      const date = new Date(year, month, day);
+      
+      // Skip if invalid date
+      if (date.getMonth() !== month) continue;
+      
+      // Skip if in the past
+      if (date < today) continue;
+      
+      // Skip if it's already a day off
+      if (isDayOff(date, holidays)) continue;
+      
+      allDates.push(new Date(date));
+    }
+  }
   
-  // Try to find days that are workdays (not weekends or holidays)
-  // and create single-day vacation periods for them
-  for (let i = 0; i < 365 && singleDays.length < daysNeeded; i++) {
-    const currentDate = new Date(startDate);
-    currentDate.setDate(startDate.getDate() + i);
+  // Find strategic single days - Prioritize days between holidays/weekends
+  for (let i = 1; i < allDates.length - 1; i++) {
+    const yesterday = allDates[i-1];
+    const today = allDates[i];
+    const tomorrow = allDates[i+1];
     
-    // Skip if it's already a day off
-    if (isDayOff(currentDate, holidays)) continue;
+    // Skip already skipped dates
+    if (isDayOff(today, holidays)) continue;
     
-    // Skip December 24-26 and December 31-January 1 (common holiday periods)
-    const month = currentDate.getMonth();
-    const day = currentDate.getDate();
-    if ((month === 11 && (day >= 24 && day <= 26)) || 
-        (month === 11 && day === 31) || 
-        (month === 0 && day === 1)) {
-      continue;
+    // Check if this day would create a bridge between days off
+    const yesterdayOff = isDayOff(yesterday, holidays);
+    const tomorrowOff = isDayOff(tomorrow, holidays);
+    
+    if (yesterdayOff && tomorrowOff) {
+      // Bridge day between two days off - highest priority
+      singleDays.push({
+        start: new Date(today),
+        end: new Date(today),
+        days: 1,
+        vacationDaysNeeded: 1,
+        description: `Klämdag ${today.getDate()}/${today.getMonth() + 1}`,
+        type: "bridge",
+        score: 95
+      });
+    } else if (yesterdayOff || tomorrowOff) {
+      // Day next to a day off - medium priority
+      singleDays.push({
+        start: new Date(today),
+        end: new Date(today),
+        days: 1,
+        vacationDaysNeeded: 1,
+        description: `Förlängd helg ${today.getDate()}/${today.getMonth() + 1}`,
+        type: "weekend",
+        score: 80
+      });
     }
     
-    // Create a single-day period
-    singleDays.push({
-      start: new Date(currentDate),
-      end: new Date(currentDate),
-      days: 1,
-      vacationDaysNeeded: 1,
-      description: `Extra ledig dag ${currentDate.getDate()}/${currentDate.getMonth() + 1}`,
-      type: "single",
-      score: 20
-    });
+    // Stop if we have enough days
+    if (singleDays.length >= daysNeeded * 2) break; // Generate extra for selection
   }
+  
+  // Sort by score
+  singleDays.sort((a, b) => (b.score || 0) - (a.score || 0));
   
   return singleDays;
 };
@@ -194,8 +200,7 @@ const createRemainingDayPeriods = (
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   
-  // Try to add workdays that don't overlap with existing periods
-  // Focus on Mondays and Fridays first to create long weekends
+  // Prioritize Mondays and Fridays first to create long weekends
   const daysToCheck = [];
   
   // Add all potential Mondays and Fridays for the rest of the year
@@ -249,6 +254,7 @@ const createRemainingDayPeriods = (
     });
     
     if (!hasOverlap) {
+      // Add this day as a vacation day
       remainingDays.push({
         start: new Date(date),
         end: new Date(date),
