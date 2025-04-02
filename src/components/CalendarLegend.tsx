@@ -12,10 +12,6 @@ export const CalendarLegend = () => {
         <span className="text-xs sm:text-sm text-gray-600">Röd dag</span>
       </div>
       <div className="flex items-center">
-        <div className="h-3 w-3 sm:h-4 sm:w-4 rounded bg-purple-200 mr-1 sm:mr-2"></div>
-        <span className="text-xs sm:text-sm text-gray-600">Klämdag</span>
-      </div>
-      <div className="flex items-center">
         <div className="h-3 w-3 sm:h-4 sm:w-4 rounded bg-orange-100 mr-1 sm:mr-2"></div>
         <span className="text-xs sm:text-sm text-gray-600">Helg</span>
       </div>

@@ -4,13 +4,13 @@ import { formatDateToString, isDayOff } from './helpers';
 import { VacationPeriod } from './types';
 
 // Calculate total days off from all selected periods
-export const calculateTotalDaysOff = (periods: VacationPeriod[], holidays: Date[], companyDays: Date[] = []): number => {
+export const calculateTotalDaysOff = (periods: VacationPeriod[], holidays: Date[]): number => {
   // Simple sum of days per period
   return periods.reduce((total, period) => total + period.days, 0);
 };
 
 // Calculate required vacation days for a period
-export const calculateVacationDaysNeeded = (start: Date, end: Date, holidays: Date[], companyDays: Date[] = []): number => {
+export const calculateVacationDaysNeeded = (start: Date, end: Date, holidays: Date[]): number => {
   let vacationDaysNeeded = 0;
   let currentDay = new Date(start);
   
@@ -22,11 +22,7 @@ export const calculateVacationDaysNeeded = (start: Date, end: Date, holidays: Da
       format(holiday, 'yyyy-MM-dd') === format(currentDay, 'yyyy-MM-dd')
     );
     
-    const isCompanyDay = companyDays.some(companyDay => 
-      format(companyDay, 'yyyy-MM-dd') === format(currentDay, 'yyyy-MM-dd')
-    );
-    
-    if (!isWeekend && !isHoliday && !isCompanyDay) {
+    if (!isWeekend && !isHoliday) {
       vacationDaysNeeded++;
     }
     

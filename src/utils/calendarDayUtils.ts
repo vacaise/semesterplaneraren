@@ -23,17 +23,11 @@ export const isInPeriod = (date: Date, periods: Array<{ start: Date; end: Date }
 export const getDayType = (
   date: Date, 
   holidays: Date[], 
-  periods: Array<{ start: Date; end: Date }>,
-  companyDays: Date[] = []
+  periods: Array<{ start: Date; end: Date }>
 ): DayTypeInfo => {
   // Röd dag (helgdag)
   if (holidays.some(holiday => isSameDay(holiday, date))) {
     return { className: "bg-red-200 text-red-800", type: "Röd dag" };
-  }
-  
-  // Klämdag (företagsspecifik ledig dag)
-  if (companyDays.some(day => isSameDay(day, date))) {
-    return { className: "bg-purple-200 text-purple-800", type: "Klämdag" };
   }
   
   // Helg

@@ -1,7 +1,25 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format, isPast } from "date-fns";
-import { Info } from "lucide-react";
+import { sv } from "date-fns/locale";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { 
+  CalendarDays, 
+  MapPin, 
+  ChevronLeft, 
+  ChevronRight,
+  Info
+} from "lucide-react";
 import { 
   Tooltip,
   TooltipContent,
@@ -9,11 +27,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { DatePickerCalendar } from "@/components/holidays/DatePickerCalendar";
-import { HolidaySelector } from "@/components/holidays/HolidaySelector";
-import { CompanyDaysSelector } from "@/components/holidays/CompanyDaysSelector";
-import { Button } from "@/components/ui/button";
-import { MapPin } from "lucide-react";
 
 interface StepThreeProps {
   holidays: Date[];
@@ -21,8 +34,6 @@ interface StepThreeProps {
   fetchHolidays: () => void;
   year: number;
   isLoading: boolean;
-  companyDays: Date[];
-  setCompanyDays: (companyDays: Date[]) => void;
 }
 
 const StepThree = ({ 
@@ -30,31 +41,35 @@ const StepThree = ({
   setHolidays, 
   fetchHolidays, 
   year,
-  isLoading,
-  companyDays,
-  setCompanyDays 
+  isLoading 
 }: StepThreeProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [addingCompanyDay, setAddingCompanyDay] = useState(false);
   const isMobile = useIsMobile();
+  const today = new Date();
 
-  const handleAddHoliday = () => {
+  const addHoliday = () => {
     if (selectedDate) {
+      // Check if date already exists or is in the past
       const exists = holidays.some(
-        date => format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
+        (date) => format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
       );
       
-      const isCompanyDay = companyDays.some(
-        date => format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
-      );
-      
-      if (!exists && !isCompanyDay && !isPast(selectedDate)) {
+      if (!exists && !isPast(selectedDate)) {
         setHolidays([...holidays, selectedDate]);
         setSelectedDate(undefined);
       } else if (isPast(selectedDate)) {
+        // Don't allow adding past dates
         setSelectedDate(undefined);
       }
     }
+  };
+
+  const removeHoliday = (dateToRemove: Date) => {
+    setHolidays(
+      holidays.filter(
+        (date) => format(date, "yyyy-MM-dd") !== format(dateToRemove, "yyyy-MM-dd")
+      )
+    );
   };
 
   const handleFetchHolidays = () => {
@@ -88,7 +103,6 @@ const StepThree = ({
         </TooltipProvider>
       </div>
 
-      {/* Knapp för att identifiera röda dagar automatiskt */}
       <Button
         onClick={handleFetchHolidays}
         disabled={isLoading}
@@ -99,44 +113,85 @@ const StepThree = ({
         {isLoading ? "Hämtar..." : "Identifiera röda dagar automatiskt"}
       </Button>
 
-      {/* Datumväljare och röda dagar sida vid sida */}
       <div className={`grid grid-cols-1 ${isMobile ? 'gap-4' : 'md:grid-cols-2 gap-6'}`}>
-        {/* Datumväljare till vänster */}
-        <DatePickerCalendar
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-          year={year}
-          onAddHoliday={handleAddHoliday}
-          onAddCompanyDay={() => {}}
-          addingCompanyDay={false}
-          holidays={holidays}
-          companyDays={companyDays}
-        />
+        <div className="border rounded-lg overflow-hidden bg-white p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="font-medium text-gray-800">Välj datum</h4>
+          </div>
+          <div className={`${isMobile ? 'flex justify-center' : ''}`}>
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              className="rounded-md"
+              locale={sv}
+              defaultMonth={new Date(year, 0)}
+              classNames={{
+                head_cell: "text-xs font-medium text-gray-500",
+                day: "h-9 w-9 text-sm p-0 font-normal aria-selected:opacity-100 aria-selected:bg-red-100 aria-selected:text-red-800 aria-selected:font-medium",
+                day_today: "bg-red-50 text-red-800 font-medium",
+                nav_button: "h-7 w-7 bg-transparent p-0 opacity-70 hover:opacity-100",
+                months: isMobile ? "flex flex-col space-y-4" : "",
+                month: isMobile ? "flex flex-col space-y-4" : "",
+              }}
+              components={{
+                IconLeft: () => <ChevronLeft className="h-4 w-4" />,
+                IconRight: () => <ChevronRight className="h-4 w-4" />,
+              }}
+            />
+          </div>
+          <Button 
+            onClick={addHoliday} 
+            disabled={!selectedDate}
+            className="w-full mt-4"
+          >
+            Lägg till röd dag
+          </Button>
+        </div>
 
-        {/* Röda dagar till höger */}
         <div className="border rounded-lg overflow-hidden bg-white p-4">
           <h4 className="font-medium text-gray-800 mb-4">Röda dagar ({holidays.length})</h4>
-          <HolidaySelector
-            holidays={holidays}
-            setHolidays={setHolidays}
-            fetchHolidays={fetchHolidays}
-            year={year}
-            isLoading={isLoading}
-            selectedDate={selectedDate}
-            setSelectedDate={setSelectedDate}
-            hideAutoButton={true} // Hide the auto button since we've moved it to the top
-          />
+          {holidays.length > 0 ? (
+            <ScrollArea className={`${isMobile ? 'h-[200px]' : 'h-[250px]'}`}>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Datum</TableHead>
+                    <TableHead>Dag</TableHead>
+                    <TableHead></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {[...holidays].sort((a, b) => a.getTime() - b.getTime()).map((date, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium">
+                        {isMobile 
+                          ? format(date, "d MMM yyyy", { locale: sv }) 
+                          : format(date, "d MMMM yyyy", { locale: sv })}
+                      </TableCell>
+                      <TableCell>{format(date, "EEEE", { locale: sv })}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeHoliday(date)}
+                          className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
+                        >
+                          &times;
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </ScrollArea>
+          ) : (
+            <div className={`flex items-center justify-center ${isMobile ? 'h-[200px]' : 'h-[250px]'} bg-gray-50 rounded-md`}>
+              <p className="text-gray-500">Inga röda dagar tillagda än</p>
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Klämdagar som ett collapsible element */}
-      <CompanyDaysSelector
-        companyDays={companyDays}
-        setCompanyDays={setCompanyDays}
-        holidays={holidays}
-        selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
-      />
 
       <div className="bg-red-50 p-4 rounded-md border border-red-100">
         <h3 className="font-medium text-red-800 mb-2">Observera</h3>

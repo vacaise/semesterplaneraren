@@ -4,7 +4,7 @@ import { isDayOff } from '../helpers';
 import { VacationPeriod } from '../types';
 
 // Create extra periods for remaining vacation days
-export const createExtraPeriods = (year: number, holidays: Date[], companyDays: Date[] = []): VacationPeriod[] => {
+export const createExtraPeriods = (year: number, holidays: Date[]): VacationPeriod[] => {
   const extraPeriods: VacationPeriod[] = [];
   
   // Find a good period for winter break (February)
@@ -21,7 +21,7 @@ export const createExtraPeriods = (year: number, holidays: Date[], companyDays: 
   const currentDay = new Date(sportBreakStartDate);
   
   while (currentDay <= sportBreakEnd) {
-    if (!isDayOff(currentDay, holidays, companyDays)) {
+    if (!isDayOff(currentDay, holidays)) {
       sportBreakVacationDays++;
     }
     currentDay.setDate(currentDay.getDate() + 1);
@@ -51,7 +51,7 @@ export const createExtraPeriods = (year: number, holidays: Date[], companyDays: 
   const fallCurrentDay = new Date(fallBreakStartDate);
   
   while (fallCurrentDay <= fallBreakEnd) {
-    if (!isDayOff(fallCurrentDay, holidays, companyDays)) {
+    if (!isDayOff(fallCurrentDay, holidays)) {
       fallBreakVacationDays++;
     }
     fallCurrentDay.setDate(fallCurrentDay.getDate() + 1);
@@ -81,7 +81,7 @@ export const createExtraPeriods = (year: number, holidays: Date[], companyDays: 
   const springCurrentDay = new Date(springBreakStartDate);
   
   while (springCurrentDay <= springBreakEnd) {
-    if (!isDayOff(springCurrentDay, holidays, companyDays)) {
+    if (!isDayOff(springCurrentDay, holidays)) {
       springBreakVacationDays++;
     }
     springCurrentDay.setDate(springCurrentDay.getDate() + 1);
@@ -111,7 +111,7 @@ export const createExtraPeriods = (year: number, holidays: Date[], companyDays: 
   const novemberCurrentDay = new Date(novemberBreakStartDate);
   
   while (novemberCurrentDay <= novemberBreakEnd) {
-    if (!isDayOff(novemberCurrentDay, holidays, companyDays)) {
+    if (!isDayOff(novemberCurrentDay, holidays)) {
       novemberBreakVacationDays++;
     }
     novemberCurrentDay.setDate(novemberCurrentDay.getDate() + 1);
@@ -154,7 +154,7 @@ export const createExtraPeriods = (year: number, holidays: Date[], companyDays: 
     const fridayCurrentDay = new Date(fridayDate);
     
     while (fridayCurrentDay <= fridayEnd) {
-      if (!isDayOff(fridayCurrentDay, holidays, companyDays)) {
+      if (!isDayOff(fridayCurrentDay, holidays)) {
         fridayVacationDays++;
       }
       fridayCurrentDay.setDate(fridayCurrentDay.getDate() + 1);

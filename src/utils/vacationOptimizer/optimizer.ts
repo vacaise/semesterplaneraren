@@ -11,48 +11,47 @@ export const findOptimalSchedule = (
   year: number,
   vacationDays: number,
   holidays: Date[],
-  mode: string,
-  companyDays: Date[] = []
+  mode: string
 ): VacationPeriod[] => {
   // Generate all possible periods by scanning the year
-  const allPossiblePeriods = generatePossiblePeriods(year, holidays, companyDays);
+  const allPossiblePeriods = generatePossiblePeriods(year, holidays);
   
   // Score and prioritize periods based on the selected mode
   const scoredPeriods = scorePeriods(allPossiblePeriods, mode);
   
   // Generate additional periods to fill in gaps and maximize total time off
-  const extraPeriods = createExtraPeriods(year, holidays, companyDays);
+  const extraPeriods = createExtraPeriods(year, holidays);
   const allPeriods = [...scoredPeriods, ...extraPeriods];
   
   // Select the optimal combination of periods
-  return selectOptimalPeriods(allPeriods, vacationDays, year, holidays, mode, companyDays);
+  return selectOptimalPeriods(allPeriods, vacationDays, year, holidays, mode);
 };
 
 // Generate all possible vacation periods around holidays and weekends
-const generatePossiblePeriods = (year: number, holidays: Date[], companyDays: Date[] = []): VacationPeriod[] => {
+const generatePossiblePeriods = (year: number, holidays: Date[]): VacationPeriod[] => {
   const periods: VacationPeriod[] = [];
   
   // 1. Find periods around major holidays (Easter, Christmas, Midsummer, etc.)
-  periods.push(...findKeyPeriods(year, holidays, companyDays));
+  periods.push(...findKeyPeriods(year, holidays));
   
   // 2. Find bridge days between holidays and weekends
-  periods.push(...findBridgeDays(year, holidays, companyDays));
+  periods.push(...findBridgeDays(year));
   
   // 3. Find extended weekends (Thursday-Sunday or Friday-Monday)
-  periods.push(...findExtendedWeekends(year, holidays, companyDays));
+  periods.push(...findExtendedWeekends(year));
   
   // 4. Find summer vacation options
-  periods.push(...findSummerPeriods(year, holidays, companyDays));
+  periods.push(...findSummerPeriods(year));
   
   // 5. Generate more possible combinations to increase efficiency
-  const additionalPeriods = generateAdditionalPeriods(year, holidays, companyDays);
+  const additionalPeriods = generateAdditionalPeriods(year, holidays);
   periods.push(...additionalPeriods);
   
   return periods;
 };
 
 // Generate additional vacation period options to maximize efficiency
-const generateAdditionalPeriods = (year: number, holidays: Date[], companyDays: Date[] = []): VacationPeriod[] => {
+const generateAdditionalPeriods = (year: number, holidays: Date[]): VacationPeriod[] => {
   const additionalPeriods: VacationPeriod[] = [];
   
   // Add week-long options focusing on months with higher holiday density
@@ -75,7 +74,7 @@ const generateAdditionalPeriods = (year: number, holidays: Date[], companyDays: 
     const currentDay = new Date(startDay);
     
     while (currentDay <= endDay) {
-      if (!isDayOff(currentDay, holidays, companyDays)) {
+      if (!isDayOff(currentDay, holidays)) {
         vacationDaysNeeded++;
       }
       currentDay.setDate(currentDay.getDate() + 1);
@@ -115,7 +114,7 @@ const generateAdditionalPeriods = (year: number, holidays: Date[], companyDays: 
       const currentMiniDay = new Date(thurStart);
       
       while (currentMiniDay <= thurEnd) {
-        if (!isDayOff(currentMiniDay, holidays, companyDays)) {
+        if (!isDayOff(currentMiniDay, holidays)) {
           miniBreakDaysNeeded++;
         }
         currentMiniDay.setDate(currentMiniDay.getDate() + 1);
