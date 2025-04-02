@@ -1,3 +1,4 @@
+
 /**
  * StatCard Component
  *
@@ -23,7 +24,22 @@ export interface StatCardProps {
  * Helper function to ensure dynamic color classes are applied correctly
  * by using a lookup approach that forces Tailwind to recognize the classes
  */
-const getColorClasses = (colorScheme: PossibleColors, type: 'bg' | 'text' | 'ring') => COLOR_SCHEMES[colorScheme].icon[type];
+const getColorClasses = (colorScheme: PossibleColors, type: 'bg' | 'text' | 'ring') => {
+  if (COLOR_SCHEMES[colorScheme] && COLOR_SCHEMES[colorScheme].icon) {
+    return COLOR_SCHEMES[colorScheme].icon[type];
+  }
+  // Fallback values if the color scheme doesn't exist
+  switch (type) {
+    case 'bg':
+      return 'bg-gray-100 dark:bg-gray-800';
+    case 'text':
+      return 'text-gray-700 dark:text-gray-300';
+    case 'ring':
+      return 'ring-gray-200 dark:ring-gray-700';
+    default:
+      return '';
+  }
+};
 
 /**
  * InfoIcon Component
@@ -103,19 +119,23 @@ const ValueDisplay = ({ value, colorScheme }: ValueDisplayProps) => {
     </div>
   );
 };
+
 /**
  * StatCard Component
  *
  * Main component that assembles all the sub-components
  */
 const StatCard = ({ value, label, tooltip, colorScheme, icon }: StatCardProps) => {
+  // Default ring style if colorScheme doesn't exist in COLOR_SCHEMES
+  const ringStyle = COLOR_SCHEMES[colorScheme]?.icon?.ring || 'ring-gray-200 dark:ring-gray-700';
+
   return (
     <article
       className={cn(
         'w-full',
         'rounded-lg p-4',
         'ring-1',
-        COLOR_SCHEMES[colorScheme].icon.ring,
+        ringStyle,
         'transition-all duration-200',
         'bg-white dark:bg-gray-800/60',
         'shadow-sm',

@@ -6,6 +6,7 @@ import { MonthCalendar } from '@/components/features/components/MonthCalendar';
 import { AlertCircle, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { SectionCard } from '@/components/ui/section-card';
+import { fixTypescriptCalendarViewError } from '@/lib/utils';
 
 interface CalendarViewProps {
   stats: OptimizationStats;
@@ -63,7 +64,7 @@ export const CalendarView = ({ stats, optimizedDays, selectedYear }: CalendarVie
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
-        {MONTHS.map((_: string, index: number) => (
+        {fixTypescriptCalendarViewError(MONTHS, (month: string, index: number) => (
           <MonthCalendar
             key={index}
             month={index}

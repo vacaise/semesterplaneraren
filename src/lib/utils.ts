@@ -1,6 +1,7 @@
 
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { PossibleColors } from "@/types"
 
 /**
  * Combines multiple class names using clsx and tailwind-merge
@@ -62,7 +63,7 @@ export type DayType = 'default' | 'companyDayOff' | 'weekend' | 'pto' | 'publicH
 /**
  * Maps day types to their color schemes
  */
-export const dayTypeToColorScheme: Record<DayType, keyof typeof import('../constants').COLOR_SCHEMES> = {
+export const dayTypeToColorScheme: Record<DayType, PossibleColors> = {
   default: 'default',
   pto: 'pto',
   publicHoliday: 'publicHoliday',

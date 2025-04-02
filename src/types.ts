@@ -81,7 +81,11 @@ type TailwindColor =
 type SpecialColor = 'black' | 'white' | 'transparent' | 'current';
 
 // Application-specific color schemes
-type AppSpecificColorScheme = 'today' | 'past';
+type AppSpecificColorScheme = 
+  | 'default' // Adding 'default' to fix type error
+  | 'today' | 'past'
+  | 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info'
+  | 'pto' | 'publicHoliday' | 'companyDayOff' | 'weekend' | 'extendedWeekend';
 
 // Type definitions for the structure of color scheme elements
 export interface TailwindColorStyles {

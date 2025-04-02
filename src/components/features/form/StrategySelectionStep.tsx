@@ -9,7 +9,12 @@ import { StepHeader } from './components/StepHeader';
 import { FormSection } from './components/FormSection';
 import { useStrategySelection } from '@/hooks/useOptimizer';
 import { StepTitleWithInfo } from './components/StepTitleWithInfo';
-import { StrategyOption } from '@/lib/utils';
+
+interface StrategyOption {
+  id: OptimizationStrategy;
+  label: string;
+  description: string;
+}
 
 // Map strategy IDs to their respective icons
 const STRATEGY_ICONS = {
@@ -73,7 +78,7 @@ export function StrategySelectionStep() {
                   name="strategy"
                   value={strategyOption.id}
                   checked={isSelected}
-                  onChange={() => setStrategy(strategyOption.id)}
+                  onChange={() => setStrategy(strategyOption.id as OptimizationStrategy)}
                   className="absolute opacity-0 h-0 w-0"
                   tabIndex={0}
                   aria-describedby={`strategy-description-${strategyOption.id}`}

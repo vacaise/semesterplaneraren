@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -57,21 +58,28 @@ interface StatTooltipContentProps extends React.ComponentPropsWithoutRef<typeof 
 const StatTooltipContent = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Content>,
   StatTooltipContentProps
->(({ className, sideOffset = 4, colorScheme, ...props }, ref) => (
-  <TooltipPrimitive.Portal>
-    <TooltipPrimitive.Content
-      ref={ref}
-      sideOffset={sideOffset}
-      className={cn(
-        'z-[9999] max-w-xs animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 rounded-md border px-2 py-2 shadow-lg',
-        COLOR_SCHEMES[colorScheme].tooltip.bg.replace(/\/\d+/g, ''),
-        className
-      )}
-      forceMount
-      {...props}
-    />
-  </TooltipPrimitive.Portal>
-));
+>(({ className, sideOffset = 4, colorScheme, ...props }, ref) => {
+  // Safely access COLOR_SCHEMES - check if the colorScheme exists first
+  const tooltipBg = COLOR_SCHEMES[colorScheme] ? 
+    COLOR_SCHEMES[colorScheme].tooltip.bg.replace(/\/\d+/g, '') : 
+    'bg-gray-100 dark:bg-gray-800';
+
+  return (
+    <TooltipPrimitive.Portal>
+      <TooltipPrimitive.Content
+        ref={ref}
+        sideOffset={sideOffset}
+        className={cn(
+          'z-[9999] max-w-xs animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 rounded-md border px-2 py-2 shadow-lg',
+          tooltipBg,
+          className
+        )}
+        forceMount
+        {...props}
+      />
+    </TooltipPrimitive.Portal>
+  );
+});
 StatTooltipContent.displayName = 'StatTooltipContent';
 
 export { Tooltip, TooltipTrigger, TooltipContent, StatTooltipContent, TooltipProvider };
