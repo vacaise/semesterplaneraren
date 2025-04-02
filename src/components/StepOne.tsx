@@ -73,7 +73,7 @@ const StepOne = ({
         <div className="space-y-4">
           <Label htmlFor="vacationDays" className="text-gray-700 text-base">Antal semesterdagar</Label>
           <div className={`${isMobile ? 'flex flex-col gap-3' : 'flex items-center space-x-4'}`}>
-            <Slider id="vacationDays" defaultValue={[vacationDays]} max={40} min={1} step={1} onValueChange={val => setVacationDays(val[0])} className="flex-1" aria-label="Välj antal semesterdagar" />
+            <Slider id="vacationDays" defaultValue={[vacationDays]} max={50} min={1} step={1} onValueChange={val => setVacationDays(val[0])} className="flex-1" aria-label="Välj antal semesterdagar" />
             <Input 
               type="number" 
               id="vacationDaysInput" 
@@ -81,7 +81,7 @@ const StepOne = ({
               onChange={e => setVacationDays(Number(e.target.value))} 
               className={`${isMobile ? 'w-full' : 'w-24'}`} 
               min={1} 
-              max={40} 
+              max={50} 
               placeholder="Ange dagar"
               aria-label="Ange antal semesterdagar" 
             />
