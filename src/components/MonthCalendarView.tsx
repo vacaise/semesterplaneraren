@@ -24,9 +24,10 @@ interface MonthCalendarViewProps {
   schedule: Schedule;
   year: number;
   holidays: Date[];
+  companyDays: Date[];
 }
 
-export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalendarViewProps) => {
+export const MonthCalendarView = ({ schedule, year, holidays = [], companyDays = [] }: MonthCalendarViewProps) => {
   const isMobile = useIsMobile();
   
   // Make sure to use the same periods as in the list view
@@ -86,6 +87,7 @@ export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalend
                 monthIndex={month}
                 periods={sortedPeriods}
                 holidays={holidays}
+                companyDays={companyDays}
               />
             </div>
           ))}

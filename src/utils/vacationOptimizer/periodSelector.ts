@@ -9,7 +9,8 @@ export const selectOptimalPeriods = (
   vacationDays: number, 
   year: number, 
   holidays: Date[], 
-  mode: string
+  mode: string,
+  companyDays: Date[] = []
 ): VacationPeriod[] => {
   // Make a copy to avoid mutating the original array
   const periods = [...potentialPeriods];
@@ -103,7 +104,7 @@ export const selectOptimalPeriods = (
   
   // Final attempt: if we still have vacation days, add extra small periods
   if (remainingVacationDays > 0) {
-    const extraPeriods = createExtraPeriods(year, holidays);
+    const extraPeriods = createExtraPeriods(year, holidays, companyDays);
     
     for (const period of extraPeriods) {
       if (period.vacationDaysNeeded <= remainingVacationDays) {
