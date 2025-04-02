@@ -1,4 +1,3 @@
-
 import { addDays, differenceInDays, format, isSameDay } from 'date-fns';
 import { VacationPeriod, OptimizationMode } from './types';
 import { isDayOff } from './helpers';
@@ -36,13 +35,13 @@ const generatePossiblePeriods = (year: number, holidays: Date[], companyDays: Da
   periods.push(...findKeyPeriods(year, holidays, companyDays));
   
   // 2. Find bridge days between holidays and weekends
-  periods.push(...findBridgeDays(year, companyDays));
+  periods.push(...findBridgeDays(year, holidays, companyDays));
   
   // 3. Find extended weekends (Thursday-Sunday or Friday-Monday)
-  periods.push(...findExtendedWeekends(year, companyDays));
+  periods.push(...findExtendedWeekends(year, holidays, companyDays));
   
   // 4. Find summer vacation options
-  periods.push(...findSummerPeriods(year, companyDays));
+  periods.push(...findSummerPeriods(year, holidays, companyDays));
   
   // 5. Generate more possible combinations to increase efficiency
   const additionalPeriods = generateAdditionalPeriods(year, holidays, companyDays);
