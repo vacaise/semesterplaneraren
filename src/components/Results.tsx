@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import StatisticCard from "@/components/StatisticCard";
 import BreakSummaryCard from "@/components/BreakSummaryCard";
@@ -43,16 +42,13 @@ const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   
-  // Calculate efficiency
   const efficiency = calculateEfficiency(schedule.totalDaysOff, schedule.vacationDaysUsed);
   
-  // Calculate total vacation days used from periods to double-check
   const actualVacationDaysUsed = schedule.periods.reduce(
     (total, period) => total + period.vacationDaysNeeded, 
     0
   );
   
-  // Get mode display text
   const getModeDisplayText = (mode: string): string => {
     switch (mode) {
       case "balanced": return "Balanserad mix";
@@ -64,7 +60,6 @@ const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
     }
   };
 
-  // Generate iCal file for export
   const exportToICal = () => {
     let iCalData = [
       "BEGIN:VCALENDAR",
@@ -78,7 +73,6 @@ const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
       const startDate = new Date(period.start);
       const endDate = new Date(period.end);
       
-      // Format dates for iCal (YYYYMMDD)
       const formatICalDate = (date: Date) => {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -86,11 +80,9 @@ const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
         return `${year}${month}${day}`;
       };
 
-      // Add one day to the end date for iCal (exclusive end date)
       const endDateIcal = new Date(endDate);
       endDateIcal.setDate(endDateIcal.getDate() + 1);
 
-      // Create event
       iCalData = [
         ...iCalData,
         "BEGIN:VEVENT",
@@ -106,7 +98,6 @@ const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
 
     iCalData.push("END:VCALENDAR");
 
-    // Create and download the file
     const blob = new Blob([iCalData.join("\r\n")], { type: "text/calendar" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");

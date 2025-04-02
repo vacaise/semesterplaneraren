@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import StepOne from "@/components/StepOne";
 import StepTwo from "@/components/StepTwo";
@@ -37,10 +36,6 @@ const Index = () => {
   const resetToStart = () => {
     setCurrentStep(1);
     setOptimizedSchedule(null);
-    // Optionally reset other values to defaults
-    // setVacationDays(25);
-    // setSelectedMode("balanced");
-    // setHolidays([]);
     window.scrollTo(0, 0);
   };
 
@@ -97,20 +92,12 @@ const Index = () => {
     setIsLoading(true);
     
     try {
-      console.log("Generating schedule with holidays:", holidays);
-      console.log("Using exactly", vacationDays, "vacation days");
+      console.log("Genererar schema med röda dagar:", holidays);
+      console.log("Använder exakt", vacationDays, "semesterdagar");
       
       const optimizedScheduleData = optimizeVacation(year, vacationDays, holidays, selectedMode);
       
-      // Verify that the optimizer used exactly the number of days specified
-      const totalVacationDaysUsed = optimizedScheduleData.periods.reduce(
-        (total, period) => total + period.vacationDaysNeeded, 0
-      );
-      
-      console.log("Optimization complete. Used", totalVacationDaysUsed, "vacation days");
-      
-      // Ensure the returned data shows the correct number of vacation days
-      optimizedScheduleData.vacationDaysUsed = vacationDays;
+      console.log("Optimering klar. Använder", optimizedScheduleData.vacationDaysUsed, "semesterdagar");
       
       setOptimizedSchedule(optimizedScheduleData);
       setCurrentStep(4);
@@ -120,7 +107,7 @@ const Index = () => {
         description: "Kunde inte optimera ditt schema, försök igen senare",
         variant: "destructive",
       });
-      console.error("Optimization error:", error);
+      console.error("Optimeringsproblem:", error);
     } finally {
       setIsLoading(false);
     }
