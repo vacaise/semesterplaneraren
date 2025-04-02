@@ -91,6 +91,7 @@ const StepThree = ({
         </TooltipProvider>
       </div>
 
+      {/* Röda dagar först */}
       <HolidaySelector
         holidays={holidays}
         setHolidays={setHolidays}
@@ -111,6 +112,7 @@ const StepThree = ({
           addingCompanyDay={addingCompanyDay}
         />
 
+        {/* Klämdagar som ett collapsible element */}
         <CompanyDaysSelector
           companyDays={companyDays}
           setCompanyDays={setCompanyDays}
