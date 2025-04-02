@@ -18,8 +18,7 @@ import {
   MapPin, 
   ChevronLeft, 
   ChevronRight,
-  Info,
-  Building2
+  Info
 } from "lucide-react";
 import { 
   Tooltip,
@@ -28,11 +27,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { 
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 
 interface StepThreeProps {
   holidays: Date[];
@@ -40,8 +34,6 @@ interface StepThreeProps {
   fetchHolidays: () => void;
   year: number;
   isLoading: boolean;
-  companyDays: Date[];
-  setCompanyDays: (companyDays: Date[]) => void;
 }
 
 const StepThree = ({ 
@@ -49,13 +41,9 @@ const StepThree = ({
   setHolidays, 
   fetchHolidays, 
   year,
-  isLoading,
-  companyDays,
-  setCompanyDays
+  isLoading 
 }: StepThreeProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [selectedCompanyDate, setSelectedCompanyDate] = useState<Date | undefined>(undefined);
-  const [isCompanyDaysOpen, setIsCompanyDaysOpen] = useState(false);
   const isMobile = useIsMobile();
   const today = new Date();
 
@@ -66,11 +54,7 @@ const StepThree = ({
         (date) => format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
       );
       
-      const existsAsCompanyDay = companyDays.some(
-        (date) => format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
-      );
-      
-      if (!exists && !existsAsCompanyDay && !isPast(selectedDate)) {
+      if (!exists && !isPast(selectedDate)) {
         setHolidays([...holidays, selectedDate]);
         setSelectedDate(undefined);
       } else if (isPast(selectedDate)) {
@@ -80,38 +64,9 @@ const StepThree = ({
     }
   };
 
-  const addCompanyDay = () => {
-    if (selectedCompanyDate) {
-      // Check if date already exists or is in the past
-      const exists = companyDays.some(
-        (date) => format(date, "yyyy-MM-dd") === format(selectedCompanyDate, "yyyy-MM-dd")
-      );
-      
-      const existsAsHoliday = holidays.some(
-        (date) => format(date, "yyyy-MM-dd") === format(selectedCompanyDate, "yyyy-MM-dd")
-      );
-      
-      if (!exists && !existsAsHoliday && !isPast(selectedCompanyDate)) {
-        setCompanyDays([...companyDays, selectedCompanyDate]);
-        setSelectedCompanyDate(undefined);
-      } else if (isPast(selectedCompanyDate)) {
-        // Don't allow adding past dates
-        setSelectedCompanyDate(undefined);
-      }
-    }
-  };
-
   const removeHoliday = (dateToRemove: Date) => {
     setHolidays(
       holidays.filter(
-        (date) => format(date, "yyyy-MM-dd") !== format(dateToRemove, "yyyy-MM-dd")
-      )
-    );
-  };
-
-  const removeCompanyDay = (dateToRemove: Date) => {
-    setCompanyDays(
-      companyDays.filter(
         (date) => format(date, "yyyy-MM-dd") !== format(dateToRemove, "yyyy-MM-dd")
       )
     );
@@ -237,113 +192,6 @@ const StepThree = ({
           )}
         </div>
       </div>
-
-      {/* Company Days Collapsible */}
-      <Collapsible
-        open={isCompanyDaysOpen}
-        onOpenChange={setIsCompanyDaysOpen}
-        className="border rounded-lg p-4 bg-white"
-      >
-        <CollapsibleTrigger asChild>
-          <div className="flex items-center justify-between cursor-pointer">
-            <div className="flex items-center gap-2">
-              <div className="bg-purple-100 text-purple-800 p-1 rounded-md">
-                <Building2 className="h-5 w-5" />
-              </div>
-              <h4 className="font-medium text-gray-800">Förväntade klämdagar</h4>
-            </div>
-            <Button variant="ghost" size="sm" className="p-1">
-              <ChevronRight className={`h-5 w-5 transition-transform ${isCompanyDaysOpen ? 'rotate-90' : ''}`} />
-            </Button>
-          </div>
-        </CollapsibleTrigger>
-        
-        <CollapsibleContent className="mt-4">
-          <p className="text-sm text-gray-600 mb-4">
-            Lägg till företagsspecifika ledigheter eller klämdagar som inte räknas som semesterdagar men som du kommer att vara ledig på.
-          </p>
-          
-          <div className={`grid grid-cols-1 ${isMobile ? 'gap-4' : 'md:grid-cols-2 gap-6'} mb-4`}>
-            <div className="border rounded-lg overflow-hidden bg-white p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="font-medium text-gray-800">Välj klämdag</h4>
-              </div>
-              <div className={`${isMobile ? 'flex justify-center' : ''}`}>
-                <Calendar
-                  mode="single"
-                  selected={selectedCompanyDate}
-                  onSelect={setSelectedCompanyDate}
-                  className="rounded-md"
-                  locale={sv}
-                  defaultMonth={new Date(year, 0)}
-                  classNames={{
-                    head_cell: "text-xs font-medium text-gray-500",
-                    day: "h-9 w-9 text-sm p-0 font-normal aria-selected:opacity-100 aria-selected:bg-purple-100 aria-selected:text-purple-800 aria-selected:font-medium",
-                    day_today: "bg-red-50 text-red-800 font-medium",
-                    nav_button: "h-7 w-7 bg-transparent p-0 opacity-70 hover:opacity-100",
-                    months: isMobile ? "flex flex-col space-y-4" : "",
-                    month: isMobile ? "flex flex-col space-y-4" : "",
-                  }}
-                  components={{
-                    IconLeft: () => <ChevronLeft className="h-4 w-4" />,
-                    IconRight: () => <ChevronRight className="h-4 w-4" />,
-                  }}
-                />
-              </div>
-              <Button 
-                onClick={addCompanyDay} 
-                disabled={!selectedCompanyDate}
-                className="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white"
-              >
-                Lägg till klämdag
-              </Button>
-            </div>
-
-            <div className="border rounded-lg overflow-hidden bg-white p-4">
-              <h4 className="font-medium text-gray-800 mb-4">Klämdagar ({companyDays.length})</h4>
-              {companyDays.length > 0 ? (
-                <ScrollArea className={`${isMobile ? 'h-[200px]' : 'h-[250px]'}`}>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Datum</TableHead>
-                        <TableHead>Dag</TableHead>
-                        <TableHead></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {[...companyDays].sort((a, b) => a.getTime() - b.getTime()).map((date, index) => (
-                        <TableRow key={index}>
-                          <TableCell className="font-medium">
-                            {isMobile 
-                              ? format(date, "d MMM yyyy", { locale: sv }) 
-                              : format(date, "d MMMM yyyy", { locale: sv })}
-                          </TableCell>
-                          <TableCell>{format(date, "EEEE", { locale: sv })}</TableCell>
-                          <TableCell>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeCompanyDay(date)}
-                              className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
-                            >
-                              &times;
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </ScrollArea>
-              ) : (
-                <div className={`flex items-center justify-center ${isMobile ? 'h-[200px]' : 'h-[250px]'} bg-gray-50 rounded-md`}>
-                  <p className="text-gray-500">Inga klämdagar tillagda än</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
 
       <div className="bg-red-50 p-4 rounded-md border border-red-100">
         <h3 className="font-medium text-red-800 mb-2">Observera</h3>
