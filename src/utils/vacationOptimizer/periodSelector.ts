@@ -11,6 +11,8 @@ export const selectOptimalPeriods = (
   holidays: Date[], 
   mode: string
 ): VacationPeriod[] => {
+  console.log("Starting optimization with", vacationDays, "vacation days");
+  
   // Make a copy to avoid mutating the original array
   const periods = [...potentialPeriods];
   
@@ -128,6 +130,7 @@ export const selectOptimalPeriods = (
   
   // If we STILL have vacation days, create single-day periods
   if (remainingVacationDays > 0) {
+    console.log("Still have", remainingVacationDays, "vacation days to allocate");
     const now = new Date();
     now.setHours(0, 0, 0, 0);
     
@@ -145,7 +148,7 @@ export const selectOptimalPeriods = (
         }
         
         // Skip if date is in past or is already a holiday/weekend
-        if (testDate < now || isDayOff(testDate, holidays)) {
+        if (isDateInPast(testDate) || isDayOff(testDate, holidays)) {
           continue;
         }
         
@@ -180,7 +183,7 @@ export const selectOptimalPeriods = (
           }
           
           // Skip if date is in past or is already a holiday/weekend
-          if (testDate < now || isDayOff(testDate, holidays)) {
+          if (isDateInPast(testDate) || isDayOff(testDate, holidays)) {
             continue;
           }
           
@@ -210,19 +213,20 @@ export const selectOptimalPeriods = (
   
   // As a last resort, if we STILL have vacation days, add them on any available weekdays
   if (remainingVacationDays > 0) {
+    console.log("Last resort: still need to allocate", remainingVacationDays, "days");
     const now = new Date();
     now.setHours(0, 0, 0, 0);
     
     // Start from current month and go through the year
     const currentMonth = now.getMonth();
-    let dayCounter = 1;
+    let dayCounter = now.getDate() + 1; // Start from tomorrow
     
     for (let month = currentMonth; month < 12 && remainingVacationDays > 0; month++) {
       for (let day = dayCounter; day <= 28 && remainingVacationDays > 0; day++) {
         const testDate = new Date(year, month, day);
         
         // Skip if date is in past, is a weekend or holiday
-        if (testDate < now || isDayOff(testDate, holidays)) {
+        if (isDateInPast(testDate) || isDayOff(testDate, holidays)) {
           continue;
         }
         
@@ -252,11 +256,41 @@ export const selectOptimalPeriods = (
     }
   }
   
+  // Final verification to make sure we used exactly the right number of vacation days
+  let totalVacationDaysUsed = 0;
+  selectedPeriods.forEach(period => {
+    totalVacationDaysUsed += period.vacationDaysNeeded;
+  });
+  
+  console.log("Total vacation days used:", totalVacationDaysUsed);
+  
+  // If we still have a mismatch, adjust by removing periods until we match exactly
+  if (totalVacationDaysUsed > vacationDays) {
+    console.log("Too many days allocated, removing some periods");
+    // Sort periods by efficiency (least efficient first)
+    selectedPeriods.sort((a, b) => {
+      const aEfficiency = a.days / Math.max(a.vacationDaysNeeded, 1);
+      const bEfficiency = b.days / Math.max(b.vacationDaysNeeded, 1);
+      return aEfficiency - bEfficiency;
+    });
+    
+    // Remove periods until we match exactly
+    while (totalVacationDaysUsed > vacationDays) {
+      const removedPeriod = selectedPeriods.shift();
+      if (removedPeriod) {
+        totalVacationDaysUsed -= removedPeriod.vacationDaysNeeded;
+      } else {
+        break; // Safety check
+      }
+    }
+  }
+  
   // Sort the final selected periods by date (chronologically)
   selectedPeriods.sort((a, b) => {
     return a.start.getTime() - b.start.getTime();
   });
   
+  console.log("Final vacation days used:", selectedPeriods.reduce((sum, p) => sum + p.vacationDaysNeeded, 0));
   return selectedPeriods;
 };
 

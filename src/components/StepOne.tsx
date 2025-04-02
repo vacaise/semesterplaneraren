@@ -29,8 +29,8 @@ const StepOne = ({
   const isMobile = useIsMobile();
   
   const handleVacationDaysChange = (value: number) => {
-    // Ensure the value is between 1 and 50
-    const clampedValue = Math.max(1, Math.min(50, value));
+    // Ensure the value is between 1 and 50 and is a whole number
+    const clampedValue = Math.max(1, Math.min(50, Math.round(value)));
     setVacationDays(clampedValue);
   };
   

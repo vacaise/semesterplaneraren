@@ -34,13 +34,16 @@ export const optimizeVacation = (
     return endDate >= today;
   });
   
+  // Verify we're using exactly the right number of vacation days
+  const totalUsed = validatedPeriods.reduce((total, period) => total + period.vacationDaysNeeded, 0);
+  console.log(`Validated periods use ${totalUsed} vacation days out of ${vacationDays} requested`);
+  
   // Calculate the total days off
   const totalDaysOff = calculateTotalDaysOff(validatedPeriods, filteredHolidays);
   
   return {
     totalDaysOff: totalDaysOff,
     vacationDaysUsed: vacationDays,
-    mode,
     periods: validatedPeriods
   };
 };
