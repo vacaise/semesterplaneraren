@@ -44,27 +44,12 @@ const StepThree = ({
         date => format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
       );
       
-      if (!exists && !isPast(selectedDate)) {
+      const isCompanyDay = companyDays.some(
+        date => format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
+      );
+      
+      if (!exists && !isCompanyDay && !isPast(selectedDate)) {
         setHolidays([...holidays, selectedDate]);
-        setSelectedDate(undefined);
-      } else if (isPast(selectedDate)) {
-        setSelectedDate(undefined);
-      }
-    }
-  };
-
-  const handleAddCompanyDay = () => {
-    if (selectedDate) {
-      const exists = companyDays.some(
-        date => format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
-      );
-      
-      const isHoliday = holidays.some(
-        date => format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
-      );
-      
-      if (!exists && !isHoliday && !isPast(selectedDate)) {
-        setCompanyDays([...companyDays, selectedDate]);
         setSelectedDate(undefined);
       } else if (isPast(selectedDate)) {
         setSelectedDate(undefined);
@@ -122,8 +107,10 @@ const StepThree = ({
           setSelectedDate={setSelectedDate}
           year={year}
           onAddHoliday={handleAddHoliday}
-          onAddCompanyDay={handleAddCompanyDay}
-          addingCompanyDay={addingCompanyDay}
+          onAddCompanyDay={() => {}}
+          addingCompanyDay={false}
+          holidays={holidays}
+          companyDays={companyDays}
         />
 
         {/* Röda dagar till höger */}

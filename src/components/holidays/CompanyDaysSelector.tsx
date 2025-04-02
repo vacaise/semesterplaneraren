@@ -102,6 +102,8 @@ export const CompanyDaysSelector = ({
             onAddHoliday={() => {}}
             onAddCompanyDay={addCompanyDay}
             addingCompanyDay={true}
+            holidays={holidays}
+            companyDays={companyDays}
           />
 
           {/* Klämdagar till höger */}

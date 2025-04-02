@@ -1,76 +1,109 @@
 
 import React from "react";
+import { format, isWeekend, isSameDay, isPast } from "date-fns";
 import { sv } from "date-fns/locale";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 interface DatePickerCalendarProps {
   selectedDate: Date | undefined;
   setSelectedDate: (date: Date | undefined) => void;
   year: number;
   onAddHoliday: () => void;
-  onAddCompanyDay?: () => void;
-  addingCompanyDay?: boolean;
+  onAddCompanyDay: () => void;
+  addingCompanyDay: boolean;
+  holidays?: Date[];
+  companyDays?: Date[];
 }
 
-export const DatePickerCalendar = ({ 
-  selectedDate, 
-  setSelectedDate, 
+export const DatePickerCalendar = ({
+  selectedDate,
+  setSelectedDate,
   year,
   onAddHoliday,
   onAddCompanyDay,
-  addingCompanyDay = false
+  addingCompanyDay,
+  holidays = [],
+  companyDays = []
 }: DatePickerCalendarProps) => {
-  const isMobile = useIsMobile();
+  const handleDayClick = (date: Date | undefined) => {
+    setSelectedDate(date);
+  };
+
+  const isDateDisabled = (date: Date) => {
+    const isPastDate = isPast(date) && !isSameDay(date, new Date());
+    
+    // Check if the date is already a holiday or company day
+    const isHoliday = holidays.some(holiday => 
+      isSameDay(holiday, date)
+    );
+    
+    const isCompanyDay = companyDays.some(companyDay => 
+      isSameDay(companyDay, date)
+    );
+    
+    // If we're adding a company day, don't allow selecting holidays
+    // If we're adding a holiday, don't allow selecting company days
+    if (addingCompanyDay) {
+      return isPastDate || isHoliday || isCompanyDay;
+    } else {
+      return isPastDate || isHoliday || isCompanyDay;
+    }
+  };
 
   return (
     <div className="border rounded-lg overflow-hidden bg-white p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h4 className="font-medium text-gray-800">Välj datum</h4>
-      </div>
-      <div className={`${isMobile ? 'flex justify-center' : ''}`}>
-        <Calendar
-          mode="single"
-          selected={selectedDate}
-          onSelect={setSelectedDate}
-          className="rounded-md"
-          locale={sv}
-          defaultMonth={new Date(year, 0)}
-          classNames={{
-            head_cell: "text-xs font-medium text-gray-500",
-            day: "h-9 w-9 text-sm p-0 font-normal aria-selected:opacity-100 aria-selected:bg-red-100 aria-selected:text-red-800 aria-selected:font-medium",
-            day_today: "bg-red-50 text-red-800 font-medium",
-            nav_button: "h-7 w-7 bg-transparent p-0 opacity-70 hover:opacity-100",
-            months: isMobile ? "flex flex-col space-y-4" : "",
-            month: isMobile ? "flex flex-col space-y-4" : "",
-          }}
-          components={{
-            IconLeft: () => <ChevronLeft className="h-4 w-4" />,
-            IconRight: () => <ChevronRight className="h-4 w-4" />,
-          }}
-        />
-      </div>
-      <div className="flex flex-col space-y-2 mt-4">
-        <Button 
-          onClick={onAddHoliday} 
-          disabled={!selectedDate}
-          className="w-full"
-        >
-          Lägg till röd dag
-        </Button>
-        {addingCompanyDay && onAddCompanyDay && (
-          <Button 
-            onClick={onAddCompanyDay} 
-            disabled={!selectedDate}
-            variant="secondary"
-            className="w-full bg-purple-100 hover:bg-purple-200 text-purple-800"
-          >
-            Lägg till klämdag
-          </Button>
-        )}
-      </div>
+      <Calendar
+        mode="single"
+        selected={selectedDate}
+        onSelect={handleDayClick}
+        year={year}
+        month={new Date(year, 0).getMonth()}
+        showOutsideDays={false}
+        className="rounded-md"
+        classNames={{
+          day_selected: "bg-blue-500 text-white",
+          day_disabled: "text-gray-300 hover:bg-transparent",
+          day_outside: "hidden"
+        }}
+        modifiers={{
+          disabled: isDateDisabled
+        }}
+        modifiersClassNames={{
+          weekend: (day) => cn(
+            isWeekend(day) && !isDateDisabled(day) ? "bg-orange-100 text-orange-800" : "",
+          ),
+          holiday: (day) => cn(
+            holidays.some(holiday => isSameDay(holiday, day)) ? "bg-red-200 text-red-800" : ""
+          ),
+          companyDay: (day) => cn(
+            companyDays.some(companyDay => isSameDay(companyDay, day)) ? "bg-purple-200 text-purple-800" : ""
+          )
+        }}
+      />
+      {selectedDate && (
+        <div className="mt-4">
+          <p className="mb-2 text-sm">
+            {format(selectedDate, "EEEE d MMMM yyyy", { locale: sv })}
+          </p>
+          {addingCompanyDay ? (
+            <Button 
+              onClick={onAddCompanyDay} 
+              className="w-full"
+            >
+              Lägg till klämdag
+            </Button>
+          ) : (
+            <Button 
+              onClick={onAddHoliday} 
+              className="w-full"
+            >
+              Lägg till röd dag
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 };
