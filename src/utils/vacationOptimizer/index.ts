@@ -37,7 +37,7 @@ export const optimizeVacation = (
   });
   
   // Calculate the total days off
-  const totalDaysOff = calculateTotalDaysOff(validatedPeriods);
+  const totalDaysOff = calculateTotalDaysOff(validatedPeriods, filteredHolidays, filteredCompanyDays);
   
   return {
     totalDaysOff: totalDaysOff,
