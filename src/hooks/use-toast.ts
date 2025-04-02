@@ -2,8 +2,7 @@
 import * as React from "react"
 
 import type {
-  Toast,
-  ToasterToast,
+  ToasterToast
 } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 5
@@ -48,6 +47,15 @@ const actionTypes: Record<
   },
 }
 
+export interface Toast {
+  id?: string
+  title?: React.ReactNode
+  description?: React.ReactNode
+  action?: React.ReactNode
+  variant?: "default" | "destructive"
+  className?: string
+}
+
 export function useToast(opts: UseToastOptions = {}) {
   const [toasts, setToasts] = React.useState<ToasterToast[]>(
     opts.toasts || []
@@ -68,7 +76,7 @@ export function useToast(opts: UseToastOptions = {}) {
     () => ({
       ...opts,
       toast: (props: Toast) => {
-        const id = genId()
+        const id = props.id || genId()
         const update = (props: ToasterToast) =>
           dispatchToasts("update", { ...props, id })
 
@@ -132,4 +140,9 @@ export function useToast(opts: UseToastOptions = {}) {
     toasts,
     handleRemove,
   }
+}
+
+export const toast = (props: Toast) => {
+  const { toast: toastFunction } = useToast()
+  return toastFunction(props)
 }

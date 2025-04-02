@@ -78,3 +78,6 @@ export const getSwedishHolidays = (year: number): Date[] => {
   
   return holidays;
 };
+
+// Create an alias for getSwedishHolidays to match the reference in Index.tsx
+export const getHolidays = getSwedishHolidays;
