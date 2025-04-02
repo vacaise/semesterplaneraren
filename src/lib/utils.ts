@@ -2,6 +2,7 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { PossibleColors } from "@/types"
+import { COLOR_SCHEMES } from "@/constants"
 
 /**
  * Combines multiple class names using clsx and tailwind-merge
@@ -71,6 +72,14 @@ export const dayTypeToColorScheme: Record<DayType, PossibleColors> = {
   weekend: 'weekend',
   extendedWeekend: 'extendedWeekend'
 };
+
+/**
+ * Safe access function for COLOR_SCHEMES to prevent TypeScript errors
+ * Returns the color scheme or a default one if not found
+ */
+export function getColorScheme(colorScheme: PossibleColors) {
+  return COLOR_SCHEMES[colorScheme] || COLOR_SCHEMES.default;
+}
 
 /**
  * Common text size utility for consistent typography

@@ -6,10 +6,9 @@
  * Uses a consistent color scheme system for styling.
  */
 import { ReactNode } from 'react';
-import { COLOR_SCHEMES } from '@/constants';
 import { PossibleColors } from '@/types';
 import { StatTooltipContent, Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
+import { cn, getColorScheme } from '@/lib/utils';
 import { InfoIcon as Icon_InfoIcon } from 'lucide-react';
 
 export interface StatCardProps {
@@ -25,8 +24,9 @@ export interface StatCardProps {
  * by using a lookup approach that forces Tailwind to recognize the classes
  */
 const getColorClasses = (colorScheme: PossibleColors, type: 'bg' | 'text' | 'ring') => {
-  if (COLOR_SCHEMES[colorScheme] && COLOR_SCHEMES[colorScheme].icon) {
-    return COLOR_SCHEMES[colorScheme].icon[type];
+  const colorData = getColorScheme(colorScheme);
+  if (colorData && colorData.icon) {
+    return colorData.icon[type];
   }
   // Fallback values if the color scheme doesn't exist
   switch (type) {
@@ -127,7 +127,8 @@ const ValueDisplay = ({ value, colorScheme }: ValueDisplayProps) => {
  */
 const StatCard = ({ value, label, tooltip, colorScheme, icon }: StatCardProps) => {
   // Default ring style if colorScheme doesn't exist in COLOR_SCHEMES
-  const ringStyle = COLOR_SCHEMES[colorScheme]?.icon?.ring || 'ring-gray-200 dark:ring-gray-700';
+  const colorData = getColorScheme(colorScheme);
+  const ringStyle = colorData?.icon?.ring || 'ring-gray-200 dark:ring-gray-700';
 
   return (
     <article

@@ -70,22 +70,15 @@ export interface StrategyOption {
     description: string;
 }
 
-// Tailwind CSS color types
-// Standard Tailwind color palette
-type TailwindColor = 
-  | 'slate' | 'gray' | 'zinc' | 'neutral' | 'stone' // Gray scales
-  | 'red' | 'orange' | 'amber' | 'yellow' | 'lime' | 'green' | 'emerald' | 'teal' // Warm to cool colors
-  | 'cyan' | 'sky' | 'blue' | 'indigo' | 'violet' | 'purple' | 'fuchsia' | 'pink' | 'rose'; // Cool to warm colors
-
-// Special colors and utility colors
-type SpecialColor = 'black' | 'white' | 'transparent' | 'current';
-
-// Application-specific color schemes
-type AppSpecificColorScheme = 
-  | 'default' // Adding 'default' to fix type error
-  | 'today' | 'past'
+// Application-specific color schemes - these should match COLOR_SCHEMES keys exactly
+export type AppColorScheme = 
   | 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info'
-  | 'pto' | 'publicHoliday' | 'companyDayOff' | 'weekend' | 'extendedWeekend';
+  | 'purple' | 'orange' | 'indigo'
+  | 'pto' | 'publicHoliday' | 'companyDayOff' | 'weekend' | 'extendedWeekend'
+  | 'default' | 'today' | 'past';
+
+// Possible colors - this is what we use as input to our components
+export type PossibleColors = AppColorScheme;
 
 // Type definitions for the structure of color scheme elements
 export interface TailwindColorStyles {
@@ -112,6 +105,5 @@ interface ColorSchemeDefinition {
   calendar: TailwindColorStyles;
 }
 
-export type PossibleColors = TailwindColor | SpecialColor | AppSpecificColorScheme;
 // The complete COLOR_SCHEMES object type
-export type ColorSchemes = Record<PossibleColors, ColorSchemeDefinition>; // Declare Umami tracking type for TypeScript
+export type ColorSchemes = Record<PossibleColors, ColorSchemeDefinition>;

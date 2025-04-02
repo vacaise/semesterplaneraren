@@ -1,3 +1,4 @@
+
 /**
  * BreakCard Component
  *
@@ -7,9 +8,9 @@
 import { format, parse } from 'date-fns';
 import { Break } from '@/types';
 import { Tooltip, TooltipTrigger, StatTooltipContent } from '@/components/ui/tooltip';
-import { BREAK_LENGTHS, COLOR_SCHEMES } from '@/constants';
+import { BREAK_LENGTHS } from '@/constants';
 import { Calendar, Clock, Sparkles, Star } from 'lucide-react';
-import { cn, DayType, dayTypeToColorScheme } from '@/lib/utils';
+import { cn, DayType, dayTypeToColorScheme, getColorScheme } from '@/lib/utils';
 import { ReactNode } from 'react';
 
 interface BreakCardProps {
@@ -100,57 +101,64 @@ interface DayCountsGridProps {
 
 const iconSize = 'h-3.5 w-3.5';
 
-const DayCountsGrid = ({ breakPeriod }: DayCountsGridProps) => (
-  <div className="mt-3 grid grid-cols-4 gap-2">
-    {/* PTO Days count */}
-    {breakPeriod.ptoDays > 0 && (
-      <DayCount
-        count={breakPeriod.ptoDays}
-        icon={<Calendar className={cn(
-          iconSize,
-          COLOR_SCHEMES[dayTypeToColorScheme.pto].icon.text
-        )} />}
-        label={breakPeriod.ptoDays === 1 ? 'PTO Day' : 'PTO Days'}
-      />
-    )}
+const DayCountsGrid = ({ breakPeriod }: DayCountsGridProps) => {
+  const ptoColorData = getColorScheme('pto');
+  const holidayColorData = getColorScheme('publicHoliday');
+  const companyColorData = getColorScheme('companyDayOff');
+  const weekendColorData = getColorScheme('weekend');
 
-    {/* Public Holidays count */}
-    {breakPeriod.publicHolidays > 0 && (
-      <DayCount
-        count={breakPeriod.publicHolidays}
-        icon={<Star className={cn(
-          iconSize,
-          COLOR_SCHEMES[dayTypeToColorScheme.publicHoliday].icon.text
-        )} />}
-        label={breakPeriod.publicHolidays === 1 ? 'Public Holiday' : 'Public Holidays'}
-      />
-    )}
+  return (
+    <div className="mt-3 grid grid-cols-4 gap-2">
+      {/* PTO Days count */}
+      {breakPeriod.ptoDays > 0 && (
+        <DayCount
+          count={breakPeriod.ptoDays}
+          icon={<Calendar className={cn(
+            iconSize,
+            ptoColorData.icon.text
+          )} />}
+          label={breakPeriod.ptoDays === 1 ? 'PTO Day' : 'PTO Days'}
+        />
+      )}
 
-    {/* Company Days Off count */}
-    {breakPeriod.companyDaysOff > 0 && (
-      <DayCount
-        count={breakPeriod.companyDaysOff}
-        icon={<Sparkles className={cn(
-          iconSize,
-          COLOR_SCHEMES[dayTypeToColorScheme.companyDayOff].icon.text
-        )} />}
-        label={breakPeriod.companyDaysOff === 1 ? 'Company Day Off' : 'Company Days Off'}
-      />
-    )}
+      {/* Public Holidays count */}
+      {breakPeriod.publicHolidays > 0 && (
+        <DayCount
+          count={breakPeriod.publicHolidays}
+          icon={<Star className={cn(
+            iconSize,
+            holidayColorData.icon.text
+          )} />}
+          label={breakPeriod.publicHolidays === 1 ? 'Public Holiday' : 'Public Holidays'}
+        />
+      )}
 
-    {/* Weekends count */}
-    {breakPeriod.weekends > 0 && (
-      <DayCount
-        count={breakPeriod.weekends}
-        icon={<Clock className={cn(
-          iconSize,
-          COLOR_SCHEMES[dayTypeToColorScheme.weekend].icon.text
-        )} />}
-        label={breakPeriod.weekends === 1 ? 'Weekend' : 'Weekends'}
-      />
-    )}
-  </div>
-);
+      {/* Company Days Off count */}
+      {breakPeriod.companyDaysOff > 0 && (
+        <DayCount
+          count={breakPeriod.companyDaysOff}
+          icon={<Sparkles className={cn(
+            iconSize,
+            companyColorData.icon.text
+          )} />}
+          label={breakPeriod.companyDaysOff === 1 ? 'Company Day Off' : 'Company Days Off'}
+        />
+      )}
+
+      {/* Weekends count */}
+      {breakPeriod.weekends > 0 && (
+        <DayCount
+          count={breakPeriod.weekends}
+          icon={<Clock className={cn(
+            iconSize,
+            weekendColorData.icon.text
+          )} />}
+          label={breakPeriod.weekends === 1 ? 'Weekend' : 'Weekends'}
+        />
+      )}
+    </div>
+  );
+};
 
 /**
  * DayVisualization Component
@@ -170,6 +178,7 @@ const DayVisualization = ({ days }: DayVisualizationProps) => {
         {days.map((day) => {
           const dayType = getDayType(day);
           const colorScheme = dayTypeToColorScheme[dayType];
+          const colorData = getColorScheme(colorScheme);
           const formattedDate = format(parse(day.date, 'yyyy-MM-dd', new Date()), 'MMM d');
           const description = getDayDescription(day);
 
@@ -184,7 +193,7 @@ const DayVisualization = ({ days }: DayVisualizationProps) => {
                   className={cn(
                     'flex-1 rounded-sm relative group cursor-help',
                     // Color mapping based on color scheme
-                    COLOR_SCHEMES[colorScheme].calendar.bg,
+                    colorData.calendar.bg,
                     heightClass,
                     'border border-transparent hover:border-gray-200 dark:hover:border-gray-700',
                     'transition-all duration-150 hover:shadow-sm',

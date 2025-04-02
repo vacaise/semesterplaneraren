@@ -1,5 +1,5 @@
-import { cn, dayTypeToColorScheme, DayType } from '@/lib/utils';
-import { COLOR_SCHEMES } from '@/constants';
+
+import { cn, dayTypeToColorScheme, DayType, getColorScheme } from '@/lib/utils';
 import { Info } from 'lucide-react';
 
 interface LegendItemProps {
@@ -10,6 +10,7 @@ interface LegendItemProps {
 
 function LegendItem({ dayType, label }: LegendItemProps) {
   const colorScheme = dayTypeToColorScheme[dayType];
+  const colorData = getColorScheme(colorScheme);
   
   return (
     <li 
@@ -19,7 +20,7 @@ function LegendItem({ dayType, label }: LegendItemProps) {
     >
       <div className={cn(
         "w-5 h-5 rounded-md flex-shrink-0",
-        COLOR_SCHEMES[colorScheme].calendar.bg,
+        colorData.calendar.bg,
         "ring-1 ring-gray-200/80 dark:ring-gray-700/80 shadow-sm"
       )} />
       <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</span>
@@ -151,4 +152,4 @@ export function CalendarLegend({
       </div>
     </div>
   )
-} 
+}

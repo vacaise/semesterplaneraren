@@ -13,8 +13,8 @@ import {
 } from 'date-fns';
 import { StatTooltipContent, Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { OptimizedDay } from '@/types';
-import { cn, DayType, dayTypeToColorScheme } from '@/lib/utils';
-import { COLOR_SCHEMES, WEEKDAYS } from '@/constants';
+import { cn, DayType, dayTypeToColorScheme, getColorScheme } from '@/lib/utils';
+import { WEEKDAYS } from '@/constants';
 
 interface MonthCalendarProps {
   month: number;
@@ -72,6 +72,8 @@ const CalendarDay = ({ day, dayInfo, hasPublicHoliday }: CalendarDayProps) => {
   const isCurrentYear = date.getFullYear() === currentYear;
   
   const colorScheme = getDayColorScheme(day, date, isCurrentDay, isCurrentYear);
+  const colorData = getColorScheme(colorScheme);
+  const publicHolidayColorData = getColorScheme('publicHoliday');
 
   return (
     <>
@@ -125,7 +127,7 @@ const CalendarDay = ({ day, dayInfo, hasPublicHoliday }: CalendarDayProps) => {
       {hasPublicHoliday && day.isPublicHoliday && (
         <div className={cn(
           'absolute bottom-1 left-1/2 -translate-x-1/2 w-0.5 h-0.5 rounded-full',
-          COLOR_SCHEMES[dayTypeToColorScheme.publicHoliday].calendar.text,
+          publicHolidayColorData.calendar.text,
         )} />
       )}
     </>
@@ -136,11 +138,13 @@ const CalendarDay = ({ day, dayInfo, hasPublicHoliday }: CalendarDayProps) => {
 // Determine styling based on day state
 const getDayStyles = (isCurrentDay: boolean, isPastDay: boolean, dayType: DayType) => {
   const colorKey = isCurrentDay ? 'today' : isPastDay ? 'past' : dayTypeToColorScheme[dayType];
+  const colorData = getColorScheme(colorKey);
+  
   return {
-    bgClass: COLOR_SCHEMES[colorKey].calendar.bg,
+    bgClass: colorData.calendar.bg,
     textClass: cn(
       isCurrentDay && 'font-bold',
-      COLOR_SCHEMES[colorKey].calendar.text,
+      colorData.calendar.text,
     ),
   };
 };

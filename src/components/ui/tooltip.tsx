@@ -4,8 +4,7 @@
 import * as React from 'react';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import { PossibleColors } from '@/types';
-import { cn } from '@/lib/utils';
-import { COLOR_SCHEMES } from '@/constants';
+import { cn, getColorScheme } from '@/lib/utils';
 
 const TooltipProvider = ({ children, ...props }: TooltipPrimitive.TooltipProviderProps) => (
   <TooltipPrimitive.Provider 
@@ -59,10 +58,9 @@ const StatTooltipContent = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Content>,
   StatTooltipContentProps
 >(({ className, sideOffset = 4, colorScheme, ...props }, ref) => {
-  // Safely access COLOR_SCHEMES - check if the colorScheme exists first
-  const tooltipBg = COLOR_SCHEMES[colorScheme] ? 
-    COLOR_SCHEMES[colorScheme].tooltip.bg.replace(/\/\d+/g, '') : 
-    'bg-gray-100 dark:bg-gray-800';
+  // Use our safe getter function
+  const colorSchemeData = getColorScheme(colorScheme);
+  const tooltipBg = colorSchemeData.tooltip.bg.replace(/\/\d+/g, '') || 'bg-gray-100 dark:bg-gray-800';
 
   return (
     <TooltipPrimitive.Portal>
