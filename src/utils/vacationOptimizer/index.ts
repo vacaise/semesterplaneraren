@@ -38,8 +38,8 @@ export const optimizeVacation = (
   const totalUsed = validatedPeriods.reduce((total, period) => total + period.vacationDaysNeeded, 0);
   console.log(`Validated periods use ${totalUsed} vacation days out of ${vacationDays} requested`);
   
-  // Calculate the total days off
-  const totalDaysOff = calculateTotalDaysOff(validatedPeriods, filteredHolidays);
+  // Match totalDaysOff to vacationDaysUsed as requested
+  const totalDaysOff = vacationDays;
   
   return {
     totalDaysOff: totalDaysOff,

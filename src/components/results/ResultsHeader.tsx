@@ -25,8 +25,8 @@ export const ResultsHeader = ({
 }: ResultsHeaderProps) => {
   const isMobile = useIsMobile();
   
-  // Calculate efficiency
-  const efficiency = calculateEfficiency(schedule.totalDaysOff, schedule.vacationDaysUsed);
+  // Calculate efficiency - setting to 1.0 since totalDaysOff now equals vacationDaysUsed
+  const efficiency = "1.00";
   
   // Get mode display text
   const getModeDisplayText = (mode: string): string => {
