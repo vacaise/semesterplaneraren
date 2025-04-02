@@ -44,6 +44,7 @@ export const optimizeVacation = (
   return {
     totalDaysOff: totalDaysOff,
     vacationDaysUsed: vacationDays,
+    mode: mode,
     periods: validatedPeriods
   };
 };
