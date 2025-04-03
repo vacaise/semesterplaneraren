@@ -17,6 +17,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { OptimizationStrategy } from "@/utils/vacationOptimizer/types";
 
 interface StepTwoProps {
   selectedMode: string;
@@ -26,6 +27,7 @@ interface StepTwoProps {
 const StepTwo = ({ selectedMode, setSelectedMode }: StepTwoProps) => {
   const isMobile = useIsMobile();
   
+  // Update modes to match new optimizer strategies
   const modes = [
     {
       id: "balanced",
@@ -35,25 +37,25 @@ const StepTwo = ({ selectedMode, setSelectedMode }: StepTwoProps) => {
       recommended: true
     },
     {
-      id: "longweekends",
+      id: "longWeekends",
       title: "Långhelger",
       description: "Fler 3-4 dagars helger genom året",
       icon: <Coffee className="h-6 w-6 text-blue-600" />
     },
     {
-      id: "minibreaks",
+      id: "miniBreaks",
       title: "Miniledigheter",
       description: "Flera kortare 5-6 dagars ledigheter utspridda över året",
       icon: <Star className="h-6 w-6 text-blue-600" />
     },
     {
-      id: "weeks",
+      id: "weekLongBreaks",
       title: "Veckor",
       description: "Fokuserar på 7-9 dagars ledighet för längre perioder",
       icon: <SunsetIcon className="h-6 w-6 text-blue-600" />
     },
     {
-      id: "extended",
+      id: "extendedVacations",
       title: "Långa semestrar",
       description: "Längre 10-15 dagars ledigheter för djupare avkoppling",
       icon: <Palmtree className="h-6 w-6 text-blue-600" />

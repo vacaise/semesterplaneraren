@@ -11,7 +11,7 @@ import StepNavigationButtons from "@/components/StepNavigationButtons";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { getHolidays } from "@/utils/holidays";
-import { optimizeVacation } from "@/utils/vacationOptimizer";
+import { optimizeDays, optimizeDaysAsync } from "@/utils/vacationOptimizer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Helmet } from "react-helmet";
 
@@ -37,10 +37,6 @@ const Index = () => {
   const resetToStart = () => {
     setCurrentStep(1);
     setOptimizedSchedule(null);
-    // Optionally reset other values to defaults
-    // setVacationDays(25);
-    // setSelectedMode("balanced");
-    // setHolidays([]);
     window.scrollTo(0, 0);
   };
 
@@ -93,14 +89,53 @@ const Index = () => {
     }
   };
 
-  const generateOptimizedSchedule = () => {
+  const generateOptimizedSchedule = async () => {
     setIsLoading(true);
     
     try {
       console.log("Generating schedule with holidays:", holidays);
-      const optimizedScheduleData = optimizeVacation(year, vacationDays, holidays, selectedMode);
-      console.log("Generated schedule:", optimizedScheduleData);
-      setOptimizedSchedule(optimizedScheduleData);
+
+      // Convert holidays to the format expected by the new optimizer
+      const convertedHolidays = holidays.map(date => ({
+        date: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`,
+        name: "Röd dag"
+      }));
+
+      // Map old mode to new strategy format if needed
+      let strategy = selectedMode;
+      if (selectedMode === 'longweekends') strategy = 'longWeekends';
+      if (selectedMode === 'minibreaks') strategy = 'miniBreaks';
+      if (selectedMode === 'weeks') strategy = 'weekLongBreaks';
+      if (selectedMode === 'extended') strategy = 'extendedVacations';
+
+      // Use the new async optimizer
+      const optimizedResult = await optimizeDaysAsync({
+        numberOfDays: vacationDays,
+        strategy: strategy as any,
+        year: year,
+        holidays: convertedHolidays
+      });
+
+      console.log("Generated schedule:", optimizedResult);
+
+      // Adapt new result format to the expected format by the Results component
+      const adaptedResult = {
+        totalDaysOff: optimizedResult.stats.totalDaysOff,
+        vacationDaysUsed: optimizedResult.stats.totalPTODays,
+        mode: selectedMode,
+        periods: optimizedResult.breaks.map(breakPeriod => ({
+          start: new Date(breakPeriod.startDate),
+          end: new Date(breakPeriod.endDate),
+          days: breakPeriod.totalDays,
+          vacationDaysNeeded: breakPeriod.ptoDays,
+          description: `${breakPeriod.totalDays} lediga dagar`,
+          type: selectedMode,
+          startDate: breakPeriod.startDate,
+          endDate: breakPeriod.endDate
+        }))
+      };
+
+      setOptimizedSchedule(adaptedResult);
       setCurrentStep(4);
     } catch (error) {
       toast({

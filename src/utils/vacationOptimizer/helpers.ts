@@ -1,58 +1,51 @@
 
-import { isSameDay, isWeekend, format, isBefore, startOfDay } from 'date-fns';
-import { sv } from 'date-fns/locale';
+import { format } from 'date-fns';
+import { OptimizedDay } from './types';
 
-// Helper function to determine if a day is a day off (weekend or holiday)
-export const isDayOff = (date: Date, holidays: Date[]): boolean => {
-  // Check if the day is a weekend (Saturday or Sunday)
-  if (isWeekend(date)) return true;
+/**
+ * Format a Date object as 'YYYY-MM-DD'
+ */
+export const formatDate = (date: Date): string => {
+  const yr = date.getFullYear();
+  const mo = String(date.getMonth() + 1).padStart(2, '0');
+  const dy = String(date.getDate()).padStart(2, '0');
+  return `${yr}-${mo}-${dy}`;
+};
+
+/**
+ * Checks if a given date is a day off (weekend or holiday).
+ */
+export const isDayOff = (date: Date, holidays: Date[] = []): boolean => {
+  const dayOfWeek = date.getDay();
+  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; // Sunday or Saturday
   
-  // Check if the day is a holiday
-  return holidays.some(holiday => isSameDay(holiday, date));
+  if (isWeekend) return true;
+  
+  // Check if the date is a holiday
+  const formattedDate = format(date, 'yyyy-MM-dd');
+  return holidays.some(holiday => format(holiday, 'yyyy-MM-dd') === formattedDate);
 };
 
-// Format date to a string for set operations
-export const formatDateToString = (date: Date): string => {
-  return format(date, 'yyyy-MM-dd');
-};
-
-// Check if a date is in the past (before today)
+/**
+ * Checks if a date is in the past.
+ */
 export const isDateInPast = (date: Date): boolean => {
-  const today = startOfDay(new Date());
-  const dateToCheck = startOfDay(new Date(date));
-  return isBefore(dateToCheck, today);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const compareDate = new Date(date);
+  compareDate.setHours(0, 0, 0, 0);
+  return compareDate < today;
 };
 
-// Get the number of work days between two dates
-export const getWorkDays = (startDate: Date, endDate: Date, holidays: Date[]): number => {
-  let workDays = 0;
-  const currentDate = new Date(startDate);
-  
-  while (currentDate <= endDate) {
-    // Check if it's a weekday (not Saturday or Sunday) and not a holiday
-    if (!isDayOff(currentDate, holidays)) {
-      workDays++;
-    }
-    
-    // Move to the next day
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
-  
-  return workDays;
-};
+/**
+ * Returns true if a day is naturally off (i.e., weekend, public holiday, or company day off).
+ * For use with the new optimizer.
+ */
+export const isFixedOff = (day: OptimizedDay): boolean =>
+  day.isWeekend || day.isPublicHoliday || day.isCompanyDayOff;
 
-// Returns the month name in Swedish
-export const getMonthName = (monthIndex: number): string => {
-  const months = [
-    "januari", "februari", "mars", "april", "maj", "juni",
-    "juli", "augusti", "september", "oktober", "november", "december"
-  ];
-  return months[monthIndex];
-};
-
-// Format a date range as a string
-export const formatDateRange = (start: Date, end: Date): string => {
-  const startFormatted = format(start, 'd MMM', { locale: sv });
-  const endFormatted = format(end, 'd MMM', { locale: sv });
-  return `${startFormatted} - ${endFormatted}`;
-};
+/**
+ * Add a specified number of days to a Date object.
+ */
+export const addDays = (date: Date, days: number): Date =>
+  new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
