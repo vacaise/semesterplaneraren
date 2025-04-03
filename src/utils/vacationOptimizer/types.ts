@@ -7,7 +7,6 @@ export interface VacationPeriod {
   description: string;
   type: string;
   score?: number;
-  efficiency?: number;
   startDate?: string; // Optional for display purposes
   endDate?: string;   // Optional for display purposes
 }
