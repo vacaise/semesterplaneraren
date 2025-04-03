@@ -1,14 +1,20 @@
 
 import { optimizeVacation } from './optimizer';
-import { calculateEfficiency } from './vacationCalculator';
-import { VacationPeriod, OptimizedSchedule } from './types';
+import { calculateEfficiency } from './calculators';
+import { VacationPeriod, OptimizedSchedule, OptimizationMode } from './types';
+import { findAllPotentialPeriods } from './potentialPeriodFinder';
+import { sortPeriodsByModeAndEfficiency, selectOptimalPeriods } from './periodSelector';
 
 export { 
   optimizeVacation,
-  calculateEfficiency
+  calculateEfficiency,
+  findAllPotentialPeriods,
+  sortPeriodsByModeAndEfficiency,
+  selectOptimalPeriods
 };
 
 export type { 
   VacationPeriod,
-  OptimizedSchedule
+  OptimizedSchedule,
+  OptimizationMode
 };
