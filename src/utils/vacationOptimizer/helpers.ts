@@ -29,7 +29,7 @@ export const getWorkDays = (startDate: Date, endDate: Date, holidays: Date[]): n
   const currentDate = new Date(startDate);
   
   while (currentDate <= endDate) {
-    // Check if it's a weekday (not Saturday or Sunday) and not a holiday
+    // Check if it's not a weekend or holiday
     if (!isDayOff(currentDate, holidays)) {
       workDays++;
     }
