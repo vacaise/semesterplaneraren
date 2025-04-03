@@ -37,9 +37,15 @@ export const optimizeVacation = (
     0
   );
   
+  // Verify that we're using exactly the number of vacation days specified
+  if (usedVacationDays !== vacationDays) {
+    console.warn(`Warning: The algorithm could not match the exact number of vacation days. 
+    Requested: ${vacationDays}, Used: ${usedVacationDays}`);
+  }
+  
   return {
     totalDaysOff: totalDaysOff,
-    vacationDaysUsed: usedVacationDays, // Use the calculated value for transparency
+    vacationDaysUsed: usedVacationDays,
     mode,
     periods: validatedPeriods
   };

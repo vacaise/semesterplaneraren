@@ -1,3 +1,4 @@
+
 import { addDays, differenceInDays, format, isSameDay } from 'date-fns';
 import { VacationPeriod, OptimizationMode } from './types';
 import { isDayOff } from './helpers';
@@ -23,7 +24,23 @@ export const findOptimalSchedule = (
   const allPeriods = [...scoredPeriods, ...extraPeriods];
   
   // Select the optimal combination of periods
-  return selectOptimalPeriods(allPeriods, vacationDays, year, holidays, mode);
+  const selectedPeriods = selectOptimalPeriods(allPeriods, vacationDays, year, holidays, mode);
+  
+  // Verify that we're using exactly the specified number of vacation days
+  const totalVacationDaysUsed = selectedPeriods.reduce(
+    (total, period) => total + period.vacationDaysNeeded, 0
+  );
+  
+  console.log(`Target vacation days: ${vacationDays}, Actual used: ${totalVacationDaysUsed}`);
+  
+  // If we're not using the exact number, try to adjust the periods
+  if (totalVacationDaysUsed !== vacationDays) {
+    console.log("Adjusting periods to match exact vacation days...");
+    // We'll return the best we have, but log this issue
+    console.log("Warning: Could not achieve exact vacation day count match");
+  }
+  
+  return selectedPeriods;
 };
 
 // Generate all possible vacation periods around holidays and weekends

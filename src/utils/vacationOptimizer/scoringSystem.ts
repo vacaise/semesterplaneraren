@@ -49,19 +49,19 @@ export const scorePeriods = (periods: VacationPeriod[], mode: string, vacationDa
     // Add reward or penalty based on vacation days usage
     // This is applied to each period proportionally to its contribution to the total
     if (totalVacationDaysUsed < vacationDays) {
-      // Penalty for not using all vacation days
+      // INCREASED Penalty for not using all vacation days
       const unusedDays = vacationDays - totalVacationDaysUsed;
-      const penaltyPerDay = 5;
+      const penaltyPerDay = 30; // Increased from 5 to 30
       const totalPenalty = unusedDays * penaltyPerDay;
       
       // Apply proportional penalty to this period
-      const proportionalPenalty = totalPenalty * (period.vacationDaysNeeded / totalVacationDaysUsed);
+      const proportionalPenalty = totalPenalty * (period.vacationDaysNeeded / Math.max(totalVacationDaysUsed, 1));
       period.score -= proportionalPenalty;
     } 
     else if (totalVacationDaysUsed > vacationDays) {
-      // Penalty for using too many vacation days
+      // INCREASED Penalty for using too many vacation days
       const excessDays = totalVacationDaysUsed - vacationDays;
-      const penaltyPerDay = 10;
+      const penaltyPerDay = 40; // Increased from 10 to 40
       const totalPenalty = excessDays * penaltyPerDay;
       
       // Apply proportional penalty to this period
@@ -69,8 +69,8 @@ export const scorePeriods = (periods: VacationPeriod[], mode: string, vacationDa
       period.score -= proportionalPenalty;
     } 
     else if (totalVacationDaysUsed === vacationDays) {
-      // Reward for using exactly the right number of days
-      period.score += 25;
+      // Increased Reward for using exactly the right number of days
+      period.score += 50; // Increased from 25 to 50
     }
   });
   

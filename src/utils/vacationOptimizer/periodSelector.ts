@@ -1,4 +1,3 @@
-
 import { createExtraPeriods } from './periodFinders';
 import { VacationPeriod } from './types';
 import { isDateInPast, isDayOff } from './helpers';
@@ -80,49 +79,108 @@ export const selectOptimalPeriods = (
   
   // Second pass: fill in remaining vacation days with efficient periods
   if (remainingVacationDays > 0) {
-    for (const period of validPeriods) {
-      // Skip already selected periods
-      if (selectedPeriods.some(p => 
+    // Sort remaining periods by smaller vacation days needed first to help exact matching
+    const remainingPeriods = validPeriods.filter(period => 
+      !selectedPeriods.some(p => 
         p.start.getTime() === period.start.getTime() && 
         p.end.getTime() === period.end.getTime()
-      )) {
-        continue;
-      }
+      )
+    );
+    
+    // Try to find periods that exactly match the remaining days
+    const exactMatchPeriods = remainingPeriods.filter(p => p.vacationDaysNeeded === remainingVacationDays);
+    if (exactMatchPeriods.length > 0) {
+      // Add the first exact match
+      selectedPeriods.push(exactMatchPeriods[0]);
+      remainingVacationDays = 0;
+    } else {
+      // If no exact match, try to find smaller periods that add up
+      remainingPeriods.sort((a, b) => a.vacationDaysNeeded - b.vacationDaysNeeded);
       
-      if (period.vacationDaysNeeded <= remainingVacationDays) {
-        selectedPeriods.push(period);
-        remainingVacationDays -= period.vacationDaysNeeded;
-      }
-      
-      // If we've hit our target or run out of vacation days, break
-      if (selectedPeriods.length >= maxPeriods || remainingVacationDays <= 0) {
-        break;
+      for (const period of remainingPeriods) {
+        if (period.vacationDaysNeeded <= remainingVacationDays) {
+          selectedPeriods.push(period);
+          remainingVacationDays -= period.vacationDaysNeeded;
+        }
+        
+        // If we've used all vacation days, break
+        if (remainingVacationDays <= 0) {
+          break;
+        }
       }
     }
   }
   
   // Final attempt: if we still have vacation days, add extra small periods
-  if (remainingVacationDays > 0) {
-    const extraPeriods = createExtraPeriods(year, holidays);
+  // or if we've used too many, try to replace with more efficient ones
+  if (remainingVacationDays !== 0) {
+    console.log(`Still have ${remainingVacationDays} vacation days remaining. Attempting final optimization...`);
     
-    for (const period of extraPeriods) {
-      if (period.vacationDaysNeeded <= remainingVacationDays) {
-        // Check that there's no overlap with existing periods
-        const hasOverlap = selectedPeriods.some(selected => {
-          return (
-            (period.start >= selected.start && period.start <= selected.end) ||
-            (period.end >= selected.start && period.end <= selected.end) ||
-            (period.start <= selected.start && period.end >= selected.end)
-          );
-        });
+    if (remainingVacationDays > 0) {
+      const extraPeriods = createExtraPeriods(year, holidays);
+      
+      // Sort by vacation days needed (ascending)
+      extraPeriods.sort((a, b) => a.vacationDaysNeeded - b.vacationDaysNeeded);
+      
+      for (const period of extraPeriods) {
+        if (period.vacationDaysNeeded <= remainingVacationDays) {
+          // Check that there's no overlap with existing periods
+          const hasOverlap = selectedPeriods.some(selected => {
+            return (
+              (period.start >= selected.start && period.start <= selected.end) ||
+              (period.end >= selected.start && period.end <= selected.end) ||
+              (period.start <= selected.start && period.end >= selected.end)
+            );
+          });
+          
+          if (!hasOverlap) {
+            selectedPeriods.push(period);
+            remainingVacationDays -= period.vacationDaysNeeded;
+          }
+        }
         
-        if (!hasOverlap) {
-          selectedPeriods.push(period);
-          remainingVacationDays -= period.vacationDaysNeeded;
+        if (remainingVacationDays <= 0) break;
+      }
+    } else if (remainingVacationDays < 0) {
+      // We've used too many vacation days, try to optimize
+      // Find the period with the least efficient use of days and remove it
+      selectedPeriods.sort((a, b) => {
+        const aEfficiency = a.days / Math.max(a.vacationDaysNeeded, 1);
+        const bEfficiency = b.days / Math.max(b.vacationDaysNeeded, 1);
+        return aEfficiency - bEfficiency; // Least efficient first
+      });
+      
+      // Keep removing the least efficient periods until we're under or at the limit
+      while (remainingVacationDays < 0 && selectedPeriods.length > 0) {
+        const removed = selectedPeriods.shift();
+        if (removed) {
+          remainingVacationDays += removed.vacationDaysNeeded;
         }
       }
       
-      if (remainingVacationDays <= 0) break;
+      // Now try to add back smaller periods to hit the exact number
+      if (remainingVacationDays > 0) {
+        const smallPeriods = validPeriods.filter(p => p.vacationDaysNeeded <= remainingVacationDays);
+        smallPeriods.sort((a, b) => b.vacationDaysNeeded - a.vacationDaysNeeded); // Largest first that fit
+        
+        for (const period of smallPeriods) {
+          // Check for overlaps
+          const hasOverlap = selectedPeriods.some(selected => {
+            return (
+              (period.start >= selected.start && period.start <= selected.end) ||
+              (period.end >= selected.start && period.end <= selected.end) ||
+              (period.start <= selected.start && period.end >= selected.end)
+            );
+          });
+          
+          if (!hasOverlap && period.vacationDaysNeeded <= remainingVacationDays) {
+            selectedPeriods.push(period);
+            remainingVacationDays -= period.vacationDaysNeeded;
+          }
+          
+          if (remainingVacationDays === 0) break;
+        }
+      }
     }
   }
   
