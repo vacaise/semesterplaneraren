@@ -47,7 +47,7 @@ const SocialShareButtons = () => {
         Share your optimized schedule with friends and colleagues
       </p>
       <div className="flex flex-wrap items-center justify-center gap-2">
-        {typeof navigator !== 'undefined' && navigator.share && (
+        {typeof navigator !== 'undefined' && 'share' in navigator && (
           <Button 
             variant="outline" 
             size="sm"
