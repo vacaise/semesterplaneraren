@@ -1,4 +1,3 @@
-
 import { addDays, differenceInDays, format, isSameDay } from 'date-fns';
 import { VacationPeriod, OptimizationMode } from './types';
 import { isDayOff } from './helpers';
@@ -17,7 +16,7 @@ export const findOptimalSchedule = (
   const allPossiblePeriods = generatePossiblePeriods(year, holidays);
   
   // Score and prioritize periods based on the selected mode
-  const scoredPeriods = scorePeriods(allPossiblePeriods, mode);
+  const scoredPeriods = scorePeriods(allPossiblePeriods, mode, vacationDays);
   
   // Generate additional periods to fill in gaps and maximize total time off
   const extraPeriods = createExtraPeriods(year, holidays);

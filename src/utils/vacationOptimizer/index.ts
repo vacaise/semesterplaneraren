@@ -3,6 +3,7 @@ import { findOptimalSchedule } from './optimizer';
 import { calculateTotalDaysOff } from './calculators';
 import { isDayOff, isDateInPast } from './helpers';
 import { VacationPeriod } from './types';
+import { processPastDates } from './pastDateHandler';
 
 interface OptimizedSchedule {
   totalDaysOff: number;
@@ -25,21 +26,20 @@ export const optimizeVacation = (
   const selectedPeriods = findOptimalSchedule(year, vacationDays, filteredHolidays, mode);
   
   // Verify periods don't contain any past dates
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  
-  const validatedPeriods = selectedPeriods.filter(period => {
-    const endDate = new Date(period.end);
-    endDate.setHours(0, 0, 0, 0);
-    return endDate >= today;
-  });
+  const validatedPeriods = processPastDates(selectedPeriods);
   
   // Calculate the total days off
   const totalDaysOff = calculateTotalDaysOff(validatedPeriods, filteredHolidays);
   
+  // Calculate total vacation days used
+  const usedVacationDays = validatedPeriods.reduce(
+    (total, period) => total + period.vacationDaysNeeded, 
+    0
+  );
+  
   return {
     totalDaysOff: totalDaysOff,
-    vacationDaysUsed: vacationDays,
+    vacationDaysUsed: usedVacationDays, // Use the calculated value for transparency
     mode,
     periods: validatedPeriods
   };

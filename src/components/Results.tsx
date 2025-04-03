@@ -39,7 +39,7 @@ interface ResultsProps {
 }
 
 const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
-  const [view, setView] = useState<"list" | "calendar">("list");
+  const [view, setView] = useState<"list" | "calendar">("calendar"); // Changed default to "calendar"
   const isMobile = useIsMobile();
   const { toast } = useToast();
   
@@ -182,7 +182,7 @@ const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
         </div>
       </div>
       
-      <Tabs defaultValue="list" className="w-full">
+      <Tabs defaultValue="calendar" className="w-full"> {/* Changed defaultValue to "calendar" */}
         <TabsList className="mb-4">
           <TabsTrigger value="list">Ledighetsperioder</TabsTrigger>
           <TabsTrigger value="calendar">Kalendervy</TabsTrigger>

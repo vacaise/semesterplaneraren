@@ -2,8 +2,11 @@
 import { VacationPeriod } from './types';
 
 // Score periods based on optimization mode
-export const scorePeriods = (periods: VacationPeriod[], mode: string): VacationPeriod[] => {
+export const scorePeriods = (periods: VacationPeriod[], mode: string, vacationDays: number): VacationPeriod[] => {
   const scoredPeriods = [...periods];
+  
+  // Calculate total vacation days used in all periods
+  const totalVacationDaysUsed = scoredPeriods.reduce((sum, period) => sum + period.vacationDaysNeeded, 0);
   
   // Apply base scores based on period characteristics
   scoredPeriods.forEach(period => {
@@ -41,6 +44,33 @@ export const scorePeriods = (periods: VacationPeriod[], mode: string): VacationP
     }
     if (mode === "extended" && period.days <= 9) {
       period.score -= 20;
+    }
+    
+    // Add reward or penalty based on vacation days usage
+    // This is applied to each period proportionally to its contribution to the total
+    if (totalVacationDaysUsed < vacationDays) {
+      // Penalty for not using all vacation days
+      const unusedDays = vacationDays - totalVacationDaysUsed;
+      const penaltyPerDay = 5;
+      const totalPenalty = unusedDays * penaltyPerDay;
+      
+      // Apply proportional penalty to this period
+      const proportionalPenalty = totalPenalty * (period.vacationDaysNeeded / totalVacationDaysUsed);
+      period.score -= proportionalPenalty;
+    } 
+    else if (totalVacationDaysUsed > vacationDays) {
+      // Penalty for using too many vacation days
+      const excessDays = totalVacationDaysUsed - vacationDays;
+      const penaltyPerDay = 10;
+      const totalPenalty = excessDays * penaltyPerDay;
+      
+      // Apply proportional penalty to this period
+      const proportionalPenalty = totalPenalty * (period.vacationDaysNeeded / totalVacationDaysUsed);
+      period.score -= proportionalPenalty;
+    } 
+    else if (totalVacationDaysUsed === vacationDays) {
+      // Reward for using exactly the right number of days
+      period.score += 25;
     }
   });
   
