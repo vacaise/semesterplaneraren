@@ -43,6 +43,16 @@ const ResultsView = ({ schedule, year, holidays }: ResultsViewProps) => {
     );
   }
 
+  // Normalize dates to ensure they are proper Date objects
+  const normalizedSchedule = {
+    ...schedule,
+    periods: schedule.periods.map(period => ({
+      ...period,
+      start: period.start instanceof Date ? period.start : new Date(period.start),
+      end: period.end instanceof Date ? period.end : new Date(period.end)
+    }))
+  };
+
   return (
     <Tabs defaultValue="list" className="w-full">
       <TabsList className="mb-4">
@@ -52,7 +62,7 @@ const ResultsView = ({ schedule, year, holidays }: ResultsViewProps) => {
       
       <TabsContent value="list">
         <PeriodsListView 
-          periods={schedule.periods}
+          periods={normalizedSchedule.periods}
           year={year}
           holidays={holidays}
         />
@@ -60,7 +70,7 @@ const ResultsView = ({ schedule, year, holidays }: ResultsViewProps) => {
       
       <TabsContent value="calendar">
         <MonthCalendarView 
-          schedule={schedule}
+          schedule={normalizedSchedule}
           year={year}
           holidays={holidays}
         />
