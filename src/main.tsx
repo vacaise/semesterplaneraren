@@ -1,11 +1,18 @@
 
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App'
-import './app/globals.css'
+import { createRoot } from 'react-dom/client'
+import App from './App.tsx'
+import './index.css'
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-)
+// Kontrollera om sidan laddas i AMP-läge
+const isAmpMode = window.location.pathname.includes('/amp') || 
+                   window.location.search.includes('amp=1');
+
+// Om det är AMP, lägg till AMP-specifika anpassningar
+if (isAmpMode) {
+  document.documentElement.setAttribute('amp', '');
+}
+
+const root = createRoot(document.getElementById("root")!);
+root.render(
+  <App />
+);

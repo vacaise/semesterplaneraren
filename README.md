@@ -1,118 +1,69 @@
-# Holiday Optimizer
+# Welcome to your Lovable project
 
-A web application for optimizing holiday travel planning.
+## Project info
 
-## Overview
+**URL**: https://lovable.dev/projects/ae3b0d53-2673-451a-85f3-f00ec66b4693
 
-Holiday Optimizer is a web application that helps users plan their holidays efficiently. By analyzing travel routes, costs, and optimal scheduling, the application provides recommendations for maximizing travel experiences while minimizing expenses and travel time.
+## How can I edit this code?
 
-## Features
+There are several ways of editing your application.
 
-- Interactive calendar visualization
-- Cost comparison between different travel options
-- Automatic optimization of travel routes
-- Shareable trip itineraries
-- Weather forecast integration
-- Accommodation recommendations
-- Local attraction suggestions
+**Use Lovable**
 
-## Technology Stack
+Simply visit the [Lovable Project](https://lovable.dev/projects/ae3b0d53-2673-451a-85f3-f00ec66b4693) and start prompting.
 
-This project is built with:
+Changes made via Lovable will be committed automatically to this repo.
 
-- **Frontend**: Next.js, React, TypeScript, TailwindCSS
-- **UI Components**: Shadcn UI
-- **Styling**: TailwindCSS
-- **Testing**: Jest, React Testing Library
-- **Deployment**: Cloudflare Pages
-- **CI/CD**: GitHub Actions for testing and quality assurance
+**Use your preferred IDE**
 
-## Getting Started
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-### Prerequisites
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-- Node.js 20+
-- pnpm 10+
+Follow these steps:
 
-### Installation
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/holiday-optimizer.git
-   cd holiday-optimizer
-   ```
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
 
-2. Install dependencies:
-   ```bash
-   pnpm install
-   ```
+# Step 3: Install the necessary dependencies.
+npm i
 
-3. Start the development server:
-   ```bash
-   pnpm dev
-   ```
-
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## Deployment
-
-This application is deployed to Cloudflare Pages. For deployment details, see [DEPLOYMENT.md](DEPLOYMENT.md).
-
-## Project Structure
-
-```
-holiday-optimizer/
-├── .github/            # GitHub Actions workflows
-├── .husky/             # Git hooks
-├── public/             # Static assets
-├── src/                # Application source code
-│   ├── app/            # Next.js app router
-│   ├── components/     # React components
-│   ├── lib/            # Utility functions and shared logic
-│   ├── styles/         # Global styles
-│   └── types/          # TypeScript type definitions
-└── tests/              # Test files
+# Step 4: Start the development server with auto-reloading and an instant preview.
+npm run dev
 ```
 
-## Development Workflow
+**Edit a file directly in GitHub**
 
-### Running Tests
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-```bash
-# Run all tests
-pnpm test
+**Use GitHub Codespaces**
 
-# Run tests in watch mode
-pnpm test:watch
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-# Run specific test categories
-pnpm test:unit
-pnpm test:integration
-pnpm test:e2e
+## What technologies are used for this project?
 
-# Generate test coverage report
-pnpm test:coverage
-```
+This project is built with .
 
-### Linting and Formatting
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
 
-```bash
-# Run linter
-pnpm lint
+## How can I deploy this project?
 
-# Format code
-pnpm format
-```
+Simply open [Lovable](https://lovable.dev/projects/ae3b0d53-2673-451a-85f3-f00ec66b4693) and click on Share -> Publish.
 
-## Contributing
+## I want to use a custom domain - is that possible?
 
-1. Create a feature branch from `main`.
-2. Make changes and ensure tests pass.
-3. Submit a pull request.
-
-### Guidelines
-
-- Follow the existing code style and naming conventions.
-- Write tests for new features and bug fixes.
-- Keep pull requests focused on a single feature or fix.
-- Document new features or changes in behavior.
+We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
