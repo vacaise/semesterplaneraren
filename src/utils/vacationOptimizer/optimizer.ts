@@ -2,9 +2,8 @@
 import { addDays, differenceInDays, format, isSameDay } from 'date-fns';
 import { VacationPeriod, OptimizationMode } from './types';
 import { isDayOff } from './helpers';
-import { selectOptimalPeriods } from './periodSelector';
-import { findKeyPeriods, findBridgeDays, findExtendedWeekends, findSummerPeriods, createExtraPeriods } from './periodFinders';
-import { scorePeriods } from './scoringSystem';
+import { calculateVacationDaysNeeded } from './calculators';
+import { findPotentialPeriods } from './periodFinders';
 
 // Main function to find and optimize vacation periods
 export const findOptimalSchedule = (
@@ -13,133 +12,256 @@ export const findOptimalSchedule = (
   holidays: Date[],
   mode: string
 ): VacationPeriod[] => {
-  // Generate all possible periods by scanning the year
-  const allPossiblePeriods = generatePossiblePeriods(year, holidays);
+  // Generate all possible candidate periods around holidays and weekends
+  const potentialPeriods = findPotentialPeriods(year, holidays);
   
-  // Score and prioritize periods based on the selected mode
-  const scoredPeriods = scorePeriods(allPossiblePeriods, mode);
-  
-  // Generate additional periods to fill in gaps and maximize total time off
-  const extraPeriods = createExtraPeriods(year, holidays);
-  const allPeriods = [...scoredPeriods, ...extraPeriods];
-  
-  // Select the optimal combination of periods
-  return selectOptimalPeriods(allPeriods, vacationDays, year, holidays, mode);
-};
-
-// Generate all possible vacation periods around holidays and weekends
-const generatePossiblePeriods = (year: number, holidays: Date[]): VacationPeriod[] => {
-  const periods: VacationPeriod[] = [];
-  
-  // 1. Find periods around major holidays (Easter, Christmas, Midsummer, etc.)
-  periods.push(...findKeyPeriods(year, holidays));
-  
-  // 2. Find bridge days between holidays and weekends
-  periods.push(...findBridgeDays(year));
-  
-  // 3. Find extended weekends (Thursday-Sunday or Friday-Monday)
-  periods.push(...findExtendedWeekends(year));
-  
-  // 4. Find summer vacation options
-  periods.push(...findSummerPeriods(year));
-  
-  // 5. Generate more possible combinations to increase efficiency
-  const additionalPeriods = generateAdditionalPeriods(year, holidays);
-  periods.push(...additionalPeriods);
-  
-  return periods;
-};
-
-// Generate additional vacation period options to maximize efficiency
-const generateAdditionalPeriods = (year: number, holidays: Date[]): VacationPeriod[] => {
-  const additionalPeriods: VacationPeriod[] = [];
-  
-  // Add week-long options focusing on months with higher holiday density
-  const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-  
-  months.forEach(month => {
-    // Create a week-long period in the middle of each month
-    const startDay = new Date(year, month - 1, 15);
-    
-    // Find the next Monday
-    while (startDay.getDay() !== 1) {
-      startDay.setDate(startDay.getDate() + 1);
-    }
-    
-    const endDay = new Date(startDay);
-    endDay.setDate(startDay.getDate() + 6); // Sunday
-    
-    // Calculate vacation days needed (excluding weekends and holidays)
-    let vacationDaysNeeded = 0;
-    const currentDay = new Date(startDay);
-    
-    while (currentDay <= endDay) {
-      if (!isDayOff(currentDay, holidays)) {
-        vacationDaysNeeded++;
-      }
-      currentDay.setDate(currentDay.getDate() + 1);
-    }
-    
-    additionalPeriods.push({
-      start: new Date(startDay),
-      end: new Date(endDay),
-      days: 7,
-      vacationDaysNeeded,
-      description: `${month}-veckan`,
-      type: "week",
-      score: 50
-    });
-    
-    // Also add mini-breaks (Thursday-Sunday)
-    const thursdayDate = new Date(year, month - 1, 1);
-    // Find the first Thursday of the month
-    while (thursdayDate.getDay() !== 4) {
-      thursdayDate.setDate(thursdayDate.getDate() + 1);
-    }
-    
-    // Add 2 Thursday-Sunday mini-breaks per month
-    for (let i = 0; i < 2; i++) {
-      const thurStart = new Date(thursdayDate);
-      thurStart.setDate(thursdayDate.getDate() + (i * 14)); // Every other Thursday
-      
-      const thurEnd = new Date(thurStart);
-      thurEnd.setDate(thurStart.getDate() + 3); // Sunday
-      
-      // Skip if in the past
-      const today = new Date();
-      if (thurEnd < today) continue;
-      
-      // Calculate vacation days needed
-      let miniBreakDaysNeeded = 0;
-      const currentMiniDay = new Date(thurStart);
-      
-      while (currentMiniDay <= thurEnd) {
-        if (!isDayOff(currentMiniDay, holidays)) {
-          miniBreakDaysNeeded++;
-        }
-        currentMiniDay.setDate(currentMiniDay.getDate() + 1);
-      }
-      
-      additionalPeriods.push({
-        start: thurStart,
-        end: thurEnd,
-        days: 4,
-        vacationDaysNeeded: miniBreakDaysNeeded,
-        description: `Långhelg i ${getMonthName(month - 1)}`,
-        type: "weekend",
-        score: 45
-      });
-    }
+  // Each potential period now has an efficiency score (days off / vacation days needed)
+  // Sort by efficiency (highest first)
+  potentialPeriods.sort((a, b) => {
+    const aEfficiency = a.days / Math.max(a.vacationDaysNeeded, 1);
+    const bEfficiency = b.days / Math.max(b.vacationDaysNeeded, 1);
+    return bEfficiency - aEfficiency;
   });
+
+  console.log(`Starting optimization with ${vacationDays} vacation days and ${potentialPeriods.length} potential periods`);
   
-  return additionalPeriods;
+  // Find the best combination of periods that uses exactly the user's vacation days
+  return selectOptimalCombination(potentialPeriods, vacationDays, holidays, mode);
 };
 
-// Helper function to get month name
-const getMonthName = (monthIndex: number): string => {
-  const months = [
-    "januari", "februari", "mars", "april", "maj", "juni",
-    "juli", "augusti", "september", "oktober", "november", "december"
-  ];
-  return months[monthIndex];
+// Select the optimal combination of periods that uses exactly the specified vacation days
+const selectOptimalCombination = (
+  candidates: VacationPeriod[],
+  totalVacationDays: number, 
+  holidays: Date[],
+  mode: string
+): VacationPeriod[] => {
+  let remainingDays = totalVacationDays;
+  const selectedPeriods: VacationPeriod[] = [];
+  
+  // First pass: Choose high-efficiency periods
+  for (const period of candidates) {
+    // Skip if period requires more vacation days than we have left
+    if (period.vacationDaysNeeded > remainingDays) continue;
+    
+    // Skip if period overlaps with already selected periods
+    const hasOverlap = selectedPeriods.some(selected => periodsOverlap(period, selected));
+    if (hasOverlap) continue;
+    
+    // Add this period to our selection
+    selectedPeriods.push(period);
+    remainingDays -= period.vacationDaysNeeded;
+    
+    // If we've used all vacation days, we're done
+    if (remainingDays === 0) break;
+  }
+
+  // If we still have vacation days remaining, we need to add more periods
+  if (remainingDays > 0) {
+    fillRemainingVacationDays(selectedPeriods, candidates, remainingDays, holidays);
+  }
+
+  // Sort periods by start date (chronologically)
+  selectedPeriods.sort((a, b) => a.start.getTime() - b.start.getTime());
+  
+  console.log(`Final schedule: ${selectedPeriods.length} periods using ${totalVacationDays} vacation days`);
+  
+  return selectedPeriods;
+};
+
+// Check if two periods overlap
+const periodsOverlap = (period1: VacationPeriod, period2: VacationPeriod): boolean => {
+  return (
+    (period1.start <= period2.end && period1.end >= period2.start) ||
+    (period2.start <= period1.end && period2.end >= period1.start)
+  );
+};
+
+// Fill any remaining vacation days by either extending existing periods
+// or finding smaller periods to fit exactly
+const fillRemainingVacationDays = (
+  selectedPeriods: VacationPeriod[],
+  candidates: VacationPeriod[],
+  remainingDays: number,
+  holidays: Date[]
+): void => {
+  console.log(`Filling ${remainingDays} remaining vacation days`);
+  
+  // Try to extend existing periods first
+  const extendedAny = tryExtendExistingPeriods(selectedPeriods, remainingDays, holidays);
+  
+  // If we still have days left, try to find shorter periods that fit exactly
+  if (remainingDays > 0) {
+    // Create additional single-day periods if needed
+    findExactFitPeriods(selectedPeriods, candidates, remainingDays, holidays);
+  }
+};
+
+// Try to extend existing periods to use more vacation days
+const tryExtendExistingPeriods = (
+  selectedPeriods: VacationPeriod[],
+  remainingDays: number,
+  holidays: Date[]
+): boolean => {
+  let daysUsed = 0;
+  
+  for (const period of selectedPeriods) {
+    if (remainingDays <= 0) break;
+    
+    // Try to extend at the beginning
+    let startDate = new Date(period.start);
+    startDate = addDays(startDate, -1);
+    
+    while (remainingDays > 0 && !isDayOff(startDate, holidays)) {
+      // Check for overlap with other periods
+      const wouldOverlap = selectedPeriods.some(p => 
+        p !== period && 
+        startDate >= addDays(p.start, -1) && 
+        startDate <= addDays(p.end, 1)
+      );
+      
+      if (wouldOverlap) break;
+      
+      // Extend the period by one day at the start
+      period.start = startDate;
+      period.days++;
+      period.vacationDaysNeeded++;
+      remainingDays--;
+      daysUsed++;
+      
+      // Try next day
+      startDate = addDays(startDate, -1);
+    }
+    
+    // Try to extend at the end
+    let endDate = new Date(period.end);
+    endDate = addDays(endDate, 1);
+    
+    while (remainingDays > 0 && !isDayOff(endDate, holidays)) {
+      // Check for overlap with other periods
+      const wouldOverlap = selectedPeriods.some(p => 
+        p !== period && 
+        endDate >= addDays(p.start, -1) && 
+        endDate <= addDays(p.end, 1)
+      );
+      
+      if (wouldOverlap) break;
+      
+      // Extend the period by one day at the end
+      period.end = endDate;
+      period.days++;
+      period.vacationDaysNeeded++;
+      remainingDays--;
+      daysUsed++;
+      
+      // Try next day
+      endDate = addDays(endDate, 1);
+    }
+  }
+  
+  return daysUsed > 0;
+};
+
+// Find smaller periods that fit exactly into our remaining vacation days
+const findExactFitPeriods = (
+  selectedPeriods: VacationPeriod[],
+  candidates: VacationPeriod[],
+  remainingDays: number,
+  holidays: Date[]
+): void => {
+  // Look for periods that use exactly our remaining days
+  const exactFits = candidates.filter(period => 
+    period.vacationDaysNeeded === remainingDays &&
+    !selectedPeriods.some(selected => periodsOverlap(period, selected))
+  );
+  
+  if (exactFits.length > 0) {
+    // Use the highest efficiency period
+    selectedPeriods.push(exactFits[0]);
+    remainingDays -= exactFits[0].vacationDaysNeeded;
+    return;
+  }
+  
+  // If no exact fit, find smaller periods
+  const smallerFits = candidates.filter(period => 
+    period.vacationDaysNeeded < remainingDays &&
+    !selectedPeriods.some(selected => periodsOverlap(period, selected))
+  ).sort((a, b) => b.vacationDaysNeeded - a.vacationDaysNeeded);
+  
+  while (remainingDays > 0 && smallerFits.length > 0) {
+    // Use the largest period that fits
+    const nextBestPeriod = smallerFits.find(period => period.vacationDaysNeeded <= remainingDays);
+    
+    if (nextBestPeriod) {
+      selectedPeriods.push(nextBestPeriod);
+      remainingDays -= nextBestPeriod.vacationDaysNeeded;
+      
+      // Remove overlapping periods
+      smallerFits.filter(period => !periodsOverlap(period, nextBestPeriod));
+    } else {
+      break; // No suitable periods found
+    }
+  }
+  
+  // If we still have days left, create individual day periods
+  if (remainingDays > 0) {
+    createSingleDayPeriods(selectedPeriods, remainingDays, holidays);
+  }
+};
+
+// Create single-day vacation periods for any remaining days
+const createSingleDayPeriods = (
+  selectedPeriods: VacationPeriod[],
+  remainingDays: number,
+  holidays: Date[]
+): void => {
+  // Find potential dates for single day periods (Fridays and Mondays are best)
+  const year = new Date().getFullYear();
+  
+  // Start looking from current date
+  let currentDate = new Date();
+  currentDate.setHours(0, 0, 0, 0);
+  
+  while (remainingDays > 0) {
+    const dayOfWeek = currentDate.getDay();
+    
+    // Skip weekends and holidays
+    if (isDayOff(currentDate, holidays)) {
+      currentDate = addDays(currentDate, 1);
+      continue;
+    }
+    
+    // Check for overlap with other periods
+    const wouldOverlap = selectedPeriods.some(p => 
+      currentDate >= addDays(p.start, -1) && 
+      currentDate <= addDays(p.end, 1)
+    );
+    
+    if (!wouldOverlap) {
+      // Prioritize Fridays and Mondays
+      if (dayOfWeek === 5 || dayOfWeek === 1 || remainingDays <= 5) {
+        // Create a single day period
+        const singleDayPeriod: VacationPeriod = {
+          start: new Date(currentDate),
+          end: new Date(currentDate),
+          days: 1,
+          vacationDaysNeeded: 1,
+          description: `Extra ledig dag ${format(currentDate, 'yyyy-MM-dd')}`,
+          type: "single",
+          score: 50
+        };
+        
+        selectedPeriods.push(singleDayPeriod);
+        remainingDays--;
+      }
+    }
+    
+    currentDate = addDays(currentDate, 1);
+    
+    // Avoid infinite loop - stop if we go too far into the future
+    if (currentDate.getFullYear() > year + 2) {
+      console.error("Failed to find suitable days for all vacation days");
+      break;
+    }
+  }
 };

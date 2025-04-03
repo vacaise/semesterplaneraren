@@ -4,8 +4,8 @@ import { formatDateToString, isDayOff } from './helpers';
 import { VacationPeriod } from './types';
 
 // Calculate total days off from all selected periods
-export const calculateTotalDaysOff = (periods: VacationPeriod[], holidays: Date[]): number => {
-  // Simple sum of days per period
+export const calculateTotalDaysOff = (periods: VacationPeriod[]): number => {
+  // Sum of days per period
   return periods.reduce((total, period) => total + period.days, 0);
 };
 
@@ -15,17 +15,12 @@ export const calculateVacationDaysNeeded = (start: Date, end: Date, holidays: Da
   let currentDay = new Date(start);
   
   while (currentDay <= end) {
-    // Skip weekends and holidays
-    const dayOfWeek = currentDay.getDay();
-    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; // Sunday or Saturday
-    const isHoliday = holidays.some(holiday => 
-      format(holiday, 'yyyy-MM-dd') === format(currentDay, 'yyyy-MM-dd')
-    );
-    
-    if (!isWeekend && !isHoliday) {
+    // Only count weekdays that are not holidays as vacation days
+    if (!isDayOff(currentDay, holidays)) {
       vacationDaysNeeded++;
     }
     
+    // Move to the next day
     currentDay = addDays(currentDay, 1);
   }
   
