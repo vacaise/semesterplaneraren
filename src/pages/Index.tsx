@@ -9,61 +9,111 @@ import StepIndicator from "@/components/StepIndicator";
 import MainContainer from "@/components/MainContainer";
 import StepNavigationButtons from "@/components/StepNavigationButtons";
 import Footer from "@/components/Footer";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { Helmet } from "react-helmet";
+import { useToast } from "@/hooks/use-toast";
+import { getHolidays } from "@/utils/holidays";
+import { optimizeVacation } from "@/utils/vacationOptimizer";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useHolidays } from "@/hooks/use-holidays";
-import { useVacationOptimization } from "@/hooks/use-vacation-optimization";
-import { useWizard } from "@/hooks/use-wizard";
+import { Helmet } from "react-helmet";
 
 const Index = () => {
-  // Basic state
+  const [currentStep, setCurrentStep] = useState(1);
   const [year, setYear] = useState(new Date().getFullYear());
   const [vacationDays, setVacationDays] = useState(25);
   const [selectedMode, setSelectedMode] = useState("balanced");
-  
-  // Custom hooks
+  const [holidays, setHolidays] = useState<Date[]>([]);
+  const [optimizedSchedule, setOptimizedSchedule] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
   const isMobile = useIsMobile();
-  const { holidays, setHolidays, fetchHolidays, resetHolidays, isLoading: isLoadingHolidays } = useHolidays(year);
-  const { 
-    optimizedSchedule, 
-    setOptimizedSchedule,
-    generateOptimizedSchedule, 
-    isLoading: isOptimizing,
-    errorMessage,
-    setErrorMessage
-  } = useVacationOptimization();
-  const { currentStep, nextStep, prevStep, resetToStart } = useWizard(1);
 
-  // Reset holidays when year changes
   useEffect(() => {
-    resetHolidays();
-    setErrorMessage(null);
+    window.scrollTo(0, 0);
+  }, [currentStep]);
+
+  useEffect(() => {
+    setHolidays([]);
   }, [year]);
 
-  // Clear error message when vacation days change
-  useEffect(() => {
-    setErrorMessage(null);
-  }, [vacationDays, setErrorMessage]);
+  const resetToStart = () => {
+    setCurrentStep(1);
+    setOptimizedSchedule(null);
+    // Optionally reset other values to defaults
+    // setVacationDays(25);
+    // setSelectedMode("balanced");
+    // setHolidays([]);
+    window.scrollTo(0, 0);
+  };
 
-  // Handle next step
   const handleNextStep = () => {
-    if (currentStep < 3) {
-      nextStep(currentStep, { vacationDays });
-    } else {
-      const success = generateOptimizedSchedule(year, vacationDays, holidays, selectedMode);
-      if (success) {
-        nextStep(currentStep, {}); // Go to results if optimization was successful
+    if (currentStep === 1) {
+      if (vacationDays <= 0) {
+        toast({
+          title: "Ogiltigt antal semesterdagar",
+          description: "Vänligen ange minst 1 semesterdag",
+          variant: "destructive",
+        });
+        return;
       }
+    }
+    
+    if (currentStep < 3) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      generateOptimizedSchedule();
     }
   };
 
-  // Handle previous step
   const handlePrevStep = () => {
-    prevStep();
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
   };
 
-  // Render current step
+  const fetchHolidays = () => {
+    setIsLoading(true);
+    try {
+      const fetchedHolidays = getHolidays(year);
+      setHolidays(fetchedHolidays);
+      
+      setTimeout(() => {
+        toast({
+          title: "Röda dagar hämtade",
+          description: `${fetchedHolidays.length} helgdagar laddades för ${year}`,
+          className: "left-toast",
+        });
+      }, 100);
+    } catch (error) {
+      toast({
+        title: "Fel vid hämtning av röda dagar",
+        description: "Kunde inte hämta röda dagar, försök igen senare",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const generateOptimizedSchedule = () => {
+    setIsLoading(true);
+    
+    try {
+      console.log("Generating schedule with holidays:", holidays);
+      const optimizedScheduleData = optimizeVacation(year, vacationDays, holidays, selectedMode);
+      console.log("Generated schedule:", optimizedScheduleData);
+      setOptimizedSchedule(optimizedScheduleData);
+      setCurrentStep(4);
+    } catch (error) {
+      toast({
+        title: "Fel vid generering av schema",
+        description: "Kunde inte optimera ditt schema, försök igen senare",
+        variant: "destructive",
+      });
+      console.error("Optimization error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const renderCurrentStep = () => {
     switch (currentStep) {
       case 1:
@@ -84,24 +134,13 @@ const Index = () => {
         );
       case 3:
         return (
-          <>
-            {errorMessage && (
-              <Alert variant="destructive" className="mb-6">
-                <AlertTitle>Optimering misslyckades</AlertTitle>
-                <AlertDescription>
-                  {errorMessage}
-                  <p className="mt-2">Försök med ett annat antal semesterdagar eller en annan optimeringsmetod.</p>
-                </AlertDescription>
-              </Alert>
-            )}
-            <StepThree 
-              holidays={holidays} 
-              setHolidays={setHolidays} 
-              fetchHolidays={fetchHolidays} 
-              year={year}
-              isLoading={isLoadingHolidays}
-            />
-          </>
+          <StepThree 
+            holidays={holidays} 
+            setHolidays={setHolidays} 
+            fetchHolidays={fetchHolidays} 
+            year={year}
+            isLoading={isLoading}
+          />
         );
       case 4:
         return (
@@ -140,7 +179,7 @@ const Index = () => {
             handleNextStep={handleNextStep}
             handlePrevStep={handlePrevStep}
             resetToStart={resetToStart}
-            isLoading={isLoadingHolidays || isOptimizing}
+            isLoading={isLoading}
           />
         </div>
       </div>

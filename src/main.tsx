@@ -3,22 +3,16 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
-// Add error boundary
-window.addEventListener('error', (event) => {
-  console.error('Global error caught:', event.error);
-});
+// Kontrollera om sidan laddas i AMP-läge
+const isAmpMode = window.location.pathname.includes('/amp') || 
+                   window.location.search.includes('amp=1');
 
-// Create root and render app
-const rootElement = document.getElementById("root");
-
-if (!rootElement) {
-  console.error("Failed to find the root element");
-} else {
-  try {
-    const root = createRoot(rootElement);
-    root.render(<App />);
-    console.log("App successfully rendered");
-  } catch (error) {
-    console.error("Failed to render the app:", error);
-  }
+// Om det är AMP, lägg till AMP-specifika anpassningar
+if (isAmpMode) {
+  document.documentElement.setAttribute('amp', '');
 }
+
+const root = createRoot(document.getElementById("root")!);
+root.render(
+  <App />
+);

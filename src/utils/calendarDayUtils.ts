@@ -1,33 +1,45 @@
-import { isSameDay } from 'date-fns';
 
-// Types of calendar days
-export type DayType = 'normal' | 'holiday' | 'weekend' | 'vacation' | 'past';
+import { isSameDay, isWeekend } from "date-fns";
 
-// Determine the type of a calendar day
+interface DayTypeInfo {
+  className: string;
+  type: string;
+}
+
+/**
+ * Determines if a date falls within any of the provided periods
+ */
+export const isInPeriod = (date: Date, periods: Array<{ start: Date; end: Date }>) => {
+  return periods.some(period => {
+    const startDate = new Date(period.start);
+    const endDate = new Date(period.end);
+    return date >= startDate && date <= endDate;
+  });
+};
+
+/**
+ * Returns styling and type information for a calendar day
+ */
 export const getDayType = (
-  date: Date,
-  holidays: Date[],
-  vacationPeriods: { start: Date, end: Date }[]
-): DayType => {
-  // Check if the date is in the past
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  if (date < today) return 'past';
+  date: Date, 
+  holidays: Date[], 
+  periods: Array<{ start: Date; end: Date }>
+): DayTypeInfo => {
+  // Röd dag (helgdag)
+  if (holidays.some(holiday => isSameDay(holiday, date))) {
+    return { className: "bg-red-200 text-red-800", type: "Röd dag" };
+  }
   
-  // Check if it's a weekend (Saturday or Sunday)
-  const dayOfWeek = date.getDay();
-  if (dayOfWeek === 0 || dayOfWeek === 6) return 'weekend';
+  // Helg
+  if (isWeekend(date)) {
+    return { className: "bg-orange-100 text-orange-800", type: "Helg" };
+  }
   
-  // Check if it's a holiday
-  if (holidays.some(holiday => isSameDay(date, new Date(holiday)))) return 'holiday';
+  // Semesterdag (om inom en period och varken röd dag eller helg)
+  if (isInPeriod(date, periods)) {
+    return { className: "bg-green-200 text-green-800 border-2 border-green-300", type: "Semesterdag" };
+  }
   
-  // Check if it's a vacation day
-  if (vacationPeriods.some(period => {
-    const start = new Date(period.start);
-    const end = new Date(period.end);
-    return date >= start && date <= end;
-  })) return 'vacation';
-  
-  // Otherwise it's a normal workday
-  return 'normal';
+  // Vardag
+  return { className: "", type: "Vardag" };
 };
