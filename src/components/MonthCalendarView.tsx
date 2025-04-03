@@ -29,32 +29,46 @@ interface MonthCalendarViewProps {
 export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalendarViewProps) => {
   const isMobile = useIsMobile();
   
-  // Ensure dates are Date objects
+  console.log("MonthCalendarView rendering with:", { 
+    scheduleData: schedule,
+    periodsCount: schedule.periods.length,
+    year, 
+    holidays 
+  });
+  
+  // Safely ensure dates are Date objects
   const normalizedPeriods = schedule.periods.map(period => ({
     ...period,
     start: period.start instanceof Date ? period.start : new Date(period.start),
     end: period.end instanceof Date ? period.end : new Date(period.end)
   }));
   
+  console.log("Normalized periods:", normalizedPeriods);
+  
   // Find months that have vacation periods
   const relevantMonths = new Set<number>();
   
   normalizedPeriods.forEach(period => {
-    const startMonth = new Date(period.start).getMonth();
-    const endMonth = new Date(period.end).getMonth();
-    
-    // If the period spans multiple months
-    if (startMonth !== endMonth) {
-      for (let m = startMonth; m <= endMonth; m++) {
-        relevantMonths.add(m);
+    try {
+      const startMonth = new Date(period.start).getMonth();
+      const endMonth = new Date(period.end).getMonth();
+      
+      // If the period spans multiple months
+      if (startMonth !== endMonth) {
+        for (let m = startMonth; m <= endMonth; m++) {
+          relevantMonths.add(m);
+        }
+      } else {
+        relevantMonths.add(startMonth);
       }
-    } else {
-      relevantMonths.add(startMonth);
+    } catch (error) {
+      console.error("Error processing period:", period, error);
     }
   });
 
   // Convert Set to Array and sort
   const monthsToRender = Array.from(relevantMonths).sort((a, b) => a - b);
+  console.log("Months to render:", monthsToRender);
 
   // If no relevant months found, show message
   if (monthsToRender.length === 0) {

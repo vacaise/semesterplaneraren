@@ -27,6 +27,22 @@ interface ResultsViewProps {
 }
 
 const ResultsView = ({ schedule, year, holidays }: ResultsViewProps) => {
+  console.log("ResultsView rendering with:", { 
+    periodsCount: schedule?.periods?.length,
+    year, 
+    holidaysCount: holidays?.length 
+  });
+
+  // Validate schedule data
+  if (!schedule || !Array.isArray(schedule.periods)) {
+    console.error("Invalid schedule data:", schedule);
+    return (
+      <div className="p-6 border border-red-200 rounded-lg bg-red-50 text-red-800">
+        Ogiltigt schemaformat. Kontakta support.
+      </div>
+    );
+  }
+
   return (
     <Tabs defaultValue="list" className="w-full">
       <TabsList className="mb-4">

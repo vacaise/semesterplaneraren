@@ -29,7 +29,10 @@ interface ResultsProps {
 }
 
 const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
+  console.log("Results component received:", { schedule, year, holidays });
+  
   if (!schedule) {
+    console.error("No schedule data received in Results component");
     return (
       <div className="p-6 text-center">
         <p className="text-lg text-red-600">Ingen semesterplan hittades. Vänligen försök igen.</p>

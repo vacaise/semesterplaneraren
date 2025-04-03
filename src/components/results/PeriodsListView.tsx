@@ -20,6 +20,18 @@ interface PeriodsListViewProps {
 }
 
 const PeriodsListView = ({ periods, year, holidays }: PeriodsListViewProps) => {
+  console.log("PeriodsListView rendering with:", { periodsCount: periods?.length, year });
+  
+  // Ensure periods is an array
+  const validPeriods = Array.isArray(periods) ? periods : [];
+  
+  // Convert date strings to Date objects if needed
+  const normalizedPeriods = validPeriods.map(period => ({
+    ...period,
+    start: period.start instanceof Date ? period.start : new Date(period.start),
+    end: period.end instanceof Date ? period.end : new Date(period.end)
+  }));
+
   return (
     <div className="space-y-6">
       <BreakTypeExplanation />
@@ -30,7 +42,7 @@ const PeriodsListView = ({ periods, year, holidays }: PeriodsListViewProps) => {
           <p className="text-gray-600">Nedan ser du alla planerade ledighetsperioder för {year}</p>
         </div>
         
-        {periods.length === 0 ? (
+        {normalizedPeriods.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center text-gray-500">
               Inga ledighetsperioder hittades för resten av året.
@@ -38,7 +50,7 @@ const PeriodsListView = ({ periods, year, holidays }: PeriodsListViewProps) => {
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {periods.map((period, index) => (
+            {normalizedPeriods.map((period, index) => (
               <BreakSummaryCard
                 key={index}
                 title={period.description}

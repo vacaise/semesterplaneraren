@@ -68,12 +68,19 @@ export const optimizeVacation = (
       throw new Error(`Algorithm error: Expected to use exactly ${vacationDays} vacation days, but used ${totalVacationDaysUsed} days`);
     }
     
+    // Make sure dates are serializable
+    const serializedPeriods = validatedPeriods.map(period => ({
+      ...period,
+      start: new Date(period.start),
+      end: new Date(period.end),
+    }));
+    
     // Everything is good, return the optimized schedule
     return {
       totalDaysOff,
       vacationDaysUsed: totalVacationDaysUsed,
       mode,
-      periods: validatedPeriods
+      periods: serializedPeriods
     };
   } catch (error) {
     console.error("Optimization failed:", error);
