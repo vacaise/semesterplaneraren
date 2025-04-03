@@ -1,6 +1,4 @@
-
 import React, { useState } from "react";
-import StatisticCard from "@/components/StatisticCard";
 import BreakSummaryCard from "@/components/BreakSummaryCard";
 import BreakTypeExplanation from "@/components/BreakTypeExplanation";
 import { MonthCalendarView } from "@/components/MonthCalendarView";

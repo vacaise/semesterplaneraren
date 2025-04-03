@@ -23,3 +23,12 @@ export interface OptimizedSchedule {
   mode: string;
   periods: VacationPeriod[];
 }
+
+export interface PotentialPeriod {
+  start: Date;
+  end: Date;
+  vacationDaysNeeded: number;
+  totalDays: number;
+  efficiency: number;
+  description: string;
+}

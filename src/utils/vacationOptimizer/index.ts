@@ -1,5 +1,6 @@
 
-import { optimizeVacation, calculateEfficiency } from './optimizer';
+import { optimizeVacation } from './optimizer';
+import { calculateEfficiency } from './calculators';
 import { isDayOff, isDateInPast } from './dateUtils';
 import { VacationPeriod, OptimizedSchedule } from './types';
 

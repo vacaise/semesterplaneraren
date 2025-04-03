@@ -2,7 +2,7 @@
 import React from "react";
 import StatisticCard from "@/components/StatisticCard";
 import { Sparkles, Calendar, AlarmClock } from "lucide-react";
-import { calculateEfficiency } from "@/utils/vacationOptimizer/optimizer";
+import { calculateEfficiency } from "@/utils/vacationOptimizer/calculators";
 
 interface StatisticsSectionProps {
   totalDaysOff: number;
