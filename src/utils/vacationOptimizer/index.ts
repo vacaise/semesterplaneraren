@@ -40,9 +40,9 @@ export const optimizeVacation = (
   // Count the actual vacation days used
   const actualVacationDaysUsed = validatedPeriods.reduce((sum, period) => sum + period.vacationDaysNeeded, 0);
   
-  // Validate that we're using exactly the number of days specified by the user
+  // Enforce the strict requirement to use exactly the number of days specified by the user
   if (actualVacationDaysUsed !== vacationDaysTarget) {
-    console.warn(`Warning: The algorithm couldn't use exactly ${vacationDaysTarget} vacation days. Using ${actualVacationDaysUsed} days instead.`);
+    throw new Error(`Critical error: The algorithm couldn't use exactly ${vacationDaysTarget} vacation days. Using ${actualVacationDaysUsed} days instead. This should not happen.`);
   }
   
   return {

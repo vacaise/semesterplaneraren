@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import StepOne from "@/components/StepOne";
 import StepTwo from "@/components/StepTwo";
@@ -37,10 +36,6 @@ const Index = () => {
   const resetToStart = () => {
     setCurrentStep(1);
     setOptimizedSchedule(null);
-    // Optionally reset other values to defaults
-    // setVacationDays(25);
-    // setSelectedMode("balanced");
-    // setHolidays([]);
     window.scrollTo(0, 0);
   };
 
@@ -113,7 +108,7 @@ const Index = () => {
         return;
       }
       
-      setOptimizedSchedule(optimizedScheduleData);
+      setOptimizedSchedule({...optimizedScheduleData, defaultView: 'calendar'});
       setCurrentStep(4);
     } catch (error) {
       toast({

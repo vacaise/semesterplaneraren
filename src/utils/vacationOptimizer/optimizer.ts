@@ -13,8 +13,11 @@ export const findOptimalSchedule = (
   holidays: Date[],
   mode: string
 ): VacationPeriod[] => {
+  console.log(`Starting optimization for ${year} with ${vacationDaysTarget} days in ${mode} mode`);
+  
   // Generate all possible periods by scanning the year
   const allPossiblePeriods = generatePossiblePeriods(year, holidays);
+  console.log(`Generated ${allPossiblePeriods.length} possible periods`);
   
   // Score and prioritize periods based on the selected mode
   const scoredPeriods = scorePeriods(allPossiblePeriods, mode, vacationDaysTarget);
@@ -23,9 +26,20 @@ export const findOptimalSchedule = (
   const extraPeriods = createExtraPeriods(year, holidays);
   const scoredExtraPeriods = scorePeriods(extraPeriods, mode, vacationDaysTarget);
   const allPeriods = [...scoredPeriods, ...scoredExtraPeriods];
+  console.log(`Total periods to consider: ${allPeriods.length}`);
   
   // Select the optimal combination of periods with strict vacation day requirements
-  return selectOptimalPeriods(allPeriods, vacationDaysTarget, year, holidays, mode);
+  const selectedPeriods = selectOptimalPeriods(allPeriods, vacationDaysTarget, year, holidays, mode);
+  console.log(`Selected ${selectedPeriods.length} periods totaling ${selectedPeriods.reduce((sum, p) => sum + p.vacationDaysNeeded, 0)} vacation days`);
+  
+  // Validate that the exact number of days is used
+  const daysUsed = selectedPeriods.reduce((sum, period) => sum + period.vacationDaysNeeded, 0);
+  if (daysUsed !== vacationDaysTarget) {
+    console.error(`Error: Expected to use exactly ${vacationDaysTarget} days, but used ${daysUsed}`);
+    throw new Error(`Failed to use exactly ${vacationDaysTarget} vacation days. This is a critical error in the optimization algorithm.`);
+  }
+  
+  return selectedPeriods;
 };
 
 // Generate all possible vacation periods around holidays and weekends
@@ -47,6 +61,10 @@ const generatePossiblePeriods = (year: number, holidays: Date[]): VacationPeriod
   // 5. Generate more possible combinations to increase efficiency
   const additionalPeriods = generateAdditionalPeriods(year, holidays);
   periods.push(...additionalPeriods);
+  
+  // 6. Generate more distributed small periods throughout the year
+  const distributedPeriods = generateDistributedPeriods(year, holidays);
+  periods.push(...distributedPeriods);
   
   return periods;
 };
@@ -134,6 +152,54 @@ const generateAdditionalPeriods = (year: number, holidays: Date[]): VacationPeri
   });
   
   return additionalPeriods;
+};
+
+// Generate more distributed small periods to ensure better coverage throughout the year
+const generateDistributedPeriods = (year: number, holidays: Date[]): VacationPeriod[] => {
+  const distributedPeriods: VacationPeriod[] = [];
+  
+  // Add more strategic short periods throughout the year
+  // Focus on different months to ensure good distribution
+  for (let month = 0; month < 12; month++) {
+    // For each month, add some 2-3 day mini-breaks
+    for (let startDay = 5; startDay < 25; startDay += 10) {
+      const startDate = new Date(year, month, startDay);
+      
+      // Skip weekends as starting days
+      if (startDate.getDay() === 0 || startDate.getDay() === 6) {
+        continue;
+      }
+      
+      // Create a 2-3 day mini-break
+      const endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + (startDate.getDay() === 5 ? 2 : 1)); // 2 days if Friday, 1 day otherwise
+      
+      // Calculate vacation days needed
+      let miniBreakDaysNeeded = 0;
+      const currentDay = new Date(startDate);
+      
+      while (currentDay <= endDate) {
+        if (!isDayOff(currentDay, holidays)) {
+          miniBreakDaysNeeded++;
+        }
+        currentDay.setDate(currentDay.getDate() + 1);
+      }
+      
+      if (miniBreakDaysNeeded > 0) {
+        distributedPeriods.push({
+          start: new Date(startDate),
+          end: new Date(endDate),
+          days: differenceInDays(endDate, startDate) + 1,
+          vacationDaysNeeded: miniBreakDaysNeeded,
+          description: `Mini-ledighet ${getMonthName(month)}`,
+          type: "mini",
+          score: 40 + (month >= 5 && month <= 8 ? 15 : 0) // Boost summer months
+        });
+      }
+    }
+  }
+  
+  return distributedPeriods;
 };
 
 // Helper function to get month name
