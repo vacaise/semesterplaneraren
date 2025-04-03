@@ -12,6 +12,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { sv } from "date-fns/locale";
+import StatisticCard from "@/components/StatisticCard";
+import StatisticsSection from "@/components/results/StatisticsSection";
 
 interface Period {
   start: Date;
@@ -41,10 +43,8 @@ const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   
-  // Calculate efficiency
   const efficiency = calculateEfficiency(schedule.totalDaysOff, schedule.vacationDaysUsed);
-  
-  // Get mode display text
+
   const getModeDisplayText = (mode: string): string => {
     switch (mode) {
       case "balanced": return "Balanserad mix";
@@ -56,7 +56,6 @@ const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
     }
   };
 
-  // Generate iCal file for export
   const exportToICal = () => {
     let iCalData = [
       "BEGIN:VCALENDAR",
@@ -70,7 +69,6 @@ const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
       const startDate = new Date(period.start);
       const endDate = new Date(period.end);
       
-      // Format dates for iCal (YYYYMMDD)
       const formatICalDate = (date: Date) => {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -78,11 +76,9 @@ const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
         return `${year}${month}${day}`;
       };
 
-      // Add one day to the end date for iCal (exclusive end date)
       const endDateIcal = new Date(endDate);
       endDateIcal.setDate(endDateIcal.getDate() + 1);
 
-      // Create event
       iCalData = [
         ...iCalData,
         "BEGIN:VEVENT",
@@ -98,7 +94,6 @@ const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
 
     iCalData.push("END:VCALENDAR");
 
-    // Create and download the file
     const blob = new Blob([iCalData.join("\r\n")], { type: "text/calendar" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -130,31 +125,10 @@ const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
           i stil "{getModeDisplayText(schedule.mode)}".
         </p>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <StatisticCard
-            title="Total ledighet"
-            value={`${schedule.totalDaysOff} dagar`}
-            description="Antal dagar du kommer vara ledig totalt"
-            color="purple"
-            icon={<Sparkles />}
-          />
-          
-          <StatisticCard
-            title="Semesterdagar"
-            value={`${schedule.vacationDaysUsed}`}
-            description="Antal semesterdagar som används"
-            color="blue"
-            icon={<Calendar />}
-          />
-          
-          <StatisticCard
-            title="Effektivitet"
-            value={`${efficiency}x`}
-            description="Lediga dagar per använd semesterdag"
-            color="teal"
-            icon={<AlarmClock />}
-          />
-        </div>
+        <StatisticsSection 
+          totalDaysOff={schedule.totalDaysOff}
+          vacationDaysUsed={schedule.vacationDaysUsed}
+        />
         
         <div className={`flex flex-wrap gap-3 mb-6 ${isMobile ? 'justify-between' : ''}`}>
           <Button onClick={resetToStart} className="flex items-center gap-2">
