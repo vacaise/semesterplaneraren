@@ -5,8 +5,8 @@ import { CalendarLegend } from "@/components/CalendarLegend";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Period {
-  start: Date;
-  end: Date;
+  start: Date | string;
+  end: Date | string;
   days: number;
   vacationDaysNeeded: number;
   description: string;
@@ -29,13 +29,17 @@ interface MonthCalendarViewProps {
 export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalendarViewProps) => {
   const isMobile = useIsMobile();
   
-  // Make sure to use the same periods as in the list view
-  const sortedPeriods = [...schedule.periods];
+  // Ensure dates are Date objects
+  const normalizedPeriods = schedule.periods.map(period => ({
+    ...period,
+    start: period.start instanceof Date ? period.start : new Date(period.start),
+    end: period.end instanceof Date ? period.end : new Date(period.end)
+  }));
   
   // Find months that have vacation periods
   const relevantMonths = new Set<number>();
   
-  sortedPeriods.forEach(period => {
+  normalizedPeriods.forEach(period => {
     const startMonth = new Date(period.start).getMonth();
     const endMonth = new Date(period.end).getMonth();
     
@@ -49,7 +53,7 @@ export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalend
     }
   });
 
-  // Konvertera Set till Array och sortera
+  // Convert Set to Array and sort
   const monthsToRender = Array.from(relevantMonths).sort((a, b) => a - b);
 
   // If no relevant months found, show message
@@ -84,7 +88,7 @@ export const MonthCalendarView = ({ schedule, year, holidays = [] }: MonthCalend
               <MonthCard 
                 year={year}
                 monthIndex={month}
-                periods={sortedPeriods}
+                periods={normalizedPeriods}
                 holidays={holidays}
               />
             </div>

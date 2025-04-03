@@ -6,6 +6,8 @@ import { isDayOff } from './helpers';
 export const scorePeriods = (periods: VacationPeriod[], mode: string): VacationPeriod[] => {
   const scoredPeriods = [...periods];
   
+  console.log(`Scoring ${scoredPeriods.length} periods with mode: ${mode}`);
+  
   // Apply scores based on period characteristics and user preferences
   scoredPeriods.forEach(period => {
     // Default base score if not set
@@ -75,6 +77,8 @@ export const scorePeriods = (periods: VacationPeriod[], mode: string): VacationP
   scoredPeriods.sort((a, b) => {
     return (b.score || 0) - (a.score || 0);
   });
+  
+  console.log(`Scored periods, top score: ${scoredPeriods[0]?.score || 0}`);
   
   return scoredPeriods;
 };

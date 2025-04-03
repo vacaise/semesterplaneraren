@@ -22,13 +22,27 @@ interface Schedule {
 }
 
 interface ResultsProps {
-  schedule: Schedule;
+  schedule: Schedule | null;
   year: number;
   holidays: Date[];
   resetToStart: () => void;
 }
 
 const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
+  if (!schedule) {
+    return (
+      <div className="p-6 text-center">
+        <p className="text-lg text-red-600">Ingen semesterplan hittades. Vänligen försök igen.</p>
+        <button 
+          onClick={resetToStart}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+        >
+          Starta om
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <ResultsHeader 

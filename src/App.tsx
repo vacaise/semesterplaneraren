@@ -14,7 +14,15 @@ import Article2025 from "./pages/Article2025";
 import Article2026 from "./pages/Article2026";
 
 // Create a new query client instance
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false, // Disable refetching when window regains focus
+      retry: false, // Disable retrying failed queries
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
