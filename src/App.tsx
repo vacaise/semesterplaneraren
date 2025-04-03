@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useEffect, useRef } from 'react';
+import SocialShareButtons from '@/components/SocialShareButtons';
 
 interface FormState {
   numberOfDays: number | null
@@ -125,6 +126,9 @@ const App = () => {
                         stats={optimizationResult.stats}
                         selectedYear={selectedYear}
                       />
+                      <div className="mt-6 flex justify-center">
+                        <SocialShareButtons />
+                      </div>
                     </div>
                   )}
                 </div>
