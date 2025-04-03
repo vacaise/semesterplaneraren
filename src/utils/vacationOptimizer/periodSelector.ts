@@ -34,7 +34,9 @@ export const selectOptimalPeriods = (
   });
   
   // Consider more periods for better combinations
-  const periodsToConsider = validPeriods.slice(0, 100);
+  const periodsToConsider = validPeriods.slice(0, 200); // Consider more periods for better chances
+  
+  console.log(`Finding combinations for EXACTLY ${vacationDays} vacation days...`);
   
   // Find all possible combinations that sum to EXACTLY the specified vacation days
   const exactCombinations = findCombinationsWithExactSum(periodsToConsider, vacationDays);
@@ -43,6 +45,8 @@ export const selectOptimalPeriods = (
   if (exactCombinations.length === 0) {
     throw new Error(`No combination found using exactly ${vacationDays} vacation days`);
   }
+  
+  console.log(`Found ${exactCombinations.length} combinations with exactly ${vacationDays} vacation days`);
   
   // Score the combinations based on total days off, alignment with mode, etc.
   const scoredCombinations = scoreCombinations(exactCombinations, mode, holidays);
@@ -59,7 +63,7 @@ export const selectOptimalPeriods = (
 function findCombinationsWithExactSum(
   periods: VacationPeriod[], 
   targetSum: number, 
-  maxCombinations: number = 5000
+  maxCombinations: number = 10000
 ): VacationPeriod[][] {
   const results: VacationPeriod[][] = [];
   

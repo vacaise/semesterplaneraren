@@ -12,6 +12,8 @@ export const findOptimalSchedule = (
   holidays: Date[],
   mode: string
 ): VacationPeriod[] => {
+  console.log(`Starting optimization for ${year} with ${vacationDays} vacation days and mode: ${mode}`);
+  
   // Generate all possible periods by scanning the year
   const allPossiblePeriods = generatePossiblePeriods(year, holidays);
   
@@ -24,6 +26,7 @@ export const findOptimalSchedule = (
   
   // Try to select the optimal combination of periods using EXACTLY the requested vacation days
   try {
+    console.log(`Attempting to find optimal schedule with exactly ${vacationDays} vacation days`);
     return selectOptimalPeriods(allPeriods, vacationDays, year, holidays, mode);
   } catch (error) {
     console.error("Failed to find optimal schedule:", error);
@@ -34,7 +37,18 @@ export const findOptimalSchedule = (
     
     // Try again with the custom periods added
     const enhancedPeriods = [...allPeriods, ...customPeriods];
-    return selectOptimalPeriods(enhancedPeriods, vacationDays, year, holidays, mode);
+    try {
+      return selectOptimalPeriods(enhancedPeriods, vacationDays, year, holidays, mode);
+    } catch (secondError) {
+      console.error("Failed second attempt:", secondError);
+      
+      // Last resort: try to generate individual day periods
+      const singleDayPeriods = generateSingleDayPeriods(year, holidays);
+      const finalAttemptPeriods = [...enhancedPeriods, ...singleDayPeriods];
+      
+      // Final attempt
+      return selectOptimalPeriods(finalAttemptPeriods, vacationDays, year, holidays, mode);
+    }
   }
 };
 
@@ -67,6 +81,7 @@ const generateCustomPeriodsForExactDays = (
   exactVacationDays: number,
   holidays: Date[]
 ): VacationPeriod[] => {
+  console.log(`Generating custom periods for exactly ${exactVacationDays} vacation days`);
   const customPeriods: VacationPeriod[] = [];
   
   // Create periods that start on Mondays and have exactly the requested vacation days
@@ -115,43 +130,102 @@ const generateCustomPeriodsForExactDays = (
           vacationDaysNeeded: exactVacationDays,
           description: `${exactVacationDays} dagars semester ${getMonthName(startDate.getMonth())}`,
           type: "custom",
-          score: 60
+          score: 70 // Higher score for exact matches
         });
+      }
+    }
+  }
+  
+  // Try to create shorter periods that can be combined
+  if (exactVacationDays <= 15 && exactVacationDays > 1) {
+    for (let splitSize = 1; splitSize <= Math.min(exactVacationDays - 1, 5); splitSize++) {
+      const remainingDays = exactVacationDays - splitSize;
+      
+      // Create custom periods with this split
+      for (const month of startMonths) {
+        for (let day = 1; day <= 21; day += 5) {
+          const startDate = new Date(year, month, day);
+          
+          // Skip if in the past
+          if (startDate < new Date()) continue;
+          
+          let vacationDaysCount = 0;
+          let totalDays = 0;
+          let currentDate = new Date(startDate);
+          
+          // Count until we reach exactly splitSize vacation days
+          while (vacationDaysCount < splitSize) {
+            if (!isDayOff(currentDate, holidays)) {
+              vacationDaysCount++;
+            }
+            
+            totalDays++;
+            currentDate.setDate(currentDate.getDate() + 1);
+            
+            if (totalDays > 20) break; // Safety limit
+          }
+          
+          // If we got exactly the requested split size
+          if (vacationDaysCount === splitSize) {
+            const endDate = new Date(currentDate);
+            endDate.setDate(currentDate.getDate() - 1); // Adjust to last day
+            
+            customPeriods.push({
+              start: new Date(startDate),
+              end: new Date(endDate),
+              days: totalDays,
+              vacationDaysNeeded: splitSize,
+              description: `${splitSize} dagars semester ${getMonthName(startDate.getMonth())}`,
+              type: "split",
+              score: 65
+            });
+          }
+        }
       }
     }
   }
   
   // Try to create 1-day periods that can be combined to reach the exact count
   if (exactVacationDays <= 10) {
-    const singleDayPeriods: VacationPeriod[] = [];
-    
-    // Create single day vacations on strategic days (like Fridays or Mondays)
-    for (let month = 0; month < 12; month++) {
-      for (let day = 1; day <= 28; day++) {
-        const date = new Date(year, month, day);
-        
-        // Only consider Fridays and Mondays
-        if (date.getDay() !== 1 && date.getDay() !== 5) continue;
-        
-        // Skip if in the past or holiday
-        if (date < new Date() || isDayOff(date, holidays)) continue;
-        
-        singleDayPeriods.push({
-          start: new Date(date),
-          end: new Date(date),
-          days: 1,
-          vacationDaysNeeded: 1,
-          description: `Ledig ${date.getDate()} ${getMonthName(month)}`,
-          type: "single",
-          score: 40
-        });
-      }
-    }
-    
+    const singleDayPeriods = generateSingleDayPeriods(year, holidays);
     customPeriods.push(...singleDayPeriods);
   }
   
+  console.log(`Generated ${customPeriods.length} custom periods for exact vacation day count`);
   return customPeriods;
+};
+
+// Generate single day periods for more flexibility
+const generateSingleDayPeriods = (year: number, holidays: Date[]): VacationPeriod[] => {
+  const singleDayPeriods: VacationPeriod[] = [];
+  
+  // Create single day vacations on strategic days (like Fridays or Mondays)
+  for (let month = 0; month < 12; month++) {
+    for (let day = 1; day <= 28; day++) {
+      const date = new Date(year, month, day);
+      
+      // Only consider work days
+      if (isDayOff(date, holidays)) continue;
+      
+      // Skip if in the past
+      if (date < new Date()) continue;
+      
+      // Prioritize Fridays and Mondays
+      const dayScore = date.getDay() === 1 || date.getDay() === 5 ? 55 : 40;
+      
+      singleDayPeriods.push({
+        start: new Date(date),
+        end: new Date(date),
+        days: 1,
+        vacationDaysNeeded: 1,
+        description: `Ledig ${date.getDate()} ${getMonthName(month)}`,
+        type: "single",
+        score: dayScore
+      });
+    }
+  }
+  
+  return singleDayPeriods;
 };
 
 // Generate additional vacation period options to maximize efficiency
