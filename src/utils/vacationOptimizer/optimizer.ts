@@ -17,30 +17,14 @@ export const findOptimalSchedule = (
   const allPossiblePeriods = generatePossiblePeriods(year, holidays);
   
   // Score and prioritize periods based on the selected mode
-  const scoredPeriods = scorePeriods(allPossiblePeriods, mode, vacationDays);
+  const scoredPeriods = scorePeriods(allPossiblePeriods, mode);
   
   // Generate additional periods to fill in gaps and maximize total time off
   const extraPeriods = createExtraPeriods(year, holidays);
   const allPeriods = [...scoredPeriods, ...extraPeriods];
   
   // Select the optimal combination of periods
-  const selectedPeriods = selectOptimalPeriods(allPeriods, vacationDays, year, holidays, mode);
-  
-  // Verify that we're using exactly the specified number of vacation days
-  const totalVacationDaysUsed = selectedPeriods.reduce(
-    (total, period) => total + period.vacationDaysNeeded, 0
-  );
-  
-  console.log(`Target vacation days: ${vacationDays}, Actual used: ${totalVacationDaysUsed}`);
-  
-  // If we're not using the exact number, try to adjust the periods
-  if (totalVacationDaysUsed !== vacationDays) {
-    console.log("Adjusting periods to match exact vacation days...");
-    // We'll return the best we have, but log this issue
-    console.log("Warning: Could not achieve exact vacation day count match");
-  }
-  
-  return selectedPeriods;
+  return selectOptimalPeriods(allPeriods, vacationDays, year, holidays, mode);
 };
 
 // Generate all possible vacation periods around holidays and weekends
