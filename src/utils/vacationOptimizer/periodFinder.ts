@@ -1,9 +1,9 @@
-
-import { addDays, differenceInDays, eachDayOfInterval, getMonth, getYear } from 'date-fns';
-import { isDayOff, isDateInPast, getMonthName, formatDateRange } from './dateUtils';
+import { addDays, differenceInDays, getMonth } from 'date-fns';
+import { isDayOff, isDateInPast, getMonthName } from './dateUtils';
 import { VacationPeriod } from './types';
+import { calculateVacationDaysNeeded } from './calculators';
 
-// Find continuous periods around holidays
+// Find optimal vacation periods based on holidays
 export function findOptimalVacationPeriods(
   year: number, 
   holidays: Date[]
@@ -16,10 +16,10 @@ export function findOptimalVacationPeriods(
   // Sort holidays chronologically
   futureHolidays.sort((a, b) => a.getTime() - b.getTime());
   
-  // Find continuous periods around each holiday
+  // Find periods around each holiday
   futureHolidays.forEach(holiday => {
     // Look for periods starting up to 5 days before the holiday
-    for (let daysBeforeHoliday = 1; daysBeforeHoliday <= 5; daysBeforeHoliday++) {
+    for (let daysBeforeHoliday = 0; daysBeforeHoliday <= 5; daysBeforeHoliday++) {
       const startDate = addDays(holiday, -daysBeforeHoliday);
       
       // Skip if start date is in the past
@@ -30,7 +30,7 @@ export function findOptimalVacationPeriods(
         const endDate = addDays(holiday, daysAfterHoliday);
         
         // Calculate vacation days needed
-        const vacationDaysNeeded = countVacationDaysNeeded(startDate, endDate, holidays);
+        const vacationDaysNeeded = calculateVacationDaysNeeded(startDate, endDate, holidays);
         
         // Skip periods that require no vacation days (already all holidays/weekends)
         if (vacationDaysNeeded === 0) continue;
@@ -41,7 +41,7 @@ export function findOptimalVacationPeriods(
         // Calculate efficiency ratio (days off per vacation day)
         const efficiency = totalDays / vacationDaysNeeded;
         
-        // Only consider periods with decent efficiency
+        // Only consider periods with good efficiency
         if (efficiency >= 1.3) {
           const description = generatePeriodDescription(startDate, endDate);
           
@@ -60,11 +60,11 @@ export function findOptimalVacationPeriods(
     }
   });
   
-  // Find weekend extension periods (Thursday-Sunday or Friday-Monday)
+  // Find weekend extension periods
   allPeriods.push(...findWeekendExtensionPeriods(year, holidays));
   
-  // Find regular vacation periods (full weeks in summer)
-  allPeriods.push(...findRegularVacationPeriods(year, holidays));
+  // Find traditional vacation periods (summer, etc.)
+  allPeriods.push(...findTraditionalVacationPeriods(year, holidays));
   
   // Sort by efficiency (most efficient first)
   return allPeriods.sort((a, b) => {
@@ -72,25 +72,6 @@ export function findOptimalVacationPeriods(
     const bEfficiency = b.days / b.vacationDaysNeeded;
     return bEfficiency - aEfficiency;
   });
-}
-
-// Count how many vacation days are needed for a period (workdays that aren't holidays)
-function countVacationDaysNeeded(
-  startDate: Date, 
-  endDate: Date,
-  holidays: Date[]
-): number {
-  let vacationDaysNeeded = 0;
-  const currentDate = new Date(startDate);
-  
-  while (currentDate <= endDate) {
-    if (!isDayOff(currentDate, holidays)) {
-      vacationDaysNeeded++;
-    }
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
-  
-  return vacationDaysNeeded;
 }
 
 // Generate a description for a period
@@ -118,7 +99,7 @@ function determinePeriodType(totalDays: number): string {
   }
 }
 
-// Find weekend extension periods (1-2 vacation days to extend weekends)
+// Find weekend extension periods
 function findWeekendExtensionPeriods(
   year: number, 
   holidays: Date[]
@@ -146,7 +127,7 @@ function findWeekendExtensionPeriods(
       
       // If Friday isn't a holiday
       if (!isDayOff(addDays(thursdayDate, 1), holidays)) {
-        const vacationDaysNeeded = 1; // Just Friday
+        const vacationDaysNeeded = calculateVacationDaysNeeded(thursdayDate, sundayDate, holidays);
         weekendPeriods.push({
           start: thursdayDate,
           end: sundayDate,
@@ -169,7 +150,7 @@ function findWeekendExtensionPeriods(
       if (!isDateInPast(fridayDate)) {
         // If Monday isn't a holiday
         if (!isDayOff(mondayDate, holidays)) {
-          const vacationDaysNeeded = 1; // Just Monday
+          const vacationDaysNeeded = calculateVacationDaysNeeded(fridayDate, mondayDate, holidays);
           weekendPeriods.push({
             start: fridayDate,
             end: mondayDate,
@@ -190,18 +171,17 @@ function findWeekendExtensionPeriods(
   return weekendPeriods;
 }
 
-// Find regular vacation periods (full weeks, mainly for summer)
-function findRegularVacationPeriods(
+// Find traditional vacation periods (summer, winter, etc.)
+function findTraditionalVacationPeriods(
   year: number, 
   holidays: Date[]
 ): VacationPeriod[] {
   const regularPeriods: VacationPeriod[] = [];
   
-  // Summer vacation options (July-August)
+  // Summer vacation options
   const summerMonths = [6, 7]; // July and August
   
   summerMonths.forEach(month => {
-    // Find a couple of good weeks in each summer month
     for (let weekStartDay = 1; weekStartDay <= 22; weekStartDay += 7) {
       const startDate = new Date(year, month, weekStartDay);
       
@@ -209,31 +189,32 @@ function findRegularVacationPeriods(
       if (isDateInPast(startDate)) continue;
       
       // Find start of week (Monday)
-      while (startDate.getDay() !== 1) {
-        startDate.setDate(startDate.getDate() + 1);
+      const adjustedStartDate = new Date(startDate);
+      while (adjustedStartDate.getDay() !== 1) {
+        adjustedStartDate.setDate(adjustedStartDate.getDate() + 1);
       }
       
       // Create options for 1, 2, and 3-week vacations
       [6, 13, 20].forEach(daysToAdd => {
-        const endDate = addDays(startDate, daysToAdd);
-        const vacationDaysNeeded = countVacationDaysNeeded(startDate, endDate, holidays);
+        const endDate = addDays(adjustedStartDate, daysToAdd);
+        const vacationDaysNeeded = calculateVacationDaysNeeded(adjustedStartDate, endDate, holidays);
         const totalDays = daysToAdd + 1;
         
         regularPeriods.push({
-          start: startDate,
+          start: adjustedStartDate,
           end: endDate,
           days: totalDays,
           vacationDaysNeeded,
-          description: `Sommarsemester i ${getMonthName(startDate.getMonth())}`,
+          description: `Sommarsemester i ${getMonthName(adjustedStartDate.getMonth())}`,
           type: totalDays <= 9 ? "week" : "extended",
-          startDate: startDate.toISOString(),
+          startDate: adjustedStartDate.toISOString(),
           endDate: endDate.toISOString()
         });
       });
     }
   });
   
-  // Winter/Spring/Fall vacation options
+  // Other seasonal vacation options
   const otherMonths = [1, 2, 3, 4, 5, 8, 9, 10, 11]; // Feb-June, Sept-Dec
   
   otherMonths.forEach(month => {
@@ -244,12 +225,13 @@ function findRegularVacationPeriods(
     if (isDateInPast(startDate)) return;
     
     // Find start of week (Monday)
-    while (startDate.getDay() !== 1) {
-      startDate.setDate(startDate.getDate() + 1);
+    const adjustedStartDate = new Date(startDate);
+    while (adjustedStartDate.getDay() !== 1) {
+      adjustedStartDate.setDate(adjustedStartDate.getDate() + 1);
     }
     
-    const endDate = addDays(startDate, 6); // One week
-    const vacationDaysNeeded = countVacationDaysNeeded(startDate, endDate, holidays);
+    const endDate = addDays(adjustedStartDate, 6); // One week
+    const vacationDaysNeeded = calculateVacationDaysNeeded(adjustedStartDate, endDate, holidays);
     
     let description = "";
     if (month === 1) description = "Sportlov";
@@ -259,13 +241,13 @@ function findRegularVacationPeriods(
     else description = `Ledighet i ${getMonthName(month)}`;
     
     regularPeriods.push({
-      start: startDate,
+      start: adjustedStartDate,
       end: endDate,
       days: 7,
       vacationDaysNeeded,
       description,
       type: "week",
-      startDate: startDate.toISOString(),
+      startDate: adjustedStartDate.toISOString(),
       endDate: endDate.toISOString()
     });
   });

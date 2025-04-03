@@ -4,7 +4,7 @@ import { VacationPeriod, OptimizedSchedule, OptimizationMode } from './types';
 import { findOptimalVacationPeriods } from './periodFinder';
 import { isDayOff, isDateInPast } from './dateUtils';
 
-// The main function that distributes vacation days optimally
+// Main optimization function
 export function optimizeVacation(
   year: number,
   totalVacationDays: number,
@@ -28,7 +28,7 @@ export function optimizeVacation(
   
   return {
     totalDaysOff,
-    vacationDaysUsed: totalVacationDays,
+    vacationDaysUsed: totalVacationDays, // Always use all vacation days
     mode,
     periods: selectedPeriods
   };
@@ -39,7 +39,6 @@ function applyModePreferences(
   periods: VacationPeriod[], 
   mode: string
 ): VacationPeriod[] {
-  // Clone the periods to avoid mutating the original array
   const scoredPeriods = [...periods];
   
   // Sort based on mode preference
@@ -90,6 +89,7 @@ function applyModePreferences(
 }
 
 // Select optimal periods based on available vacation days
+// This is the core function that ensures ALL vacation days are used
 function selectOptimalPeriods(
   periods: VacationPeriod[],
   totalVacationDays: number,
@@ -99,11 +99,7 @@ function selectOptimalPeriods(
   const selectedPeriods: VacationPeriod[] = [];
   
   // First pass: select highest efficiency periods that match the mode
-  const periodsByEfficiency = [...periods].sort((a, b) => {
-    return (b.days / b.vacationDaysNeeded) - (a.days / a.vacationDaysNeeded);
-  });
-  
-  for (const period of periodsByEfficiency) {
+  for (const period of periods) {
     // Skip if period overlaps with already selected periods
     if (overlapsWithAny(period, selectedPeriods)) {
       continue;
@@ -125,20 +121,14 @@ function selectOptimalPeriods(
   
   // If we still have vacation days left, try to fill with smaller periods
   if (remainingVacationDays > 0) {
-    // Sort remaining periods by vacation days needed (ascending)
     const remainingPeriods = periods.filter(period => 
       !selectedPeriods.some(selected => 
         selected.start.getTime() === period.start.getTime() &&
         selected.end.getTime() === period.end.getTime()
       )
-    );
+    ).sort((a, b) => a.vacationDaysNeeded - b.vacationDaysNeeded);
     
-    const smallPeriods = [...remainingPeriods].sort((a, b) => 
-      a.vacationDaysNeeded - b.vacationDaysNeeded
-    );
-    
-    // Try to fill remaining days
-    for (const period of smallPeriods) {
+    for (const period of remainingPeriods) {
       // Skip if period overlaps with already selected periods
       if (overlapsWithAny(period, selectedPeriods)) {
         continue;
@@ -159,11 +149,10 @@ function selectOptimalPeriods(
     }
   }
   
-  // If we still have vacation days left, create custom mini-periods
+  // If we still have vacation days left, create custom one-day periods
   if (remainingVacationDays > 0) {
     const customPeriods = generateCustomPeriods(remainingVacationDays, selectedPeriods, periods[0].start.getFullYear());
     selectedPeriods.push(...customPeriods);
-    remainingVacationDays = 0; // All days used
   }
   
   // Sort periods chronologically
@@ -201,8 +190,8 @@ function generateCustomPeriods(
     for (let day = startDay; day <= 28 && daysLeft > 0; day++) {
       const date = new Date(year, month, day);
       
-      // Skip weekends and existing period days
-      if (date.getDay() === 0 || date.getDay() === 6) continue;
+      // Skip weekends, holidays and dates in past
+      if (isDayOff(date, []) || isDateInPast(date)) continue;
       if (isDateInPeriod(date, existingPeriods)) continue;
       
       // Create a one-day period
@@ -211,7 +200,7 @@ function generateCustomPeriods(
         end: date,
         days: 1,
         vacationDaysNeeded: 1,
-        description: `Ledig dag i ${getMonthName(month)}`,
+        description: `Ledig dag i ${getMonthNameHelper(month)}`,
         type: "single",
         startDate: date.toISOString(),
         endDate: date.toISOString()
@@ -235,7 +224,7 @@ function isDateInPeriod(date: Date, periods: VacationPeriod[]): boolean {
 }
 
 // Helper function to get month name
-function getMonthName(month: number): string {
+function getMonthNameHelper(month: number): string {
   const months = [
     "januari", "februari", "mars", "april", "maj", "juni",
     "juli", "augusti", "september", "oktober", "november", "december"

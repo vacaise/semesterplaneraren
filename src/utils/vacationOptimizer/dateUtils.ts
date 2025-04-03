@@ -1,46 +1,40 @@
 
-import { isSameDay, isWeekend, format, isBefore, startOfDay } from 'date-fns';
+import { format, isWeekend } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
-// Check if a day is a holiday (red day)
-export const isHoliday = (date: Date, holidays: Date[]): boolean => {
-  return holidays.some(holiday => isSameDay(holiday, date));
-};
+// Check if a date is a day off (weekend or holiday)
+export function isDayOff(date: Date, holidays: Date[] = []): boolean {
+  return isWeekend(date) || isHoliday(date, holidays);
+}
 
-// Check if a day is a weekend (Saturday or Sunday)
-export const isWeekendDay = (date: Date): boolean => {
-  return isWeekend(date);
-};
-
-// Check if a day is a day off (either weekend or holiday)
-export const isDayOff = (date: Date, holidays: Date[]): boolean => {
-  return isWeekendDay(date) || isHoliday(date, holidays);
-};
+// Check if a date is a holiday
+export function isHoliday(date: Date, holidays: Date[] = []): boolean {
+  return holidays.some(holiday => 
+    holiday.getFullYear() === date.getFullYear() &&
+    holiday.getMonth() === date.getMonth() &&
+    holiday.getDate() === date.getDate()
+  );
+}
 
 // Check if a date is in the past
-export const isDateInPast = (date: Date): boolean => {
-  const today = startOfDay(new Date());
-  const dateToCheck = startOfDay(new Date(date));
-  return isBefore(dateToCheck, today);
-};
+export function isDateInPast(date: Date): boolean {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return date < today;
+}
 
-// Format a date to a readable string
-export const formatDate = (date: Date): string => {
-  return format(date, 'd MMMM yyyy', { locale: sv });
-};
+// Get month name in Swedish
+export function getMonthName(month: number): string {
+  const date = new Date();
+  date.setMonth(month);
+  return format(date, 'MMMM', { locale: sv });
+}
 
-// Format a date range to a readable string
-export const formatDateRange = (start: Date, end: Date): string => {
-  const startFormatted = format(start, 'd MMM', { locale: sv });
-  const endFormatted = format(end, 'd MMM', { locale: sv });
-  return `${startFormatted} - ${endFormatted}`;
-};
-
-// Get the month name in Swedish
-export const getMonthName = (monthIndex: number): string => {
-  const months = [
-    "januari", "februari", "mars", "april", "maj", "juni",
-    "juli", "augusti", "september", "oktober", "november", "december"
-  ];
-  return months[monthIndex];
-};
+// Format date range as string
+export function formatDateRange(startDate: Date, endDate: Date): string {
+  if (startDate.getMonth() === endDate.getMonth()) {
+    return `${startDate.getDate()}-${endDate.getDate()} ${getMonthName(startDate.getMonth())}`;
+  } else {
+    return `${startDate.getDate()} ${getMonthName(startDate.getMonth())} - ${endDate.getDate()} ${getMonthName(endDate.getMonth())}`;
+  }
+}
