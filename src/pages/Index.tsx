@@ -14,6 +14,7 @@ import { getHolidays } from "@/utils/holidays";
 import { optimizeVacation } from "@/utils/vacationOptimizer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Helmet } from "react-helmet";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -23,6 +24,7 @@ const Index = () => {
   const [holidays, setHolidays] = useState<Date[]>([]);
   const [optimizedSchedule, setOptimizedSchedule] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -32,11 +34,18 @@ const Index = () => {
 
   useEffect(() => {
     setHolidays([]);
+    setErrorMessage(null);
   }, [year]);
+
+  useEffect(() => {
+    // Clear error message when vacation days change
+    setErrorMessage(null);
+  }, [vacationDays]);
 
   const resetToStart = () => {
     setCurrentStep(1);
     setOptimizedSchedule(null);
+    setErrorMessage(null);
     // Optionally reset other values to defaults
     // setVacationDays(25);
     // setSelectedMode("balanced");
@@ -95,6 +104,7 @@ const Index = () => {
 
   const generateOptimizedSchedule = () => {
     setIsLoading(true);
+    setErrorMessage(null);
     
     try {
       console.log("Generating schedule with holidays:", holidays);
@@ -102,12 +112,18 @@ const Index = () => {
       console.log("Generated schedule:", optimizedScheduleData);
       setOptimizedSchedule(optimizedScheduleData);
       setCurrentStep(4);
-    } catch (error) {
+    } catch (error: any) {
+      // Handle the case where we couldn't use exactly the requested number of vacation days
+      const errorMessage = error?.message || "Kunde inte optimera ditt schema, försök igen senare";
+      
+      setErrorMessage(errorMessage);
+      
       toast({
-        title: "Fel vid generering av schema",
-        description: "Kunde inte optimera ditt schema, försök igen senare",
+        title: "Kunde inte skapa optimal semesterplan",
+        description: "Det gick inte att hitta en kombination som använder exakt angivet antal semesterdagar",
         variant: "destructive",
       });
+      
       console.error("Optimization error:", error);
     } finally {
       setIsLoading(false);
@@ -134,13 +150,24 @@ const Index = () => {
         );
       case 3:
         return (
-          <StepThree 
-            holidays={holidays} 
-            setHolidays={setHolidays} 
-            fetchHolidays={fetchHolidays} 
-            year={year}
-            isLoading={isLoading}
-          />
+          <>
+            {errorMessage && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertTitle>Optimering misslyckades</AlertTitle>
+                <AlertDescription>
+                  {errorMessage}
+                  <p className="mt-2">Försök med ett annat antal semesterdagar eller en annan optimeringsmetod.</p>
+                </AlertDescription>
+              </Alert>
+            )}
+            <StepThree 
+              holidays={holidays} 
+              setHolidays={setHolidays} 
+              fetchHolidays={fetchHolidays} 
+              year={year}
+              isLoading={isLoading}
+            />
+          </>
         );
       case 4:
         return (

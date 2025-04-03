@@ -21,7 +21,7 @@ export const optimizeVacation = (
   // Filter out holidays that have already passed
   const filteredHolidays = holidays.filter(holiday => !isDateInPast(holiday));
   
-  // Find potential periods based on the parameters
+  // Find potential periods based on the parameters with STRICT enforcement of vacation days
   const selectedPeriods = findOptimalSchedule(year, vacationDays, filteredHolidays, mode);
   
   // Verify periods don't contain any past dates
@@ -36,6 +36,17 @@ export const optimizeVacation = (
   
   // Calculate the total days off
   const totalDaysOff = calculateTotalDaysOff(validatedPeriods, filteredHolidays);
+  
+  // Calculate total vacation days used
+  const totalVacationDaysUsed = validatedPeriods.reduce(
+    (total, period) => total + period.vacationDaysNeeded, 
+    0
+  );
+  
+  // Verify we're using exactly the requested number of vacation days
+  if (totalVacationDaysUsed !== vacationDays) {
+    throw new Error(`Could not create a schedule using exactly ${vacationDays} vacation days. Algorithm produced ${totalVacationDaysUsed} days.`);
+  }
   
   return {
     totalDaysOff: totalDaysOff,
