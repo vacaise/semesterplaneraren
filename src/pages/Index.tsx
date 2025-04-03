@@ -119,7 +119,7 @@ const Index = () => {
       console.log("Vacation days:", vacationDays);
       console.log("Selected mode:", selectedMode);
       
-      const optimizedScheduleData = optimizeVacation(year, vacationDays, holidays, selectedMode);
+      const optimizedScheduleData = optimizeVacation(year, vacationDays, holidays, selectedMode as any);
       console.log("Generated schedule:", optimizedScheduleData);
       
       setOptimizedSchedule(optimizedScheduleData);

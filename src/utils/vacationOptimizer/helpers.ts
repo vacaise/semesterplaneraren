@@ -1,5 +1,5 @@
 
-import { isSameDay, isWeekend, format, isBefore, startOfDay } from 'date-fns';
+import { isSameDay, isWeekend, format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
 // Helper function to determine if a day is a day off (weekend or holiday)
@@ -18,11 +18,11 @@ export const formatDateToString = (date: Date): string => {
   return format(date, 'yyyy-MM-dd');
 };
 
-// Check if a date is in the past (before today)
+// Check if a date is in the past
 export const isDateInPast = (date: Date): boolean => {
-  const today = startOfDay(new Date());
-  const dateToCheck = startOfDay(new Date(date));
-  return isBefore(dateToCheck, today);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return date < today;
 };
 
 // Get the number of work days between two dates
@@ -43,6 +43,13 @@ export const getWorkDays = (startDate: Date, endDate: Date, holidays: Date[]): n
   return workDays;
 };
 
+// Format a date range as a string
+export const formatDateRange = (start: Date, end: Date): string => {
+  const startFormatted = format(new Date(start), 'd MMM', { locale: sv });
+  const endFormatted = format(new Date(end), 'd MMM', { locale: sv });
+  return `${startFormatted} - ${endFormatted}`;
+};
+
 // Returns the month name in Swedish
 export const getMonthName = (monthIndex: number): string => {
   const months = [
@@ -50,11 +57,4 @@ export const getMonthName = (monthIndex: number): string => {
     "juli", "augusti", "september", "oktober", "november", "december"
   ];
   return months[monthIndex];
-};
-
-// Format a date range as a string
-export const formatDateRange = (start: Date, end: Date): string => {
-  const startFormatted = format(new Date(start), 'd MMM', { locale: sv });
-  const endFormatted = format(new Date(end), 'd MMM', { locale: sv });
-  return `${startFormatted} - ${endFormatted}`;
 };
