@@ -21,29 +21,32 @@ export const selectOptimalPeriods = (
     return endDate >= now;
   });
   
-  // Sort by efficiency (days off per vacation day needed)
+  // Sort by various parameters for better distribution and efficiency
+  // Enhanced sorting logic to prioritize efficiency (days off per vacation day)
   validPeriods.sort((a, b) => {
     const aEfficiency = a.days / Math.max(a.vacationDaysNeeded, 1);
     const bEfficiency = b.days / Math.max(b.vacationDaysNeeded, 1);
     
-    // If efficiency is the same, prioritize by mode preference
-    if (aEfficiency === bEfficiency) {
-      return (b.score || 0) - (a.score || 0);
+    // Give strong preference to highly efficient periods
+    if (Math.abs(aEfficiency - bEfficiency) > 0.5) {
+      return bEfficiency - aEfficiency;
     }
     
-    return bEfficiency - aEfficiency;
+    // If efficiency is similar, prioritize by score (which includes mode preference)
+    return (b.score || 0) - (a.score || 0);
   });
   
   // Define maximum number of periods to select based on mode
-  let maxPeriods = 15; // Increased to give more options
+  let maxPeriods = 20; // Increased to allow more diverse options
   
   if (mode === "longweekends") {
-    maxPeriods = 20; // More shorter periods
+    maxPeriods = 25; // More shorter periods
   } else if (mode === "extended") {
-    maxPeriods = 10; // Fewer longer periods
+    maxPeriods = 12; // Fewer longer periods
   }
   
   // Try to find combinations that use exactly the target number of vacation days
+  // and achieve better year-round distribution
   const bestCombination = findExactVacationDayCombination(validPeriods, targetVacationDays, maxPeriods, mode);
   
   if (bestCombination.length > 0) {
@@ -107,18 +110,26 @@ function findQuickCombination(
 ): VacationPeriod[] {
   // Sort periods by various criteria to try different strategies
   const strategies = [
-    // 1. By score (highest first)
-    [...periods].sort((a, b) => (b.score || 0) - (a.score || 0)),
-    // 2. By efficiency (best vacation day ratio first)
+    // 1. By efficiency (best vacation day ratio first)
     [...periods].sort((a, b) => {
-      return (b.days / b.vacationDaysNeeded) - (a.days / a.vacationDaysNeeded);
+      const aEfficiency = a.days / Math.max(a.vacationDaysNeeded, 1);
+      const bEfficiency = b.days / Math.max(b.vacationDaysNeeded, 1);
+      return bEfficiency - aEfficiency;
     }),
+    // 2. By score (highest first)
+    [...periods].sort((a, b) => (b.score || 0) - (a.score || 0)),
     // 3. By season distribution (try to get periods throughout the year)
     [...periods].sort((a, b) => {
       const aMonth = a.start.getMonth();
       const bMonth = b.start.getMonth();
-      // If in same quarter, sort by score
+      // If in same quarter, sort by efficiency then score
       if (Math.floor(aMonth / 3) === Math.floor(bMonth / 3)) {
+        const aEfficiency = a.days / Math.max(a.vacationDaysNeeded, 1);
+        const bEfficiency = b.days / Math.max(b.vacationDaysNeeded, 1);
+        
+        if (Math.abs(aEfficiency - bEfficiency) > 0.5) {
+          return bEfficiency - aEfficiency;
+        }
         return (b.score || 0) - (a.score || 0);
       }
       // Otherwise sort by month to get a good distribution
@@ -150,6 +161,7 @@ function tryGreedyCombination(
   const selectedPeriods: VacationPeriod[] = [];
   let remainingDays = targetDays;
   const selectedMonths = new Set<number>();
+  const quarterCount = [0, 0, 0, 0]; // Count periods per quarter for even distribution
   
   for (const period of sortedPeriods) {
     // Check for overlaps with already selected periods
@@ -160,24 +172,73 @@ function tryGreedyCombination(
     });
     
     const periodMonth = period.start.getMonth();
+    const periodQuarter = Math.floor(periodMonth / 3);
     
     if (!hasOverlap && period.vacationDaysNeeded <= remainingDays) {
-      // Penalty for concentrating too many periods in the same month
-      if (selectedMonths.has(periodMonth) && selectedPeriods.length > 3) {
-        // Skip this period if we already have periods in this month
-        // and we have enough periods to be choosy
-        // 25% chance to still accept it for some variety
-        if (Math.random() > 0.25) continue;
+      // Stronger distribution logic - avoid concentration in a single quarter
+      // Only apply this restriction if we have some periods selected
+      if (selectedPeriods.length > 2) {
+        // Skip if this quarter already has too many periods compared to others
+        const maxQuarterCount = Math.max(...quarterCount);
+        if (quarterCount[periodQuarter] >= maxQuarterCount + 1 && 
+            quarterCount.some(count => count < Math.floor(maxQuarterCount / 2))) {
+          // 15% chance to still accept it for some variety
+          if (Math.random() > 0.15) continue;
+        }
+      }
+      
+      // Calculate efficiency to prefer high-efficiency periods
+      const efficiency = period.days / period.vacationDaysNeeded;
+      
+      // Stronger protection against month concentration
+      // If we already have 2 periods in this month and there are months with no periods,
+      // be more selective
+      if (selectedMonths.has(periodMonth) && 
+          selectedPeriods.filter(p => p.start.getMonth() === periodMonth).length >= 2 &&
+          selectedMonths.size < 6) {
+        // 20% chance to still accept it for some variety
+        if (Math.random() > 0.2) continue;
       }
       
       selectedPeriods.push(period);
       selectedMonths.add(periodMonth);
+      quarterCount[periodQuarter]++;
       remainingDays -= period.vacationDaysNeeded;
       
       if (remainingDays === 0 && selectedPeriods.length <= maxPeriods) {
-        return selectedPeriods; // Perfect match found
+        // Check distribution for final validation
+        const monthCounts = new Array(12).fill(0);
+        selectedPeriods.forEach(p => {
+          monthCounts[p.start.getMonth()]++;
+        });
+        
+        const nonEmptyMonths = monthCounts.filter(count => count > 0).length;
+        
+        // If we have good month distribution, return the result
+        if (nonEmptyMonths >= Math.min(4, selectedPeriods.length)) {
+          return selectedPeriods; // Perfect match found with good distribution
+        }
+        
+        // If poor distribution but high efficiency, accept it anyway
+        const avgEfficiency = selectedPeriods.reduce((sum, p) => 
+          sum + p.days / Math.max(p.vacationDaysNeeded, 1), 0) / selectedPeriods.length;
+          
+        if (avgEfficiency > 1.9) {
+          return selectedPeriods;
+        }
+        
+        // Otherwise, keep searching
+        selectedPeriods.pop();
+        selectedMonths.delete(periodMonth);
+        quarterCount[periodQuarter]--;
+        remainingDays += period.vacationDaysNeeded;
       }
     }
+  }
+  
+  // If we found an exact match with reasonable distribution, return it
+  if (remainingDays === 0 && selectedPeriods.length <= maxPeriods) {
+    return selectedPeriods;
   }
   
   // If we didn't find an exact match, return empty array
@@ -194,29 +255,50 @@ function findBestCombination(
   // Filter periods to only include those that don't exceed target days
   const validPeriods = periods.filter(p => p.vacationDaysNeeded <= targetDays);
   
+  // Sort by efficiency first, then by score
+  validPeriods.sort((a, b) => {
+    const aEfficiency = a.days / Math.max(a.vacationDaysNeeded, 1);
+    const bEfficiency = b.days / Math.max(b.vacationDaysNeeded, 1);
+    
+    if (Math.abs(aEfficiency - bEfficiency) > 0.3) {
+      return bEfficiency - aEfficiency;
+    }
+    
+    return (b.score || 0) - (a.score || 0);
+  });
+  
   // If we have too many periods, limit to most promising ones
-  const limitedPeriods = validPeriods.length > 150
-    ? validPeriods.slice(0, 150) 
+  const limitedPeriods = validPeriods.length > 200
+    ? validPeriods.slice(0, 200) 
     : validPeriods;
   
   // Try to find combinations that sum exactly to target days
   const combinations = findCombinations(limitedPeriods, targetDays, maxPeriods, mode);
   
   if (combinations.length > 0) {
-    // Sort combinations by various factors
+    // Sort combinations by various factors with higher emphasis on efficiency
     combinations.sort((a, b) => {
-      // First calculate total score
-      const aScore = a.reduce((sum, p) => sum + (p.score || 0), 0);
-      const bScore = b.reduce((sum, p) => sum + (p.score || 0), 0);
+      // Calculate average efficiency
+      const aAvgEfficiency = a.reduce((sum, p) => sum + (p.days / Math.max(p.vacationDaysNeeded, 1)), 0) / a.length;
+      const bAvgEfficiency = b.reduce((sum, p) => sum + (p.days / Math.max(p.vacationDaysNeeded, 1)), 0) / b.length;
       
-      // If scores are close, choose combination with better month distribution
-      if (Math.abs(aScore - bScore) < 50) {
-        const aMonths = new Set(a.map(p => p.start.getMonth()));
-        const bMonths = new Set(b.map(p => p.start.getMonth()));
+      if (Math.abs(aAvgEfficiency - bAvgEfficiency) > 0.3) {
+        return bAvgEfficiency - aAvgEfficiency;
+      }
+      
+      // If efficiencies are close, check month distribution
+      const aMonths = new Set(a.map(p => p.start.getMonth()));
+      const bMonths = new Set(b.map(p => p.start.getMonth()));
+      
+      if (Math.abs(bMonths.size - aMonths.size) > 1) {
         return bMonths.size - aMonths.size; // Prefer more month variety
       }
       
-      return bScore - aScore; // Otherwise choose higher score
+      // If month variety is similar, choose by total score
+      const aScore = a.reduce((sum, p) => sum + (p.score || 0), 0);
+      const bScore = b.reduce((sum, p) => sum + (p.score || 0), 0);
+      
+      return bScore - aScore;
     });
     
     // Return the highest scoring combination
@@ -235,9 +317,17 @@ function findCombinations(
 ): VacationPeriod[][] {
   const results: VacationPeriod[][] = [];
   
-  // Pre-sort periods to favor better distribution across the year
+  // Pre-sort periods to improve search efficiency
   periods.sort((a, b) => {
-    // First by quarter (to distribute across the year)
+    // First by efficiency
+    const aEfficiency = a.days / Math.max(a.vacationDaysNeeded, 1);
+    const bEfficiency = b.days / Math.max(b.vacationDaysNeeded, 1);
+    
+    if (Math.abs(aEfficiency - bEfficiency) > 0.5) {
+      return bEfficiency - aEfficiency;
+    }
+    
+    // Then by quarter (to distribute across the year)
     const aQuarter = Math.floor(a.start.getMonth() / 3);
     const bQuarter = Math.floor(b.start.getMonth() / 3);
     
@@ -245,16 +335,17 @@ function findCombinations(
       return aQuarter - bQuarter;
     }
     
-    // Then by score within each quarter
+    // Then by score within each quarter and efficiency band
     return (b.score || 0) - (a.score || 0);
   });
   
-  // Recursive helper function
+  // Recursive helper function with better pruning
   function backtrack(
     start: number, 
     currentPeriods: VacationPeriod[], 
     remainingDays: number,
-    quarterCount: number[]
+    quarterCount: number[],
+    monthSet: Set<number>
   ) {
     // Success case: we found a combination that uses exactly the target days
     if (remainingDays === 0 && currentPeriods.length <= maxPeriods) {
@@ -264,9 +355,7 @@ function findCombinations(
         for (let j = i + 1; j < currentPeriods.length; j++) {
           const p1 = currentPeriods[i];
           const p2 = currentPeriods[j];
-          if (
-            (p1.start <= p2.end && p1.end >= p2.start)
-          ) {
+          if ((p1.start <= p2.end && p1.end >= p2.start)) {
             hasOverlap = true;
             break;
           }
@@ -275,13 +364,25 @@ function findCombinations(
       }
       
       if (!hasOverlap) {
-        results.push([...currentPeriods]);
+        // Score the combination by month distribution
+        const distributionScore = monthSet.size;
+        
+        // Only accept combinations with at least 3 different months
+        // (if we have enough periods)
+        if (currentPeriods.length < 4 || distributionScore >= 3) {
+          results.push([...currentPeriods]);
+        }
       }
       return;
     }
     
     // Stop if we have too many periods or negative remaining days
     if (currentPeriods.length >= maxPeriods || remainingDays < 0) {
+      return;
+    }
+    
+    // Early stopping: if we don't have enough periods to cover remainingDays
+    if (remainingDays > 0 && start >= periods.length) {
       return;
     }
     
@@ -311,20 +412,35 @@ function findCombinations(
         const newQuarterCount = [...quarterCount];
         newQuarterCount[periodQuarter]++;
         
+        // For better distribution, once we have several periods, apply a threshold
+        if (currentPeriods.length >= 3) {
+          const maxQuarter = Math.max(...newQuarterCount);
+          const minQuarter = Math.min(...newQuarterCount);
+          
+          // Skip if distribution is too uneven
+          if (maxQuarter > minQuarter + 2 && maxQuarter > 2) {
+            continue;
+          }
+        }
+        
+        // Track months for distribution
+        const newMonthSet = new Set(monthSet);
+        newMonthSet.add(period.start.getMonth());
+        
         // Include this period and continue search
         currentPeriods.push(period);
-        backtrack(i + 1, currentPeriods, remainingDays - period.vacationDaysNeeded, newQuarterCount);
+        backtrack(i + 1, currentPeriods, remainingDays - period.vacationDaysNeeded, newQuarterCount, newMonthSet);
         currentPeriods.pop(); // backtrack
       }
       
       // Optimization: if we already have enough results, stop searching
-      if (results.length >= 20) {
+      if (results.length >= 30) {
         return;
       }
     }
   }
   
   // Start the recursive search with empty quarter counts [Q1, Q2, Q3, Q4]
-  backtrack(0, [], targetDays, [0, 0, 0, 0]);
+  backtrack(0, [], targetDays, [0, 0, 0, 0], new Set());
   return results;
 }

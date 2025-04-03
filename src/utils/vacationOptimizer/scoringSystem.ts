@@ -18,42 +18,47 @@ export const scorePeriods = (
     
     // Apply mode-specific scoring
     if (mode === "longweekends" && period.days <= 4) {
-      period.score += 80;
+      period.score += 100;
     } else if (mode === "minibreaks" && period.days <= 6 && period.days > 4) {
-      period.score += 80;
+      period.score += 100;
     } else if (mode === "weeks" && period.days <= 9 && period.days > 6) {
-      period.score += 80;
+      period.score += 100;
     } else if (mode === "extended" && period.days > 9) {
-      period.score += 80;
+      period.score += 100;
     } else if (mode === "balanced") {
       // For balanced mode, give more varied scoring across different period lengths
       if (period.days <= 4) period.score += 40;
-      else if (period.days <= 6) period.score += 50;
-      else if (period.days <= 9) period.score += 60;
-      else period.score += 70;
+      else if (period.days <= 6) period.score += 60;
+      else if (period.days <= 9) period.score += 80;
+      else period.score += 90;
     }
     
     // Apply stronger penalties to periods that don't match the selected mode
     if (mode === "longweekends" && period.days > 4) {
-      period.score -= 40;
+      period.score -= 60;
     }
     if (mode === "minibreaks" && (period.days <= 4 || period.days > 6)) {
-      period.score -= 40;
+      period.score -= 60;
     }
     if (mode === "weeks" && (period.days <= 6 || period.days > 9)) {
-      period.score -= 40;
+      period.score -= 60;
     }
     if (mode === "extended" && period.days <= 9) {
-      period.score -= 40;
+      period.score -= 60;
     }
 
     // Reward periods that have better vacation day efficiency
     const efficiency = period.days / Math.max(period.vacationDaysNeeded, 1);
-    period.score += Math.min(efficiency * 15, 30); // Cap the bonus at 30 points
+    period.score += Math.min(efficiency * 25, 50); // Increased efficiency importance with higher cap
+    
+    // Give extra points for extremely efficient periods
+    if (efficiency > 2.5) {
+      period.score += 30;
+    }
     
     // Reward periods that include holidays
     if (period.type === "holiday" || period.type === "bridge") {
-      period.score += 25;
+      period.score += 40; // Increased from 25
     }
     
     // Add score boost for summer periods in July-August if not in extended mode
@@ -64,7 +69,12 @@ export const scorePeriods = (
     
     // Add score boost for winter holiday periods (December-January)
     if (periodMonth === 11 || periodMonth === 0) {
-      period.score += 20;
+      period.score += 25; // Increased from 20
+    }
+    
+    // Add bonus for longer continuous periods - highly reward creating long breaks
+    if (period.days >= 9) {
+      period.score += Math.min(period.days * 3, 45); // Bonus for long periods
     }
   });
   
