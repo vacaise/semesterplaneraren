@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Share2, Twitter, Facebook, Linkedin, Mail } from 'lucide-react';
 
 const SocialShareButtons = () => {
-  const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const shareUrl = window.location.href;
   const shareTitle = 'Check out my optimized vacation plan!';
   const shareText = 'I used Holiday Optimizer to maximize my time off - take a look at my schedule.';
 
@@ -47,15 +47,17 @@ const SocialShareButtons = () => {
         Share your optimized schedule with friends and colleagues
       </p>
       <div className="flex flex-wrap items-center justify-center gap-2">
-        <Button 
-          variant="outline" 
-          size="sm"
-          className="flex items-center gap-1.5"
-          onClick={handleShare}
-        >
-          <Share2 className="h-3.5 w-3.5" />
-          <span>Share</span>
-        </Button>
+        {typeof navigator !== 'undefined' && navigator.share && (
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="flex items-center gap-1.5"
+            onClick={handleShare}
+          >
+            <Share2 className="h-3.5 w-3.5" />
+            <span>Share</span>
+          </Button>
+        )}
         
         <Button 
           variant="outline" 
