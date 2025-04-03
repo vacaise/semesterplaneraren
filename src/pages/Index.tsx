@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import StepOne from "@/components/StepOne";
 import StepTwo from "@/components/StepTwo";
@@ -36,6 +37,10 @@ const Index = () => {
   const resetToStart = () => {
     setCurrentStep(1);
     setOptimizedSchedule(null);
+    // Optionally reset other values to defaults
+    // setVacationDays(25);
+    // setSelectedMode("balanced");
+    // setHolidays([]);
     window.scrollTo(0, 0);
   };
 
@@ -93,48 +98,17 @@ const Index = () => {
     
     try {
       console.log("Generating schedule with holidays:", holidays);
-      
-      if (holidays.length === 0) {
-        toast({
-          title: "Inga röda dagar",
-          description: "Vänligen ladda röda dagar innan du optimerar schemat",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-      
-      try {
-        const optimizedScheduleData = optimizeVacation(year, vacationDays, holidays, selectedMode);
-        console.log("Generated schedule:", optimizedScheduleData);
-        
-        // Double-check that the exact number of vacation days were used
-        if (optimizedScheduleData.vacationDaysUsed !== vacationDays) {
-          throw new Error(`Kunde inte använda exakt ${vacationDays} semesterdagar.`);
-        }
-        
-        setOptimizedSchedule({...optimizedScheduleData, defaultView: 'calendar'});
-        setCurrentStep(4);
-        
-        toast({
-          title: "Optimering klar!",
-          description: `${optimizedScheduleData.totalDaysOff} lediga dagar med ${vacationDays} semesterdagar`,
-        });
-      } catch (error: any) {
-        console.error("Optimization error:", error);
-        toast({
-          title: "Optimering misslyckades",
-          description: error.message || `Kunde inte använda exakt ${vacationDays} semesterdagar. Försök med ett annat antal.`,
-          variant: "destructive",
-        });
-      }
+      const optimizedScheduleData = optimizeVacation(year, vacationDays, holidays, selectedMode);
+      console.log("Generated schedule:", optimizedScheduleData);
+      setOptimizedSchedule(optimizedScheduleData);
+      setCurrentStep(4);
     } catch (error) {
-      console.error("Optimization error:", error);
       toast({
-        title: "Fel vid optimering",
-        description: "Ett oväntat fel inträffade. Försök igen senare.",
+        title: "Fel vid generering av schema",
+        description: "Kunde inte optimera ditt schema, försök igen senare",
         variant: "destructive",
       });
+      console.error("Optimization error:", error);
     } finally {
       setIsLoading(false);
     }
