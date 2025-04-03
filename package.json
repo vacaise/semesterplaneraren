@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
+    "dev": "vite",
+    "build": "vite build",
+    "build:dev": "vite build --mode dev",
     "start": "next start",
     "lint": "next lint",
     "test": "jest --passWithNoTests",
