@@ -1,14 +1,11 @@
 
 import { optimizeVacation } from './optimizer';
-import { calculateEfficiency } from './calculators';
-import { isDayOff, isDateInPast } from './dateUtils';
+import { calculateEfficiency } from './vacationCalculator';
 import { VacationPeriod, OptimizedSchedule } from './types';
 
 export { 
   optimizeVacation,
-  calculateEfficiency,
-  isDayOff, 
-  isDateInPast 
+  calculateEfficiency
 };
 
 export type { 

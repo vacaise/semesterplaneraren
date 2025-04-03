@@ -1,35 +1,37 @@
 
-import { VacationPeriod, OptimizedSchedule, OptimizationMode, PotentialPeriod } from './types';
-import { calculateVacationDaysNeeded } from './calculators';
-import { isDayOff, isDateInPast } from './dateUtils';
-import { determinePeriodType, generatePeriodDescription, overlapsWithAny } from './helpers';
 import { addDays, differenceInDays } from 'date-fns';
+import { VacationPeriod, OptimizedSchedule, OptimizationMode, PotentialPeriod } from './types';
+import { 
+  calculateVacationDaysNeeded, 
+  generatePeriodDescription, 
+  determinePeriodType,
+  isDateInPast,
+  overlapsWithAny
+} from './vacationCalculator';
+import { SwedishHoliday, isDayOff, getSwedishMonthName } from '../swedishHolidays';
 
 // Main optimization function
 export function optimizeVacation(
   year: number,
   totalVacationDays: number,
-  holidays: Date[],
+  holidays: SwedishHoliday[],
   mode: OptimizationMode | string
 ): OptimizedSchedule {
-  // Filter out holidays that have already passed
-  const futureHolidays = holidays.filter(holiday => !isDateInPast(holiday));
-  
   // Find potential vacation periods with high efficiency
-  const potentialPeriods = findAllPotentialPeriods(year, futureHolidays);
+  const potentialPeriods = findAllPotentialPeriods(year, holidays);
   
   // Sort periods by mode and efficiency
   const sortedPeriods = sortPeriodsByModeAndEfficiency(potentialPeriods, mode as OptimizationMode);
   
   // Select the optimal periods based on available vacation days
-  const selectedPeriods = selectOptimalPeriods(sortedPeriods, totalVacationDays, mode as OptimizationMode, futureHolidays, year);
+  const selectedPeriods = selectOptimalPeriods(sortedPeriods, totalVacationDays, mode as OptimizationMode);
   
-  // Format and return the optimized schedule
+  // Calculate total days off
   const totalDaysOff = selectedPeriods.reduce((sum, period) => sum + period.days, 0);
   
   return {
     totalDaysOff,
-    vacationDaysUsed: totalVacationDays, // Always use exactly this many days
+    vacationDaysUsed: totalVacationDays,
     mode,
     periods: selectedPeriods
   };
@@ -38,12 +40,13 @@ export function optimizeVacation(
 // Find all potential vacation periods with high efficiency
 function findAllPotentialPeriods(
   year: number, 
-  holidays: Date[]
+  holidays: SwedishHoliday[]
 ): PotentialPeriod[] {
   const potentialPeriods: PotentialPeriod[] = [];
   const today = new Date();
+  today.setHours(0, 0, 0, 0);
   
-  // Current year until December 31
+  // Start date is either today or January 1st of the selected year, whichever is later
   const startDate = isDateInPast(new Date(year, 0, 1)) 
     ? new Date(Math.max(today.getTime(), new Date(year, 0, 1).getTime()))
     : new Date(year, 0, 1);
@@ -51,16 +54,16 @@ function findAllPotentialPeriods(
   const endDate = new Date(year, 11, 31);
   
   // 1. Find periods around holidays
-  holidays.forEach(holiday => {
-    if (isDateInPast(holiday)) return;
+  for (const holiday of holidays) {
+    if (isDateInPast(holiday.date)) continue;
     
     // Look for periods extending before and after the holiday
-    for (let daysBeforeHoliday = 0; daysBeforeHoliday <= 7; daysBeforeHoliday++) {
-      for (let daysAfterHoliday = 0; daysAfterHoliday <= 7; daysAfterHoliday++) {
+    for (let daysBeforeHoliday = 0; daysBeforeHoliday <= 5; daysBeforeHoliday++) {
+      for (let daysAfterHoliday = 0; daysAfterHoliday <= 5; daysAfterHoliday++) {
         if (daysBeforeHoliday === 0 && daysAfterHoliday === 0) continue; // Skip just the holiday itself
         
-        const periodStart = addDays(holiday, -daysBeforeHoliday);
-        const periodEnd = addDays(holiday, daysAfterHoliday);
+        const periodStart = addDays(holiday.date, -daysBeforeHoliday);
+        const periodEnd = addDays(holiday.date, daysAfterHoliday);
         
         // Skip if start is in the past
         if (isDateInPast(periodStart)) continue;
@@ -68,7 +71,7 @@ function findAllPotentialPeriods(
         // Calculate vacation days needed
         const vacationDaysNeeded = calculateVacationDaysNeeded(periodStart, periodEnd, holidays);
         
-        // Skip if no vacation days needed (already all holidays/weekends) or more than 10 days needed
+        // Skip if no vacation days needed (already all holidays/weekends) or too many days needed
         if (vacationDaysNeeded === 0 || vacationDaysNeeded > 10) continue;
         
         // Calculate total days in the period
@@ -85,20 +88,20 @@ function findAllPotentialPeriods(
             vacationDaysNeeded,
             totalDays,
             efficiency,
-            description: generatePeriodDescription(periodStart, periodEnd)
+            description: `Ledighet kring ${holiday.name}`
           });
         }
       }
     }
-  });
+  }
 
-  // 2. Find weekend extension periods
+  // 2. Find weekend extension periods (Thursday-Sunday, Friday-Monday)
   let currentDate = new Date(startDate);
   while (currentDate <= endDate) {
     const dayOfWeek = currentDate.getDay();
     
     // Thursday (extend weekend by taking Friday off)
-    if (dayOfWeek === 4) {
+    if (dayOfWeek === 4) { // Thursday
       const thursdayDate = new Date(currentDate);
       const sundayDate = addDays(thursdayDate, 3);
       
@@ -116,18 +119,18 @@ function findAllPotentialPeriods(
             vacationDaysNeeded,
             totalDays,
             efficiency,
-            description: `Långhelg i ${getMonthNameHelper(thursdayDate.getMonth())}`
+            description: `Långhelg i ${getSwedishMonthName(thursdayDate.getMonth())}`
           });
         }
       }
     }
     
     // Monday (extend weekend by taking Monday off)
-    if (dayOfWeek === 1) {
+    if (dayOfWeek === 1) { // Monday
       const mondayDate = new Date(currentDate);
       const fridayDate = addDays(mondayDate, -3);
       
-      // If Monday isn't already a holiday and it's not in the past
+      // If Monday isn't already a holiday and dates aren't in the past
       if (!isDayOff(mondayDate, holidays) && !isDateInPast(fridayDate)) {
         const vacationDaysNeeded = calculateVacationDaysNeeded(fridayDate, mondayDate, holidays);
         const totalDays = 4;
@@ -140,7 +143,7 @@ function findAllPotentialPeriods(
             vacationDaysNeeded,
             totalDays,
             efficiency,
-            description: `Långhelg i ${getMonthNameHelper(fridayDate.getMonth())}`
+            description: `Långhelg i ${getSwedishMonthName(fridayDate.getMonth())}`
           });
         }
       }
@@ -149,15 +152,16 @@ function findAllPotentialPeriods(
     currentDate.setDate(currentDate.getDate() + 1);
   }
   
-  // 3. Find traditional vacation periods (summer, etc.)
+  // 3. Find traditional Swedish vacation periods (summer weeks, July, etc.)
   const summerMonths = [5, 6, 7]; // June, July, August
   
-  summerMonths.forEach(month => {
+  for (const month of summerMonths) {
     // Skip if the entire month is in the past
     if (today.getFullYear() > year || (today.getFullYear() === year && today.getMonth() > month)) {
-      return;
+      continue;
     }
     
+    // Create typical Swedish vacation weeks (common to take full weeks in summer)
     for (let weekStartDay = 1; weekStartDay <= 22; weekStartDay += 7) {
       const startDate = new Date(year, month, weekStartDay);
       
@@ -166,34 +170,71 @@ function findAllPotentialPeriods(
       
       // Find start of week (Monday)
       const adjustedStartDate = new Date(startDate);
-      while (adjustedStartDate.getDay() !== 1) {
-        adjustedStartDate.setDate(adjustedStartDate.getDate() + 1);
+      while (adjustedStartDate.getDay() !== 1) { // 1 is Monday
+        adjustedStartDate.setDate(adjustedStartDate.getDate() + (adjustedStartDate.getDay() === 0 ? 1 : 8 - adjustedStartDate.getDay()));
       }
       
-      // Create options for 1, 2, and 3-week vacations
-      [6, 13, 20].forEach(daysToAdd => {
+      // Create options for 1, 2, 3, and 4-week vacations (Swedish people often take 3-4 weeks)
+      for (const weekCount of [1, 2, 3, 4]) {
+        const daysToAdd = (weekCount * 7) - 1; // e.g., 6, 13, 20, 27 days
         const endDate = addDays(adjustedStartDate, daysToAdd);
         const vacationDaysNeeded = calculateVacationDaysNeeded(adjustedStartDate, endDate, holidays);
         
-        // Skip if no vacation days needed or more than 15 days needed
-        if (vacationDaysNeeded === 0 || vacationDaysNeeded > 15) return;
+        // Skip if no vacation days needed or too many days needed
+        if (vacationDaysNeeded === 0) continue;
         
         const totalDays = daysToAdd + 1;
         const efficiency = totalDays / vacationDaysNeeded;
         
-        if (efficiency >= 1.3) {
-          potentialPeriods.push({
-            start: adjustedStartDate,
-            end: endDate,
-            vacationDaysNeeded,
-            totalDays,
-            efficiency,
-            description: `Sommarsemester i ${getMonthNameHelper(adjustedStartDate.getMonth())}`
-          });
+        let description = '';
+        if (weekCount === 1) {
+          description = `En veckas semester i ${getSwedishMonthName(adjustedStartDate.getMonth())}`;
+        } else {
+          description = `${weekCount} veckors semester i ${getSwedishMonthName(adjustedStartDate.getMonth())}`;
         }
+        
+        potentialPeriods.push({
+          start: adjustedStartDate,
+          end: endDate,
+          vacationDaysNeeded,
+          totalDays,
+          efficiency,
+          description
+        });
+      }
+    }
+    
+    // Special case for July - "Industrisemester" (Industrial vacation - many Swedes take all of July off)
+    if (month === 6 && !isDateInPast(new Date(year, 6, 1))) {
+      const julyStart = new Date(year, 6, 1);
+      const julyEnd = new Date(year, 6, 31);
+      
+      // Find closest Monday to July 1st
+      const adjustedJulyStart = new Date(julyStart);
+      while (adjustedJulyStart.getDay() !== 1) { // 1 is Monday
+        adjustedJulyStart.setDate(adjustedJulyStart.getDate() - 1);
+      }
+      
+      // Find closest Friday/Sunday to July 31st
+      const adjustedJulyEnd = new Date(julyEnd);
+      while (adjustedJulyEnd.getDay() !== 0) { // 0 is Sunday
+        adjustedJulyEnd.setDate(adjustedJulyEnd.getDate() + 1);
+      }
+      
+      const vacationDaysNeeded = calculateVacationDaysNeeded(adjustedJulyStart, adjustedJulyEnd, holidays);
+      const totalDays = differenceInDays(adjustedJulyEnd, adjustedJulyStart) + 1;
+      const efficiency = totalDays / vacationDaysNeeded;
+      
+      potentialPeriods.push({
+        start: adjustedJulyStart,
+        end: adjustedJulyEnd,
+        vacationDaysNeeded,
+        totalDays,
+        efficiency,
+        description: "Industrisemester (hela juli)"
       });
     }
-  });
+  }
   
   return potentialPeriods;
 }
@@ -254,9 +295,7 @@ function sortPeriodsByModeAndEfficiency(
 function selectOptimalPeriods(
   sortedPeriods: PotentialPeriod[],
   totalVacationDays: number,
-  mode: OptimizationMode,
-  holidays: Date[],
-  year: number
+  mode: OptimizationMode
 ): VacationPeriod[] {
   let remainingVacationDays = totalVacationDays;
   const selectedPeriods: VacationPeriod[] = [];
@@ -293,175 +332,56 @@ function selectOptimalPeriods(
     }
   }
   
-  // If we still have vacation days left, try to distribute them
-  // by creating single-day vacations with decent efficiency
-  if (remainingVacationDays > 0) {
-    distributeRemainingDays(
-      remainingVacationDays,
-      selectedPeriods,
-      holidays,
-      year
-    );
+  // Second pass: if we still have vacation days left, add shorter periods
+  if (remainingVacationDays > 0 && sortedPeriods.length > 0) {
+    const additionalPeriods = distributeRemainingDays(remainingVacationDays, selectedPeriods, sortedPeriods);
+    selectedPeriods.push(...additionalPeriods);
   }
   
   // Sort periods chronologically
   return selectedPeriods.sort((a, b) => a.start.getTime() - b.start.getTime());
 }
 
-// Distribute remaining vacation days optimally
+// Distribute remaining vacation days
 function distributeRemainingDays(
   remainingDays: number,
   selectedPeriods: VacationPeriod[],
-  holidays: Date[],
-  year: number
-): void {
-  // Try to add days near weekends and holidays for maximum efficiency
-  // Priority order for months (summer first, then spring/fall, then winter)
-  const months = [6, 7, 5, 8, 4, 9, 3, 10, 2, 11, 1, 0]; // Jul, Aug, Jun, Sep, May, Oct, Apr, Nov, Mar, Dec, Feb, Jan
-  const today = new Date();
+  allPeriods: PotentialPeriod[]
+): VacationPeriod[] {
+  const additionalPeriods: VacationPeriod[] = [];
   
-  for (const month of months) {
-    if (remainingDays === 0) break;
+  // Create a copy of all periods sorted by efficiency
+  const candidatePeriods = [...allPeriods]
+    .filter(p => p.vacationDaysNeeded <= remainingDays)
+    .sort((a, b) => b.efficiency - a.efficiency);
+  
+  for (const period of candidatePeriods) {
+    if (remainingDays <= 0) break;
     
-    // Try each day in the month
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const startDay = (year === today.getFullYear() && month === today.getMonth()) ? today.getDate() + 1 : 1;
-    
-    // Try to place days around existing holidays or weekends
-    for (let day = startDay; day <= daysInMonth && remainingDays > 0; day++) {
-      const currentDate = new Date(year, month, day);
-      
-      // Skip if it's a weekend, holiday, or already in a selected period
-      if (isDayOff(currentDate, holidays) || 
-          overlapsWithAny(currentDate, currentDate, selectedPeriods)) {
-        continue;
-      }
-      
-      // Check if taking this day off would create a "bridge" to a weekend or holiday
-      let shouldTakeOff = false;
-      
-      // Check day before
-      const dayBefore = addDays(currentDate, -1);
-      if (isDayOff(dayBefore, holidays)) {
-        shouldTakeOff = true;
-      }
-      
-      // Check day after
-      const dayAfter = addDays(currentDate, 1);
-      if (isDayOff(dayAfter, holidays)) {
-        shouldTakeOff = true;
-      }
-      
-      // Check two days before (for potential 4-day weekend)
-      const twoDaysBefore = addDays(currentDate, -2);
-      if (isDayOff(twoDaysBefore, holidays) && isDayOff(dayBefore, holidays)) {
-        shouldTakeOff = true;
-      }
-      
-      // Check two days after (for potential 4-day weekend)
-      const twoDaysAfter = addDays(currentDate, 2);
-      if (isDayOff(dayAfter, holidays) && isDayOff(twoDaysAfter, holidays)) {
-        shouldTakeOff = true;
-      }
-      
-      if (shouldTakeOff) {
-        // Calculate total days in the period
-        let periodStart = new Date(currentDate);
-        let periodEnd = new Date(currentDate);
-        
-        // Expand backward until we hit a workday
-        while (periodStart.getDay() !== 1) { // Keep going until we hit a Monday
-          const prevDay = addDays(periodStart, -1);
-          if (isDayOff(prevDay, holidays) || overlapsWithAny(prevDay, prevDay, selectedPeriods)) {
-            periodStart = prevDay;
-          } else {
-            break;
-          }
-        }
-        
-        // Expand forward until we hit a workday
-        while (periodEnd.getDay() !== 5) { // Keep going until we hit a Friday
-          const nextDay = addDays(periodEnd, 1);
-          if (isDayOff(nextDay, holidays) || overlapsWithAny(nextDay, nextDay, selectedPeriods)) {
-            periodEnd = nextDay;
-          } else {
-            break;
-          }
-        }
-        
-        const totalDays = differenceInDays(periodEnd, periodStart) + 1;
-        
-        // Add this period
-        selectedPeriods.push({
-          start: currentDate,
-          end: currentDate,
-          days: totalDays,
-          vacationDaysNeeded: 1,
-          description: `Ledig dag i ${getMonthNameHelper(currentDate.getMonth())}`,
-          type: "single",
-          startDate: currentDate.toISOString(),
-          endDate: currentDate.toISOString()
-        });
-        
-        remainingDays--;
-      }
+    // Skip if period overlaps with already selected periods
+    if (overlapsWithAny(period.start, period.end, [...selectedPeriods, ...additionalPeriods])) {
+      continue;
     }
-  }
-  
-  // If we still have days left, just add them as standalone days
-  if (remainingDays > 0) {
-    addStandaloneDays(remainingDays, selectedPeriods, holidays, year);
-  }
-}
-
-// Add standalone vacation days when no better options exist
-function addStandaloneDays(
-  remainingDays: number,
-  selectedPeriods: VacationPeriod[],
-  holidays: Date[],
-  year: number
-): void {
-  const months = [6, 7, 5, 8, 4, 9, 3, 10, 2, 11, 1, 0]; // Priority order
-  const today = new Date();
-  
-  for (const month of months) {
-    if (remainingDays === 0) break;
     
-    // Try to place days in this month
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const startDay = (year === today.getFullYear() && month === today.getMonth()) ? today.getDate() + 1 : 1;
-    
-    for (let day = startDay; day <= daysInMonth && remainingDays > 0; day++) {
-      const date = new Date(year, month, day);
-      
-      // Skip weekends, holidays and dates already in a period
-      if (isDayOff(date, holidays) || overlapsWithAny(date, date, selectedPeriods)) {
-        continue;
-      }
-      
-      // Create a one-day period
-      selectedPeriods.push({
-        start: date,
-        end: date,
-        days: 1, // Just one day off
-        vacationDaysNeeded: 1,
-        description: `Ledig dag i ${getMonthNameHelper(month)}`,
-        type: "single",
-        startDate: date.toISOString(),
-        endDate: date.toISOString()
-      });
-      
-      remainingDays--;
-      if (remainingDays === 0) break;
+    // Skip if not enough vacation days left
+    if (period.vacationDaysNeeded > remainingDays) {
+      continue;
     }
+    
+    const vacationPeriod: VacationPeriod = {
+      start: period.start,
+      end: period.end,
+      days: period.totalDays,
+      vacationDaysNeeded: period.vacationDaysNeeded,
+      description: period.description,
+      type: determinePeriodType(period.totalDays),
+      startDate: period.start.toISOString(),
+      endDate: period.end.toISOString()
+    };
+    
+    additionalPeriods.push(vacationPeriod);
+    remainingDays -= period.vacationDaysNeeded;
   }
-}
-
-// Helper function to get month name
-function getMonthNameHelper(month: number): string {
-  const months = [
-    "januari", "februari", "mars", "april", "maj", "juni",
-    "juli", "augusti", "september", "oktober", "november", "december"
-  ];
-  return months[month];
+  
+  return additionalPeriods;
 }
