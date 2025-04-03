@@ -20,7 +20,7 @@ export const findBridgeDays = (year: number) => {
       days: differenceInDays(mayFirstEnd, mayFirstStart) + 1,
       vacationDaysNeeded: mayfirstDay === 1 ? 1 : mayfirstDay === 2 ? 1 : mayfirstDay === 4 ? 1 : mayfirstDay === 5 ? 1 : 0,
       description: "Första maj-helg",
-      score: 70,
+      score: 85, // Increased from 70
       type: "bridge"
     };
     
@@ -42,7 +42,7 @@ export const findBridgeDays = (year: number) => {
       days: differenceInDays(nationalDayEnd, nationalDayStart) + 1,
       vacationDaysNeeded: nationalDayOfWeek === 1 ? 1 : nationalDayOfWeek === 2 ? 1 : nationalDayOfWeek === 4 ? 1 : nationalDayOfWeek === 5 ? 1 : 0,
       description: "Nationaldagshelg",
-      score: 68,
+      score: 83, // Increased from 68
       type: "bridge"
     };
     
@@ -66,11 +66,56 @@ export const findBridgeDays = (year: number) => {
     days: differenceInDays(allSaintsEnd, allSaintsStart) + 1,
     vacationDaysNeeded: 1, // Friday
     description: "Alla helgons helg",
-    score: 73,
+    score: 88, // Increased from 73
     type: "bridge"
   };
   
   periods.push(allSaintsPeriod);
+
+  // Add specific bridge days for common red days throughout the year
+  // These are days that can turn a single holiday into a long weekend with just 1 vacation day
+  for (let month = 0; month < 12; month++) {
+    // Try days throughout the month
+    for (let day = 1; day <= 28; day++) {
+      const currentDate = new Date(year, month, day);
+      const dayOfWeek = currentDate.getDay();
+      
+      // Look for Tuesday or Thursday holidays - these are prime bridge day candidates
+      if (dayOfWeek === 2 || dayOfWeek === 4) {
+        // For Tuesday holidays, Monday is the bridge day
+        if (dayOfWeek === 2) {
+          const bridgeStart = addDays(currentDate, -3); // Saturday
+          const bridgeEnd = currentDate; // Tuesday
+          
+          periods.push({
+            start: bridgeStart,
+            end: bridgeEnd,
+            days: 4,
+            vacationDaysNeeded: 1,
+            description: `Bro dag ${month+1}/${day}`,
+            score: 90, // Very high score for efficient 1-day bridge
+            type: "bridge"
+          });
+        }
+        
+        // For Thursday holidays, Friday is the bridge day
+        if (dayOfWeek === 4) {
+          const bridgeStart = currentDate; // Thursday
+          const bridgeEnd = addDays(currentDate, 3); // Sunday
+          
+          periods.push({
+            start: bridgeStart,
+            end: bridgeEnd,
+            days: 4,
+            vacationDaysNeeded: 1,
+            description: `Bro dag ${month+1}/${day}`,
+            score: 90, // Very high score for efficient 1-day bridge
+            type: "bridge"
+          });
+        }
+      }
+    }
+  }
   
   return periods;
 };

@@ -47,18 +47,18 @@ export const scorePeriods = (
       period.score -= 60;
     }
 
-    // Reward periods that have better vacation day efficiency
+    // Reward periods that have better vacation day efficiency with more weight
     const efficiency = period.days / Math.max(period.vacationDaysNeeded, 1);
-    period.score += Math.min(efficiency * 25, 50); // Increased efficiency importance with higher cap
+    period.score += Math.min(efficiency * 35, 70); // Significantly increased efficiency importance
     
-    // Give extra points for extremely efficient periods
+    // Give extra points for extremely efficient periods (super efficient periods get massive boost)
     if (efficiency > 2.5) {
-      period.score += 30;
+      period.score += 50; // Increased from 30
     }
     
-    // Reward periods that include holidays
+    // Heavy boost for periods that include holidays (significantly increased)
     if (period.type === "holiday" || period.type === "bridge") {
-      period.score += 40; // Increased from 25
+      period.score += 70; // Increased from 40
     }
     
     // Add score boost for summer periods in July-August if not in extended mode
@@ -69,7 +69,7 @@ export const scorePeriods = (
     
     // Add score boost for winter holiday periods (December-January)
     if (periodMonth === 11 || periodMonth === 0) {
-      period.score += 25; // Increased from 20
+      period.score += 25;
     }
     
     // Add bonus for longer continuous periods - highly reward creating long breaks
