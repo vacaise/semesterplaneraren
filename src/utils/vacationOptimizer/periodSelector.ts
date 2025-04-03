@@ -1,6 +1,7 @@
 
 import { VacationPeriod } from './types';
-import { isDateInPast, isDayOff, getMonthName } from './helpers';
+import { isDateInPast, formatDateToString } from './helpers';
+import { verifyExactVacationDays } from './calculators';
 
 // Select the optimal periods based on the available vacation days
 export const selectOptimalPeriods = (
@@ -13,7 +14,7 @@ export const selectOptimalPeriods = (
   // Make a copy to avoid mutating the original array
   const periods = [...potentialPeriods];
   
-  // Filter out periods that are entirely in the past
+  // Filter out periods that are in the past
   const validPeriods = periods.filter(period => {
     const endDate = new Date(period.end);
     const now = new Date();
@@ -21,160 +22,207 @@ export const selectOptimalPeriods = (
     return endDate >= now;
   });
   
-  // Sort by score and efficiency
-  validPeriods.sort((a, b) => {
-    // First by score
-    const scoreDiff = (b.score || 0) - (a.score || 0);
-    if (Math.abs(scoreDiff) > 10) return scoreDiff;
-    
-    // Then by efficiency (days off per vacation day)
-    const aEfficiency = a.days / Math.max(a.vacationDaysNeeded, 1);
-    const bEfficiency = b.days / Math.max(b.vacationDaysNeeded, 1);
-    return bEfficiency - aEfficiency;
-  });
+  console.log(`Finding combinations using EXACTLY ${vacationDays} vacation days...`);
   
-  // Consider more periods for better combinations
-  const periodsToConsider = validPeriods.slice(0, 200); // Consider more periods for better chances
+  // Find combinations that use exactly the specified vacation days
+  const exactCombinations = findCombinationsWithExactSum(validPeriods, vacationDays);
   
-  console.log(`Finding combinations for EXACTLY ${vacationDays} vacation days...`);
-  
-  // Find all possible combinations that sum to EXACTLY the specified vacation days
-  const exactCombinations = findCombinationsWithExactSum(periodsToConsider, vacationDays);
-  
-  // If no exact combinations found, throw an error to trigger the fallback mechanism
+  // If no exact combinations found, throw a clear error
   if (exactCombinations.length === 0) {
-    throw new Error(`No combination found using exactly ${vacationDays} vacation days`);
+    throw new Error(`Could not find a valid schedule using exactly ${vacationDays} vacation days. Try a different number of days or a different optimization style.`);
   }
   
-  console.log(`Found ${exactCombinations.length} combinations with exactly ${vacationDays} vacation days`);
+  console.log(`Found ${exactCombinations.length} combinations using exactly ${vacationDays} days`);
   
-  // Score the combinations based on total days off, alignment with mode, etc.
+  // Score the combinations based on optimization criteria
   const scoredCombinations = scoreCombinations(exactCombinations, mode, holidays);
   
   // Return the best combination
-  if (scoredCombinations.length === 0) {
-    throw new Error(`Could not find a valid schedule with exactly ${vacationDays} vacation days`);
-  }
-  
   return scoredCombinations[0];
 };
 
-// Find all combinations that sum to exactly the target value
+// Find all combinations that sum to exactly the target vacation days
 function findCombinationsWithExactSum(
   periods: VacationPeriod[], 
-  targetSum: number, 
-  maxCombinations: number = 10000
+  targetVacationDays: number,
+  maxCombinations = 10000
 ): VacationPeriod[][] {
   const results: VacationPeriod[][] = [];
+  let counter = 0;
   
-  // Define a recursive helper function to find combinations
+  // Define recursive function to find combinations
   const findCombinations = (
-    start: number, 
-    currentSum: number, 
-    currentCombination: VacationPeriod[]
+    start: number,
+    currentSum: number,
+    currentCombination: VacationPeriod[],
+    daysSet: Set<string>
   ) => {
-    // If we've found a valid combination
-    if (currentSum === targetSum) {
+    // If we've reached the target sum exactly
+    if (currentSum === targetVacationDays) {
       results.push([...currentCombination]);
       return;
     }
     
-    // If we've exceeded the target or have too many combinations
-    if (currentSum > targetSum || results.length >= maxCombinations) {
+    // If we've exceeded the target or limit
+    if (currentSum > targetVacationDays || 
+        counter >= maxCombinations ||
+        results.length >= 1000) {
       return;
     }
     
-    // Try adding each period, starting from the current position
+    counter++;
+    
+    // Try adding each period from the current position
     for (let i = start; i < periods.length; i++) {
       const period = periods[i];
       
-      // Skip if adding this period would exceed the target
-      if (currentSum + period.vacationDaysNeeded > targetSum) {
+      // Skip if adding this period would exceed target
+      if (currentSum + period.vacationDaysNeeded > targetVacationDays) {
         continue;
       }
       
-      // Skip if there's overlap with current combination
-      if (hasOverlapWithCombination(period, currentCombination)) {
+      // Check for date overlaps with current combination
+      if (hasOverlap(period, currentCombination, daysSet)) {
         continue;
       }
       
+      // Add period to current combination
       currentCombination.push(period);
-      findCombinations(i + 1, currentSum + period.vacationDaysNeeded, currentCombination);
-      currentCombination.pop(); // Backtrack
+      
+      // Add all days to the set to track overlaps
+      const newDaysSet = new Set(daysSet);
+      addPeriodDaysToSet(period, newDaysSet);
+      
+      // Continue searching with updated parameters
+      findCombinations(i + 1, currentSum + period.vacationDaysNeeded, currentCombination, newDaysSet);
+      
+      // Backtrack
+      currentCombination.pop();
     }
   };
   
   // Start the recursive search
-  findCombinations(0, 0, []);
-  return results;
+  findCombinations(0, 0, [], new Set<string>());
+  
+  // Double-check all returned combinations use exactly the target days
+  const verifiedResults = results.filter(combination => 
+    verifyExactVacationDays(combination, targetVacationDays)
+  );
+  
+  return verifiedResults;
 }
 
-// Check if a period overlaps with any period in a combination
-function hasOverlapWithCombination(period: VacationPeriod, combination: VacationPeriod[]): boolean {
-  return combination.some(existingPeriod => {
-    const periodStart = new Date(period.start).getTime();
-    const periodEnd = new Date(period.end).getTime();
-    const existingStart = new Date(existingPeriod.start).getTime();
-    const existingEnd = new Date(existingPeriod.end).getTime();
-    
-    return (
-      (periodStart >= existingStart && periodStart <= existingEnd) ||
-      (periodEnd >= existingStart && periodEnd <= existingEnd) ||
-      (periodStart <= existingStart && periodEnd >= existingEnd)
-    );
-  });
+// Check if a period overlaps with existing periods
+function hasOverlap(
+  period: VacationPeriod, 
+  combination: VacationPeriod[],
+  daysSet: Set<string>
+): boolean {
+  const start = new Date(period.start);
+  const end = new Date(period.end);
+  
+  // Check if any day in this period is already in the set
+  let currentDay = new Date(start);
+  while (currentDay <= end) {
+    const dayString = formatDateToString(currentDay);
+    if (daysSet.has(dayString)) {
+      return true;
+    }
+    currentDay.setDate(currentDay.getDate() + 1);
+  }
+  
+  return false;
 }
 
-// Score combinations based on total days off, alignment with mode, distribution, etc.
+// Add all days of a period to a set
+function addPeriodDaysToSet(period: VacationPeriod, daysSet: Set<string>): void {
+  const start = new Date(period.start);
+  const end = new Date(period.end);
+  
+  let currentDay = new Date(start);
+  while (currentDay <= end) {
+    daysSet.add(formatDateToString(currentDay));
+    currentDay.setDate(currentDay.getDate() + 1);
+  }
+}
+
+// Score combinations based on optimization criteria
 function scoreCombinations(
   combinations: VacationPeriod[][], 
-  mode: string, 
+  mode: string,
   holidays: Date[]
 ): VacationPeriod[][] {
-  // Calculate score for each combination
   const scoredCombinations = combinations.map(combination => {
-    const totalDaysOff = combination.reduce((sum, period) => sum + period.days, 0);
-    const totalVacationDays = combination.reduce((sum, period) => sum + period.vacationDaysNeeded, 0);
-    const efficiency = totalDaysOff / totalVacationDays;
+    let totalScore = 0;
     
-    // Calculate mode alignment score
-    let modeScore = 0;
+    // Base score from individual periods
+    const baseScore = combination.reduce((sum, period) => sum + (period.score || 0), 0);
+    
+    // Length alignment score based on selected mode
+    let lengthScore = 0;
     combination.forEach(period => {
-      if (mode === "longweekends" && period.days <= 4) modeScore += 15;
-      else if (mode === "minibreaks" && period.days <= 6 && period.days > 4) modeScore += 15;
-      else if (mode === "weeks" && period.days <= 9 && period.days > 6) modeScore += 15;
-      else if (mode === "extended" && period.days > 9) modeScore += 15;
-      else if (mode === "balanced") modeScore += 10;
+      const periodLength = period.days;
+      
+      switch(mode) {
+        case "longweekends":
+          // Favor 3-4 day periods
+          lengthScore += periodLength <= 4 ? 50 : 10;
+          break;
+        case "minibreaks":
+          // Favor 4-6 day periods
+          lengthScore += (periodLength >= 4 && periodLength <= 6) ? 50 : 10;
+          break;
+        case "weeks":
+          // Favor 7-9 day periods
+          lengthScore += (periodLength >= 7 && periodLength <= 9) ? 50 : 10;
+          break;
+        case "extended":
+          // Favor 10+ day periods
+          lengthScore += periodLength >= 10 ? 50 : 10;
+          break;
+        case "balanced":
+        default:
+          // More evenly distributed scoring for balanced mode
+          if (periodLength <= 4) lengthScore += 25;
+          else if (periodLength <= 7) lengthScore += 35;
+          else if (periodLength <= 10) lengthScore += 40;
+          else lengthScore += 30;
+      }
     });
     
-    // Bonus for distribution throughout the year
+    // Distribution score - favor spreading periods throughout the year
     const monthCoverage = new Set(combination.map(p => new Date(p.start).getMonth())).size;
-    const distributionScore = monthCoverage * 5;
+    const distributionScore = monthCoverage * 10;
     
-    // Bonus for holidays included
+    // Efficiency score - maximize total days off
+    const totalDays = combination.reduce((sum, period) => sum + period.days, 0);
+    const efficiencyScore = totalDays * 2;
+    
+    // Holiday utilization score - favor periods that include holidays
     let holidayScore = 0;
     combination.forEach(period => {
       const start = new Date(period.start);
       const end = new Date(period.end);
+      
       for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
         if (holidays.some(h => h.getDate() === d.getDate() && h.getMonth() === d.getMonth())) {
-          holidayScore += 10;
+          holidayScore += 15; // Significant bonus for including holidays
         }
       }
     });
     
     // Calculate total score
-    const score = efficiency * 10 + modeScore + distributionScore + holidayScore + totalDaysOff;
+    totalScore = baseScore + lengthScore + distributionScore + efficiencyScore + holidayScore;
     
     return {
       combination,
-      score
+      score: totalScore
     };
   });
   
   // Sort by score (descending)
   scoredCombinations.sort((a, b) => b.score - a.score);
   
-  // Return combinations sorted by their scores
+  // Return sorted combinations
   return scoredCombinations.map(item => item.combination);
 }

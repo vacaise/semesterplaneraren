@@ -8,7 +8,9 @@ export const isDayOff = (date: Date, holidays: Date[]): boolean => {
   if (isWeekend(date)) return true;
   
   // Check if the day is a holiday
-  return holidays.some(holiday => isSameDay(holiday, date));
+  return holidays.some(holiday => 
+    isSameDay(new Date(holiday), new Date(date))
+  );
 };
 
 // Format date to a string for set operations
@@ -52,7 +54,7 @@ export const getMonthName = (monthIndex: number): string => {
 
 // Format a date range as a string
 export const formatDateRange = (start: Date, end: Date): string => {
-  const startFormatted = format(start, 'd MMM', { locale: sv });
-  const endFormatted = format(end, 'd MMM', { locale: sv });
+  const startFormatted = format(new Date(start), 'd MMM', { locale: sv });
+  const endFormatted = format(new Date(end), 'd MMM', { locale: sv });
   return `${startFormatted} - ${endFormatted}`;
 };

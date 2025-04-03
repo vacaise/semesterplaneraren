@@ -1,5 +1,5 @@
 
-import { addDays, format, differenceInDays } from 'date-fns';
+import { addDays, format, differenceInDays, isSameDay } from 'date-fns';
 import { formatDateToString, isDayOff } from './helpers';
 import { VacationPeriod } from './types';
 
@@ -15,12 +15,14 @@ export const calculateTotalDaysOff = (periods: VacationPeriod[], holidays: Date[
     const start = new Date(period.start);
     const end = new Date(period.end);
     
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      daysOffSet.add(formatDateToString(d));
+    let currentDay = new Date(start);
+    while (currentDay <= end) {
+      daysOffSet.add(formatDateToString(new Date(currentDay)));
+      currentDay.setDate(currentDay.getDate() + 1);
     }
   });
   
-  // Remove duplicates and count total days
+  // Return the total unique days
   return daysOffSet.size;
 };
 
@@ -30,7 +32,7 @@ export const calculateVacationDaysNeeded = (start: Date, end: Date, holidays: Da
   let currentDay = new Date(start);
   
   while (currentDay <= end) {
-    // Skip weekends and holidays
+    // Count only weekdays that are not holidays
     if (!isDayOff(currentDay, holidays)) {
       vacationDaysNeeded++;
     }
@@ -52,4 +54,15 @@ export const calculateEfficiency = (totalDaysOff: number, vacationDaysUsed: numb
   
   const efficiency = totalDaysOff / vacationDaysUsed;
   return efficiency.toFixed(2);
+};
+
+// Verify that a set of periods uses exactly the specified number of vacation days
+export const verifyExactVacationDays = (periods: VacationPeriod[], targetDays: number): boolean => {
+  const totalVacationDays = periods.reduce((sum, period) => sum + period.vacationDaysNeeded, 0);
+  return totalVacationDays === targetDays;
+};
+
+// Sum the vacation days needed for all periods
+export const sumVacationDaysNeeded = (periods: VacationPeriod[]): number => {
+  return periods.reduce((sum, period) => sum + period.vacationDaysNeeded, 0);
 };

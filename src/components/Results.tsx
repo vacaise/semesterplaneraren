@@ -128,7 +128,7 @@ const Results = ({ schedule, year, holidays, resetToStart }: ResultsProps) => {
         </div>
         
         <p className="text-gray-600 mb-6">
-          Baserat på dina val har vi optimerat din ledighet för {year} med {schedule.vacationDaysUsed} semesterdagar 
+          Baserat på dina val har vi optimerat din ledighet för {year} med exakt {schedule.vacationDaysUsed} semesterdagar 
           i stil "{getModeDisplayText(schedule.mode)}".
         </p>
         

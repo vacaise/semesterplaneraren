@@ -1,6 +1,6 @@
 
 import { findOptimalSchedule } from './optimizer';
-import { calculateTotalDaysOff } from './calculators';
+import { calculateTotalDaysOff, sumVacationDaysNeeded } from './calculators';
 import { isDayOff, isDateInPast } from './helpers';
 import { VacationPeriod } from './types';
 
@@ -18,10 +18,21 @@ export const optimizeVacation = (
   holidays: Date[],
   mode: string
 ): OptimizedSchedule => {
+  // Input validation
+  if (!vacationDays || vacationDays <= 0) {
+    throw new Error("The number of vacation days must be greater than zero");
+  }
+
+  if (!holidays || holidays.length === 0) {
+    console.warn("No holidays provided, efficiency will be reduced");
+  }
+
+  console.log(`Optimizing vacation with exactly ${vacationDays} days for ${year}`);
+  
   // Filter out holidays that have already passed
   const filteredHolidays = holidays.filter(holiday => !isDateInPast(holiday));
   
-  // Find optimal periods based on the parameters with STRICT enforcement of vacation days
+  // Find optimal periods based on the parameters
   const selectedPeriods = findOptimalSchedule(year, vacationDays, filteredHolidays, mode);
   
   // Verify periods don't contain any past dates
@@ -30,22 +41,18 @@ export const optimizeVacation = (
   
   const validatedPeriods = selectedPeriods.filter(period => {
     const endDate = new Date(period.end);
-    endDate.setHours(0, 0, 0, 0);
     return endDate >= today;
   });
   
-  // Calculate the total days off
+  // Calculate the total days off (all days in all periods)
   const totalDaysOff = calculateTotalDaysOff(validatedPeriods, filteredHolidays);
   
-  // Calculate total vacation days used
-  const totalVacationDaysUsed = validatedPeriods.reduce(
-    (total, period) => total + period.vacationDaysNeeded, 
-    0
-  );
+  // Calculate total vacation days used (must match input)
+  const totalVacationDaysUsed = sumVacationDaysNeeded(validatedPeriods);
   
-  // Verify we're using exactly the requested number of vacation days
+  // Strict enforcement: verify we're using exactly the requested number of vacation days
   if (totalVacationDaysUsed !== vacationDays) {
-    throw new Error(`Could not create a schedule using exactly ${vacationDays} vacation days. Algorithm produced ${totalVacationDaysUsed} days.`);
+    throw new Error(`Algorithm error: Expected to use exactly ${vacationDays} vacation days, but used ${totalVacationDaysUsed} days`);
   }
   
   return {
