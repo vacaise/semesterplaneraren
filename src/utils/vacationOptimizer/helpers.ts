@@ -1,61 +1,58 @@
 
-import { format } from 'date-fns';
+import { isSameDay, isWeekend, format, isBefore, startOfDay } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
-// Format a date range for display
-export function formatDateRange(startDate: Date, endDate: Date): string {
-  if (startDate.getMonth() === endDate.getMonth()) {
-    // Same month
-    return `${format(startDate, 'd')}–${format(endDate, 'd MMM', { locale: sv })}`;
-  } else {
-    // Different months
-    return `${format(startDate, 'd MMM', { locale: sv })}–${format(endDate, 'd MMM', { locale: sv })}`;
-  }
-}
+// Helper function to determine if a day is a day off (weekend or holiday)
+export const isDayOff = (date: Date, holidays: Date[]): boolean => {
+  // Check if the day is a weekend (Saturday or Sunday)
+  if (isWeekend(date)) return true;
+  
+  // Check if the day is a holiday
+  return holidays.some(holiday => isSameDay(holiday, date));
+};
 
-// Determine the type of period based on its length
-export function determinePeriodType(totalDays: number): string {
-  if (totalDays <= 4) {
-    return "longweekend";
-  } else if (totalDays <= 6) {
-    return "minibreak";
-  } else if (totalDays <= 9) {
-    return "week";
-  } else {
-    return "extended";
-  }
-}
+// Format date to a string for set operations
+export const formatDateToString = (date: Date): string => {
+  return format(date, 'yyyy-MM-dd');
+};
 
-// Get month name in Swedish
-export function getMonthName(month: number): string {
+// Check if a date is in the past (before today)
+export const isDateInPast = (date: Date): boolean => {
+  const today = startOfDay(new Date());
+  const dateToCheck = startOfDay(new Date(date));
+  return isBefore(dateToCheck, today);
+};
+
+// Get the number of work days between two dates
+export const getWorkDays = (startDate: Date, endDate: Date, holidays: Date[]): number => {
+  let workDays = 0;
+  const currentDate = new Date(startDate);
+  
+  while (currentDate <= endDate) {
+    // Check if it's a weekday (not Saturday or Sunday) and not a holiday
+    if (!isDayOff(currentDate, holidays)) {
+      workDays++;
+    }
+    
+    // Move to the next day
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  
+  return workDays;
+};
+
+// Returns the month name in Swedish
+export const getMonthName = (monthIndex: number): string => {
   const months = [
     "januari", "februari", "mars", "april", "maj", "juni",
     "juli", "augusti", "september", "oktober", "november", "december"
   ];
-  return months[month];
-}
+  return months[monthIndex];
+};
 
-// Generate description for a vacation period
-export function generatePeriodDescription(startDate: Date, endDate: Date): string {
-  const monthStart = startDate.getMonth();
-  const monthEnd = endDate.getMonth();
-  
-  if (monthStart === monthEnd) {
-    return `Ledighet i ${getMonthName(monthStart)}`;
-  } else {
-    return `Ledighet ${getMonthName(monthStart)}-${getMonthName(monthEnd)}`;
-  }
-}
-
-// Check if a period overlaps with any period in a list
-export function overlapsWithAny(
-  periodStart: Date,
-  periodEnd: Date,
-  existingPeriods: { start: Date, end: Date }[]
-): boolean {
-  return existingPeriods.some(existingPeriod => {
-    return (
-      (periodStart <= existingPeriod.end && periodEnd >= existingPeriod.start)
-    );
-  });
-}
+// Format a date range as a string
+export const formatDateRange = (start: Date, end: Date): string => {
+  const startFormatted = format(start, 'd MMM', { locale: sv });
+  const endFormatted = format(end, 'd MMM', { locale: sv });
+  return `${startFormatted} - ${endFormatted}`;
+};

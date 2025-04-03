@@ -1,151 +1,135 @@
 
-import { VacationPeriod, OptimizationMode, PotentialPeriod } from './types';
-import { overlapsWithAny } from './helpers';
-import { determinePeriodType } from './helpers';
+import { createExtraPeriods } from './periodFinders';
+import { VacationPeriod } from './types';
+import { isDateInPast, isDayOff } from './helpers';
 
-// Sort periods by mode and efficiency
-export function sortPeriodsByModeAndEfficiency(
-  periods: PotentialPeriod[],
-  mode: OptimizationMode
-): PotentialPeriod[] {
-  const sortedPeriods = [...periods];
+// Select the optimal periods based on the available vacation days
+export const selectOptimalPeriods = (
+  potentialPeriods: VacationPeriod[], 
+  vacationDays: number, 
+  year: number, 
+  holidays: Date[], 
+  mode: string
+): VacationPeriod[] => {
+  // Make a copy to avoid mutating the original array
+  const periods = [...potentialPeriods];
   
-  // Sort based on mode preference
-  switch (mode) {
-    case "longweekends":
-      // Prioritize short periods (1-4 days)
-      return sortedPeriods.sort((a, b) => {
-        if (a.totalDays <= 4 && b.totalDays > 4) return -1;
-        if (a.totalDays > 4 && b.totalDays <= 4) return 1;
-        // If both are the same type, sort by efficiency
-        return b.efficiency - a.efficiency;
-      });
-      
-    case "minibreaks":
-      // Prioritize medium periods (5-6 days)
-      return sortedPeriods.sort((a, b) => {
-        if ((a.totalDays === 5 || a.totalDays === 6) && (b.totalDays < 5 || b.totalDays > 6)) return -1;
-        if ((b.totalDays === 5 || b.totalDays === 6) && (a.totalDays < 5 || a.totalDays > 6)) return 1;
-        // If both are the same type, sort by efficiency
-        return b.efficiency - a.efficiency;
-      });
-      
-    case "weeks":
-      // Prioritize week-long periods (7-9 days)
-      return sortedPeriods.sort((a, b) => {
-        if (a.totalDays >= 7 && a.totalDays <= 9 && (b.totalDays < 7 || b.totalDays > 9)) return -1;
-        if (b.totalDays >= 7 && b.totalDays <= 9 && (a.totalDays < 7 || a.totalDays > 9)) return 1;
-        // If both are the same type, sort by efficiency
-        return b.efficiency - a.efficiency;
-      });
-      
-    case "extended":
-      // Prioritize extended periods (10+ days)
-      return sortedPeriods.sort((a, b) => {
-        if (a.totalDays >= 10 && b.totalDays < 10) return -1;
-        if (a.totalDays < 10 && b.totalDays >= 10) return 1;
-        // If both are the same type, sort by efficiency
-        return b.efficiency - a.efficiency;
-      });
-      
-    case "balanced":
-    default:
-      // Default to sorting by efficiency
-      return sortedPeriods.sort((a, b) => b.efficiency - a.efficiency);
+  // Filter out periods that are entirely in the past
+  const validPeriods = periods.filter(period => {
+    const endDate = new Date(period.end);
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    return endDate >= now;
+  });
+  
+  // Sort by efficiency (days off per vacation day needed)
+  validPeriods.sort((a, b) => {
+    const aEfficiency = a.days / Math.max(a.vacationDaysNeeded, 1);
+    const bEfficiency = b.days / Math.max(b.vacationDaysNeeded, 1);
+    
+    // If efficiency is the same, prioritize by mode preference
+    if (aEfficiency === bEfficiency) {
+      return (b.score || 0) - (a.score || 0);
+    }
+    
+    return bEfficiency - aEfficiency;
+  });
+  
+  // Define maximum number of periods to select based on mode
+  let maxPeriods = 10; // Default
+  
+  if (mode === "longweekends") {
+    maxPeriods = 15; // More shorter periods
+  } else if (mode === "extended") {
+    maxPeriods = 5; // Fewer longer periods
   }
-}
-
-// Select optimal periods based on available vacation days
-export function selectOptimalPeriods(
-  sortedPeriods: PotentialPeriod[],
-  totalVacationDays: number,
-  mode: OptimizationMode
-): VacationPeriod[] {
-  let remainingVacationDays = totalVacationDays;
+  
+  // First pass: try to select periods with extremely high efficiency
   const selectedPeriods: VacationPeriod[] = [];
+  let remainingVacationDays = vacationDays;
   
-  // First pass: select highest efficiency periods that match the mode
-  for (const period of sortedPeriods) {
-    // Skip if period overlaps with already selected periods
-    if (overlapsWithAny(period.start, period.end, selectedPeriods)) {
-      continue;
+  // First select periods that match the requested mode
+  for (const period of validPeriods) {
+    let isPreferredType = false;
+    
+    if (mode === "longweekends" && period.days <= 4) {
+      isPreferredType = true;
+    } else if (mode === "minibreaks" && period.days <= 6 && period.days > 4) {
+      isPreferredType = true;
+    } else if (mode === "weeks" && period.days <= 9 && period.days > 6) {
+      isPreferredType = true;
+    } else if (mode === "extended" && period.days > 9) {
+      isPreferredType = true;
+    } else if (mode === "balanced") {
+      isPreferredType = true;
     }
     
-    // Skip if not enough vacation days left
-    if (period.vacationDaysNeeded > remainingVacationDays) {
-      continue;
-    }
+    const efficiency = period.days / Math.max(period.vacationDaysNeeded, 1);
     
-    const vacationPeriod: VacationPeriod = {
-      start: period.start,
-      end: period.end,
-      days: period.totalDays,
-      vacationDaysNeeded: period.vacationDaysNeeded,
-      description: period.description,
-      type: determinePeriodType(period.totalDays),
-      startDate: period.start.toISOString(),
-      endDate: period.end.toISOString()
-    };
-    
-    selectedPeriods.push(vacationPeriod);
-    remainingVacationDays -= period.vacationDaysNeeded;
-    
-    // Break if we've used all vacation days
-    if (remainingVacationDays === 0) {
-      break;
+    // Only select high-efficiency periods that match the mode
+    if (isPreferredType && efficiency >= 1.5 && period.vacationDaysNeeded <= remainingVacationDays) {
+      selectedPeriods.push(period);
+      remainingVacationDays -= period.vacationDaysNeeded;
+      
+      // If we've hit our target or run out of vacation days, break
+      if (selectedPeriods.length >= maxPeriods || remainingVacationDays <= 0) {
+        break;
+      }
     }
   }
   
-  // Second pass: if we still have vacation days left, add shorter periods
-  if (remainingVacationDays > 0 && sortedPeriods.length > 0) {
-    const additionalPeriods = distributeRemainingDays(remainingVacationDays, selectedPeriods, sortedPeriods);
-    selectedPeriods.push(...additionalPeriods);
+  // Second pass: fill in remaining vacation days with efficient periods
+  if (remainingVacationDays > 0) {
+    for (const period of validPeriods) {
+      // Skip already selected periods
+      if (selectedPeriods.some(p => 
+        p.start.getTime() === period.start.getTime() && 
+        p.end.getTime() === period.end.getTime()
+      )) {
+        continue;
+      }
+      
+      if (period.vacationDaysNeeded <= remainingVacationDays) {
+        selectedPeriods.push(period);
+        remainingVacationDays -= period.vacationDaysNeeded;
+      }
+      
+      // If we've hit our target or run out of vacation days, break
+      if (selectedPeriods.length >= maxPeriods || remainingVacationDays <= 0) {
+        break;
+      }
+    }
   }
   
-  // Sort periods chronologically
-  return selectedPeriods.sort((a, b) => a.start.getTime() - b.start.getTime());
-}
-
-// Distribute remaining vacation days
-function distributeRemainingDays(
-  remainingDays: number,
-  selectedPeriods: VacationPeriod[],
-  allPeriods: PotentialPeriod[]
-): VacationPeriod[] {
-  const additionalPeriods: VacationPeriod[] = [];
-  
-  // Create a copy of all periods sorted by efficiency
-  const candidatePeriods = [...allPeriods]
-    .filter(p => p.vacationDaysNeeded <= remainingDays)
-    .sort((a, b) => b.efficiency - a.efficiency);
-  
-  for (const period of candidatePeriods) {
-    if (remainingDays <= 0) break;
+  // Final attempt: if we still have vacation days, add extra small periods
+  if (remainingVacationDays > 0) {
+    const extraPeriods = createExtraPeriods(year, holidays);
     
-    // Skip if period overlaps with already selected periods
-    if (overlapsWithAny(period.start, period.end, [...selectedPeriods, ...additionalPeriods])) {
-      continue;
+    for (const period of extraPeriods) {
+      if (period.vacationDaysNeeded <= remainingVacationDays) {
+        // Check that there's no overlap with existing periods
+        const hasOverlap = selectedPeriods.some(selected => {
+          return (
+            (period.start >= selected.start && period.start <= selected.end) ||
+            (period.end >= selected.start && period.end <= selected.end) ||
+            (period.start <= selected.start && period.end >= selected.end)
+          );
+        });
+        
+        if (!hasOverlap) {
+          selectedPeriods.push(period);
+          remainingVacationDays -= period.vacationDaysNeeded;
+        }
+      }
+      
+      if (remainingVacationDays <= 0) break;
     }
-    
-    // Skip if not enough vacation days left
-    if (period.vacationDaysNeeded > remainingDays) {
-      continue;
-    }
-    
-    const vacationPeriod: VacationPeriod = {
-      start: period.start,
-      end: period.end,
-      days: period.totalDays,
-      vacationDaysNeeded: period.vacationDaysNeeded,
-      description: period.description,
-      type: determinePeriodType(period.totalDays),
-      startDate: period.start.toISOString(),
-      endDate: period.end.toISOString()
-    };
-    
-    additionalPeriods.push(vacationPeriod);
-    remainingDays -= period.vacationDaysNeeded;
   }
   
-  return additionalPeriods;
-}
+  // Sort the final selected periods by date (chronologically)
+  selectedPeriods.sort((a, b) => {
+    return a.start.getTime() - b.start.getTime();
+  });
+  
+  return selectedPeriods;
+};

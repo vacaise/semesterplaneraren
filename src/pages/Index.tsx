@@ -14,14 +14,13 @@ import { getHolidays } from "@/utils/holidays";
 import { optimizeVacation } from "@/utils/vacationOptimizer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Helmet } from "react-helmet";
-import { SwedishHoliday } from "@/utils/swedishHolidays";
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [year, setYear] = useState(new Date().getFullYear());
   const [vacationDays, setVacationDays] = useState(25);
   const [selectedMode, setSelectedMode] = useState("balanced");
-  const [holidays, setHolidays] = useState<SwedishHoliday[]>([]);
+  const [holidays, setHolidays] = useState<Date[]>([]);
   const [optimizedSchedule, setOptimizedSchedule] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -38,6 +37,10 @@ const Index = () => {
   const resetToStart = () => {
     setCurrentStep(1);
     setOptimizedSchedule(null);
+    // Optionally reset other values to defaults
+    // setVacationDays(25);
+    // setSelectedMode("balanced");
+    // setHolidays([]);
     window.scrollTo(0, 0);
   };
 
@@ -156,9 +159,9 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Helmet>
-        <title>Semesteroptimering | Maxa din ledighet</title>
+        <title>vacai | Maxa din ledighet</title>
         <meta name="description" content="Maximera din ledighet med smart semesterplanering. Planera dina semesterdagar optimalt för att få ut mest möjliga ledighet." />
-        <link rel="canonical" href="https://semesteroptimering.se" />
+        <link rel="canonical" href="https://vacai.se" />
       </Helmet>
       
       <div className={`py-6 md:py-12 px-4 sm:px-6 lg:px-8`}>

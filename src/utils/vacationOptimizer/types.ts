@@ -6,8 +6,9 @@ export interface VacationPeriod {
   vacationDaysNeeded: number;
   description: string;
   type: string;
-  startDate?: string; // For display purposes
-  endDate?: string;   // For display purposes
+  score?: number;
+  startDate?: string; // Optional for display purposes
+  endDate?: string;   // Optional for display purposes
 }
 
 export type OptimizationMode = 
@@ -16,19 +17,3 @@ export type OptimizationMode =
   | "minibreaks"   // Short breaks (4-6 days)
   | "weeks"        // Full week breaks
   | "extended";    // Long vacation periods
-
-export interface OptimizedSchedule {
-  totalDaysOff: number;
-  vacationDaysUsed: number;
-  mode: string;
-  periods: VacationPeriod[];
-}
-
-export interface PotentialPeriod {
-  start: Date;
-  end: Date;
-  vacationDaysNeeded: number;
-  totalDays: number;
-  efficiency: number;
-  description: string;
-}
