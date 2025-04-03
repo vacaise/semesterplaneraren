@@ -1,6 +1,6 @@
 
 import { findOptimalSchedule } from './optimizer';
-import { calculateTotalDaysOff } from './calculators';
+import { calculateTotalDaysOff, calculateEfficiency } from './calculators';
 import { isDayOff, isDateInPast } from './helpers';
 import { VacationPeriod } from './types';
 
@@ -45,5 +45,5 @@ export const optimizeVacation = (
   };
 };
 
-export { isDayOff, isDateInPast };
+export { isDayOff, isDateInPast, calculateEfficiency };
 export type { VacationPeriod };
