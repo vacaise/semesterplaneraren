@@ -14,15 +14,15 @@ interface OptimizedSchedule {
 // Main export function for optimizing vacation
 export const optimizeVacation = (
   year: number,
-  vacationDays: number,
+  vacationDaysTarget: number,
   holidays: Date[],
   mode: string
 ): OptimizedSchedule => {
   // Filter out holidays that have already passed
   const filteredHolidays = holidays.filter(holiday => !isDateInPast(holiday));
   
-  // Find potential periods based on the parameters
-  const selectedPeriods = findOptimalSchedule(year, vacationDays, filteredHolidays, mode);
+  // Find potential periods based on the parameters with strict requirement to use exact number of days
+  const selectedPeriods = findOptimalSchedule(year, vacationDaysTarget, filteredHolidays, mode);
   
   // Verify periods don't contain any past dates
   const today = new Date();
@@ -37,9 +37,17 @@ export const optimizeVacation = (
   // Calculate the total days off
   const totalDaysOff = calculateTotalDaysOff(validatedPeriods, filteredHolidays);
   
+  // Count the actual vacation days used
+  const actualVacationDaysUsed = validatedPeriods.reduce((sum, period) => sum + period.vacationDaysNeeded, 0);
+  
+  // Validate that we're using exactly the number of days specified by the user
+  if (actualVacationDaysUsed !== vacationDaysTarget) {
+    console.warn(`Warning: The algorithm couldn't use exactly ${vacationDaysTarget} vacation days. Using ${actualVacationDaysUsed} days instead.`);
+  }
+  
   return {
     totalDaysOff: totalDaysOff,
-    vacationDaysUsed: vacationDays,
+    vacationDaysUsed: actualVacationDaysUsed,
     mode,
     periods: validatedPeriods
   };

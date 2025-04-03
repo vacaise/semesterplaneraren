@@ -100,6 +100,19 @@ const Index = () => {
       console.log("Generating schedule with holidays:", holidays);
       const optimizedScheduleData = optimizeVacation(year, vacationDays, holidays, selectedMode);
       console.log("Generated schedule:", optimizedScheduleData);
+      
+      // Validate that the exact number of vacation days were used
+      if (optimizedScheduleData.vacationDaysUsed !== vacationDays) {
+        console.warn(`Warning: The algorithm didn't use exactly ${vacationDays} vacation days. It used ${optimizedScheduleData.vacationDaysUsed} days instead.`);
+        toast({
+          title: "Optimering inte optimal",
+          description: `Algoritmen kunde inte använda exakt ${vacationDays} semesterdagar. Försök med ett annat antal dagar.`,
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      
       setOptimizedSchedule(optimizedScheduleData);
       setCurrentStep(4);
     } catch (error) {

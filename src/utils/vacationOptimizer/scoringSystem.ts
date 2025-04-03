@@ -2,7 +2,11 @@
 import { VacationPeriod } from './types';
 
 // Score periods based on optimization mode
-export const scorePeriods = (periods: VacationPeriod[], mode: string): VacationPeriod[] => {
+export const scorePeriods = (
+  periods: VacationPeriod[], 
+  mode: string, 
+  targetVacationDays: number = 0
+): VacationPeriod[] => {
   const scoredPeriods = [...periods];
   
   // Apply base scores based on period characteristics

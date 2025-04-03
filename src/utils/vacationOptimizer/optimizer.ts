@@ -9,7 +9,7 @@ import { scorePeriods } from './scoringSystem';
 // Main function to find and optimize vacation periods
 export const findOptimalSchedule = (
   year: number,
-  vacationDays: number,
+  vacationDaysTarget: number,
   holidays: Date[],
   mode: string
 ): VacationPeriod[] => {
@@ -17,14 +17,15 @@ export const findOptimalSchedule = (
   const allPossiblePeriods = generatePossiblePeriods(year, holidays);
   
   // Score and prioritize periods based on the selected mode
-  const scoredPeriods = scorePeriods(allPossiblePeriods, mode);
+  const scoredPeriods = scorePeriods(allPossiblePeriods, mode, vacationDaysTarget);
   
   // Generate additional periods to fill in gaps and maximize total time off
   const extraPeriods = createExtraPeriods(year, holidays);
-  const allPeriods = [...scoredPeriods, ...extraPeriods];
+  const scoredExtraPeriods = scorePeriods(extraPeriods, mode, vacationDaysTarget);
+  const allPeriods = [...scoredPeriods, ...scoredExtraPeriods];
   
-  // Select the optimal combination of periods
-  return selectOptimalPeriods(allPeriods, vacationDays, year, holidays, mode);
+  // Select the optimal combination of periods with strict vacation day requirements
+  return selectOptimalPeriods(allPeriods, vacationDaysTarget, year, holidays, mode);
 };
 
 // Generate all possible vacation periods around holidays and weekends
