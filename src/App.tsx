@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ResultsDisplay } from '@/components/features/ResultsDisplay';
 import { OptimizerForm } from '@/components/OptimizerForm';
 import { OptimizerProvider } from '@/contexts/OptimizerContext';
@@ -10,7 +10,6 @@ import { PageContent, PageDescription, PageHeader, PageLayout, PageTitle } from 
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { useEffect, useRef } from 'react';
 import SocialShareButtons from '@/components/SocialShareButtons';
 
 interface FormState {
