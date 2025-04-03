@@ -68,19 +68,19 @@ export const scorePeriods = (
     
     // Heavy boost for periods that include holidays (significantly increased)
     if (period.type === "holiday" || period.type === "bridge") {
-      period.score += 90; // Increased from 70
+      period.score += 120; // Increased from 90 to prioritize holidays even more
     }
     
     // Apply mode-specific optimizations for holidays
     if ((period.type === "holiday" || period.type === "bridge")) {
       if (mode === "longweekends" && period.days <= 4) {
-        period.score += 30; // Extra boost for holiday long weekends
+        period.score += 40; // Extra boost for holiday long weekends
       } else if (mode === "minibreaks" && period.days <= 6 && period.days > 4) {
-        period.score += 30; // Extra boost for holiday mini-breaks
+        period.score += 40; // Extra boost for holiday mini-breaks
       } else if (mode === "weeks" && period.days <= 9 && period.days > 6) {
-        period.score += 30; // Extra boost for holiday weeks
+        period.score += 40; // Extra boost for holiday weeks
       } else if (mode === "extended" && period.days > 9) {
-        period.score += 40; // Extra boost for extended holiday periods
+        period.score += 50; // Extra boost for extended holiday periods
       }
     }
     
@@ -138,8 +138,17 @@ export const scorePeriods = (
         period.score += 15; // And for mini-breaks
       }
     }
+    
+    // Super-boost for periods that have high efficiency AND include holidays
+    if (efficiency > 2.0 && (period.type === "holiday" || period.type === "bridge")) {
+      period.score += 70; // Big boost for the most efficient holiday periods
+    }
+    
+    // Extra boost for December periods that are highly efficient (Christmas optimization)
+    if (periodMonth === 11 && efficiency > 2.0) {
+      period.score += 60;
+    }
   });
   
   return scoredPeriods;
 };
-
