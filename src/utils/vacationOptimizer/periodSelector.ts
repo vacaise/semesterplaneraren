@@ -2,6 +2,7 @@
 import { VacationPeriod } from './types';
 import { isDateInPast, formatDateToString } from './helpers';
 import { verifyExactVacationDays } from './calculators';
+import { scoreCombination } from './scoringSystem';
 
 // Select the optimal periods based on the available vacation days
 export const selectOptimalPeriods = (
@@ -146,77 +147,18 @@ function addPeriodDaysToSet(period: VacationPeriod, daysSet: Set<string>): void 
   }
 }
 
-// Score combinations based on optimization criteria
+// Score combinations based on optimization criteria using our enhanced scoring function
 function scoreCombinations(
   combinations: VacationPeriod[][], 
   mode: string,
   holidays: Date[]
 ): VacationPeriod[][] {
   const scoredCombinations = combinations.map(combination => {
-    let totalScore = 0;
-    
-    // Base score from individual periods
-    const baseScore = combination.reduce((sum, period) => sum + (period.score || 0), 0);
-    
-    // Length alignment score based on selected mode
-    let lengthScore = 0;
-    combination.forEach(period => {
-      const periodLength = period.days;
-      
-      switch(mode) {
-        case "longweekends":
-          // Favor 3-4 day periods
-          lengthScore += periodLength <= 4 ? 50 : 10;
-          break;
-        case "minibreaks":
-          // Favor 4-6 day periods
-          lengthScore += (periodLength >= 4 && periodLength <= 6) ? 50 : 10;
-          break;
-        case "weeks":
-          // Favor 7-9 day periods
-          lengthScore += (periodLength >= 7 && periodLength <= 9) ? 50 : 10;
-          break;
-        case "extended":
-          // Favor 10+ day periods
-          lengthScore += periodLength >= 10 ? 50 : 10;
-          break;
-        case "balanced":
-        default:
-          // More evenly distributed scoring for balanced mode
-          if (periodLength <= 4) lengthScore += 25;
-          else if (periodLength <= 7) lengthScore += 35;
-          else if (periodLength <= 10) lengthScore += 40;
-          else lengthScore += 30;
-      }
-    });
-    
-    // Distribution score - favor spreading periods throughout the year
-    const monthCoverage = new Set(combination.map(p => new Date(p.start).getMonth())).size;
-    const distributionScore = monthCoverage * 10;
-    
-    // Efficiency score - maximize total days off
-    const totalDays = combination.reduce((sum, period) => sum + period.days, 0);
-    const efficiencyScore = totalDays * 2;
-    
-    // Holiday utilization score - favor periods that include holidays
-    let holidayScore = 0;
-    combination.forEach(period => {
-      const start = new Date(period.start);
-      const end = new Date(period.end);
-      
-      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-        if (holidays.some(h => h.getDate() === d.getDate() && h.getMonth() === d.getMonth())) {
-          holidayScore += 15; // Significant bonus for including holidays
-        }
-      }
-    });
-    
-    // Calculate total score
-    totalScore = baseScore + lengthScore + distributionScore + efficiencyScore + holidayScore;
+    const score = scoreCombination(combination, mode, holidays);
     
     return {
       combination,
-      score: totalScore
+      score
     };
   });
   
