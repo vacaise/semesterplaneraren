@@ -1,9 +1,9 @@
 
 import { addDays, differenceInDays } from 'date-fns';
 import { PotentialPeriod, OptimizationMode } from './types';
-import { isDateInPast, overlapsWithAny } from './helpers';
-import { SwedishHoliday, isDayOff, getSwedishMonthName } from '../swedishHolidays';
-import { calculateVacationDaysNeeded } from './calculators';
+import { isDateInPast, isDayOff, calculateVacationDaysNeeded } from './calculators';
+import { overlapsWithAny } from './helpers';
+import { SwedishHoliday, getSwedishMonthName } from '../swedishHolidays';
 
 // Find all potential vacation periods with high efficiency
 export function findAllPotentialPeriods(

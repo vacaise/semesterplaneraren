@@ -1,7 +1,7 @@
+
 import { addDays } from 'date-fns';
 import { VacationPeriod } from '../types';
-import { isDateInPast, getMonthName } from '../dateUtils';
-import { calculateVacationDaysNeeded } from '../calculators';
+import { isDateInPast, getMonthName, calculateVacationDaysNeeded } from '../calculators';
 import { determinePeriodType } from '../helpers';
 
 // Find traditional vacation periods (summer, winter, etc.)

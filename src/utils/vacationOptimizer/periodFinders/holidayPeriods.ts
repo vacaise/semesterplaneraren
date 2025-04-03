@@ -1,8 +1,6 @@
-
 import { addDays, differenceInDays } from 'date-fns';
 import { VacationPeriod } from '../types';
-import { isDateInPast } from '../dateUtils';
-import { calculateVacationDaysNeeded } from '../calculators';
+import { isDateInPast, calculateVacationDaysNeeded } from '../calculators';
 import { generatePeriodDescription, determinePeriodType } from '../helpers';
 
 // Find periods around holidays

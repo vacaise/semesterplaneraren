@@ -1,7 +1,6 @@
-
 import { addDays } from 'date-fns';
 import { VacationPeriod } from '../types';
-import { isDayOff, isDateInPast, getMonthName } from '../dateUtils';
+import { isDayOff, isDateInPast, getMonthName } from '../calculators';
 import { calculateVacationDaysNeeded } from '../calculators';
 
 // Find weekend extension periods
