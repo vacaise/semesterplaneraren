@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import StepOne from "@/components/StepOne";
 import StepTwo from "@/components/StepTwo";
@@ -105,39 +104,35 @@ const Index = () => {
         return;
       }
       
-      const optimizedScheduleData = optimizeVacation(year, vacationDays, holidays, selectedMode);
-      console.log("Generated schedule:", optimizedScheduleData);
-      
-      // Double-check that the exact number of vacation days were used
-      if (optimizedScheduleData.vacationDaysUsed !== vacationDays) {
-        console.error(`Error: The algorithm didn't use exactly ${vacationDays} vacation days. It used ${optimizedScheduleData.vacationDaysUsed} days instead.`);
+      try {
+        const optimizedScheduleData = optimizeVacation(year, vacationDays, holidays, selectedMode);
+        console.log("Generated schedule:", optimizedScheduleData);
+        
+        // Double-check that the exact number of vacation days were used
+        if (optimizedScheduleData.vacationDaysUsed !== vacationDays) {
+          throw new Error(`Kunde inte använda exakt ${vacationDays} semesterdagar.`);
+        }
+        
+        setOptimizedSchedule({...optimizedScheduleData, defaultView: 'calendar'});
+        setCurrentStep(4);
+        
+        toast({
+          title: "Optimering klar!",
+          description: `${optimizedScheduleData.totalDaysOff} lediga dagar med ${vacationDays} semesterdagar`,
+        });
+      } catch (error: any) {
+        console.error("Optimization error:", error);
         toast({
           title: "Optimering misslyckades",
-          description: `Algoritmen kunde inte använda exakt ${vacationDays} semesterdagar. Försök med ett annat antal dagar.`,
+          description: error.message || `Kunde inte använda exakt ${vacationDays} semesterdagar. Försök med ett annat antal.`,
           variant: "destructive",
         });
-        setIsLoading(false);
-        return;
       }
-      
-      setOptimizedSchedule({...optimizedScheduleData, defaultView: 'calendar'});
-      setCurrentStep(4);
-      
-      toast({
-        title: "Optimering klar!",
-        description: `${optimizedScheduleData.totalDaysOff} lediga dagar med ${vacationDays} semesterdagar`,
-      });
     } catch (error) {
       console.error("Optimization error:", error);
-      
-      let errorMessage = "Kunde inte optimera ditt schema, försök igen senare";
-      if (error instanceof Error && error.message.includes("couldn't use exactly")) {
-        errorMessage = `Kunde inte använda exakt ${vacationDays} semesterdagar. Försök med ett annat antal.`;
-      }
-      
       toast({
-        title: "Fel vid generering av schema",
-        description: errorMessage,
+        title: "Fel vid optimering",
+        description: "Ett oväntat fel inträffade. Försök igen senare.",
         variant: "destructive",
       });
     } finally {

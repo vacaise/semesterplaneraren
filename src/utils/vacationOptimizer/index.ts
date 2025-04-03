@@ -21,56 +21,41 @@ export const optimizeVacation = (
   // Filter out holidays that have already passed
   const filteredHolidays = holidays.filter(holiday => !isDateInPast(holiday));
   
-  // Try up to 3 times with different strategies to use exact number of days
-  let selectedPeriods;
-  let attempts = 0;
-  const maxAttempts = 3;
-
-  while (attempts < maxAttempts) {
-    try {
-      // Find potential periods based on the parameters with strict requirement to use exact number of days
-      selectedPeriods = findOptimalSchedule(year, vacationDaysTarget, filteredHolidays, mode);
-      
-      // Validate periods don't contain any past dates
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      const validatedPeriods = selectedPeriods.filter(period => {
-        const endDate = new Date(period.end);
-        endDate.setHours(0, 0, 0, 0);
-        return endDate >= today;
-      });
-      
-      // Calculate the total days off
-      const totalDaysOff = calculateTotalDaysOff(validatedPeriods, filteredHolidays);
-      
-      // Count the actual vacation days used
-      const actualVacationDaysUsed = validatedPeriods.reduce((sum, period) => sum + period.vacationDaysNeeded, 0);
-      
-      // Enforce the strict requirement to use exactly the number of days specified by the user
-      if (actualVacationDaysUsed !== vacationDaysTarget) {
-        console.warn(`Attempt ${attempts + 1}: The algorithm used ${actualVacationDaysUsed} days instead of ${vacationDaysTarget}. Trying again...`);
-        throw new Error("Did not use exact vacation days");
-      }
-      
-      // If we reach here, we found a valid schedule with the exact number of days
-      return {
-        totalDaysOff: totalDaysOff,
-        vacationDaysUsed: actualVacationDaysUsed,
-        mode,
-        periods: validatedPeriods
-      };
-    } catch (error) {
-      attempts++;
-      if (attempts >= maxAttempts) {
-        throw new Error(`Critical error: The algorithm couldn't use exactly ${vacationDaysTarget} vacation days after ${maxAttempts} attempts. Please try a different number of vacation days.`);
-      }
-      console.log(`Attempt ${attempts} failed, trying again with different strategy...`);
+  try {
+    // Find potential periods based on the parameters with strict requirement to use exact number of days
+    const selectedPeriods = findOptimalSchedule(year, vacationDaysTarget, filteredHolidays, mode);
+    
+    // Validate periods don't contain any past dates
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const validatedPeriods = selectedPeriods.filter(period => {
+      const endDate = new Date(period.end);
+      endDate.setHours(0, 0, 0, 0);
+      return endDate >= today;
+    });
+    
+    // Calculate the total days off
+    const totalDaysOff = calculateTotalDaysOff(validatedPeriods, filteredHolidays);
+    
+    // Count the actual vacation days used
+    const actualVacationDaysUsed = validatedPeriods.reduce((sum, period) => sum + period.vacationDaysNeeded, 0);
+    
+    // CRITICAL CHECK: Throw an error if we're not using exactly the required number of vacation days
+    if (actualVacationDaysUsed !== vacationDaysTarget) {
+      throw new Error(`Critical error: The algorithm used ${actualVacationDaysUsed} days instead of ${vacationDaysTarget}. This is a bug in the optimization algorithm.`);
     }
+    
+    return {
+      totalDaysOff: totalDaysOff,
+      vacationDaysUsed: actualVacationDaysUsed,
+      mode,
+      periods: validatedPeriods
+    };
+  } catch (error) {
+    // Rethrow the error with a clear message for the UI
+    throw new Error(`Could not create a schedule using exactly ${vacationDaysTarget} vacation days. Please try a different number of days.`);
   }
-  
-  // This should never be reached if the error is thrown correctly above
-  throw new Error(`Failed to generate schedule using exactly ${vacationDaysTarget} vacation days.`);
 };
 
 export { isDayOff, isDateInPast };

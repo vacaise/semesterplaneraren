@@ -1,4 +1,3 @@
-
 import { addDays, differenceInDays, format, isSameDay } from 'date-fns';
 import { VacationPeriod, OptimizationMode } from './types';
 import { isDayOff } from './helpers';
@@ -37,10 +36,9 @@ export const findOptimalSchedule = (
   const selectedPeriods = selectOptimalPeriods(allPeriods, vacationDaysTarget, year, holidays, mode);
   console.log(`Selected ${selectedPeriods.length} periods totaling ${selectedPeriods.reduce((sum, p) => sum + p.vacationDaysNeeded, 0)} vacation days`);
   
-  // Validate that the exact number of days is used
+  // CRITICAL VALIDATION: The exact number of days must be used
   const daysUsed = selectedPeriods.reduce((sum, period) => sum + period.vacationDaysNeeded, 0);
   if (daysUsed !== vacationDaysTarget) {
-    console.error(`Error: Expected to use exactly ${vacationDaysTarget} days, but used ${daysUsed}`);
     throw new Error(`Failed to use exactly ${vacationDaysTarget} vacation days. This is a critical error in the optimization algorithm.`);
   }
   
@@ -245,7 +243,7 @@ const generateStrategicPeriods = (year: number, holidays: Date[]): VacationPerio
   });
   
   return strategicPeriods;
-}
+};
 
 // Generate additional vacation period options to maximize efficiency
 const generateAdditionalPeriods = (year: number, holidays: Date[]): VacationPeriod[] => {
