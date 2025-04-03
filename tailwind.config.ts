@@ -1,96 +1,55 @@
-import type { Config } from "tailwindcss";
+import type { Config } from 'tailwindcss';
 
-export default {
-	darkMode: ["class"],
-	content: [
-		"./pages/**/*.{ts,tsx}",
-		"./components/**/*.{ts,tsx}",
-		"./app/**/*.{ts,tsx}",
-		"./src/**/*.{ts,tsx}",
-	],
-	prefix: "",
-	theme: {
-		container: {
-			center: true,
-			padding: '2rem',
-			screens: {
-				'2xl': '1400px'
-			}
-		},
-		extend: {
-			colors: {
-				border: 'hsl(var(--border))',
-				input: 'hsl(var(--input))',
-				ring: 'hsl(var(--ring))',
-				background: 'hsl(var(--background))',
-				foreground: 'hsl(var(--foreground))',
-				primary: {
-					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
-				},
-				secondary: {
-					DEFAULT: 'hsl(var(--secondary))',
-					foreground: 'hsl(var(--secondary-foreground))'
-				},
-				destructive: {
-					DEFAULT: 'hsl(var(--destructive))',
-					foreground: 'hsl(var(--destructive-foreground))'
-				},
-				muted: {
-					DEFAULT: 'hsl(var(--muted))',
-					foreground: 'hsl(var(--muted-foreground))'
-				},
-				accent: {
-					DEFAULT: 'hsl(var(--accent))',
-					foreground: 'hsl(var(--accent-foreground))'
-				},
-				popover: {
-					DEFAULT: 'hsl(var(--popover))',
-					foreground: 'hsl(var(--popover-foreground))'
-				},
-				card: {
-					DEFAULT: 'hsl(var(--card))',
-					foreground: 'hsl(var(--card-foreground))'
-				},
-				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
-				}
-			},
-			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
-			},
-			keyframes: {
-				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
-				},
-				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
-				}
-			},
-			animation: {
-				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
-		}
-	},
-	plugins: [require("tailwindcss-animate")],
+import colors from 'tailwindcss/colors';
+
+import tailwindcss_animate from 'tailwindcss-animate';
+
+const config = {
+  darkMode: 'class',
+  content: [
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    // Add a custom content pattern to ensure color classes are preserved
+    {
+      raw: [
+        // Ensure all color classes used in dynamic color schemes are preserved
+        'bg-(blue|green|amber|emerald|purple|pink|violet|teal|gray|neutral|transparent|slate|zinc|stone|red|orange|yellow|lime|indigo|sky|cyan|fuchsia|rose|black|white|current|today|past)-(50|100|200|300|400|500|600|700|800|900)',
+        'text-(blue|green|amber|emerald|purple|pink|violet|teal|gray|neutral|transparent|slate|zinc|stone|red|orange|yellow|lime|indigo|sky|cyan|fuchsia|rose|black|white|current|today|past)-(50|100|200|300|400|500|600|700|800|900)',
+        'ring-(blue|green|amber|emerald|purple|pink|violet|teal|gray|neutral|transparent|slate|zinc|stone|red|orange|yellow|lime|indigo|sky|cyan|fuchsia|rose|black|white|current|today|past)-(50|100|200|300|400|500|600|700|800|900)',
+        'hover:bg-(blue|green|amber|emerald|purple|pink|violet|teal|gray|neutral|transparent|slate|zinc|stone|red|orange|yellow|lime|indigo|sky|cyan|fuchsia|rose|black|white|current|today|past)-(50|100|200|300|400|500|600|700|800|900)',
+        'dark:bg-(blue|green|amber|emerald|purple|pink|violet|teal|gray|neutral|transparent|slate|zinc|stone|red|orange|yellow|lime|indigo|sky|cyan|fuchsia|rose|black|white|current|today|past)-(50|100|200|300|400|500|600|700|800|900)/50',
+        'dark:text-(blue|green|amber|emerald|purple|pink|violet|teal|gray|neutral|transparent|slate|zinc|stone|red|orange|yellow|lime|indigo|sky|cyan|fuchsia|rose|black|white|current|today|past)-(50|100|200|300|400|500|600|700|800|900)',
+        'dark:ring-(blue|green|amber|emerald|purple|pink|violet|teal|gray|neutral|transparent|slate|zinc|stone|red|orange|yellow|lime|indigo|sky|cyan|fuchsia|rose|black|white|current|today|past)-(50|100|200|300|400|500|600|700|800|900)',
+
+        // Add patterns for opacity modifiers
+        'ring-(blue|green|amber|emerald|purple|pink|violet|teal|gray|neutral|transparent|slate|zinc|stone|red|orange|yellow|lime|indigo|sky|cyan|fuchsia|rose|black|white|current|today|past)-(50|100|200|300|400|500|600|700|800|900)/(5|10|20|25|30|40|50|60|70|75|80|90|95)',
+        'dark:ring-(blue|green|amber|emerald|purple|pink|violet|teal|gray|neutral|transparent|slate|zinc|stone|red|orange|yellow|lime|indigo|sky|cyan|fuchsia|rose|black|white|current|today|past)-(50|100|200|300|400|500|600|700|800|900)/(5|10|20|25|30|40|50|60|70|75|80|90|95)',
+        'bg-(blue|green|amber|emerald|purple|pink|violet|teal|gray|neutral|transparent|slate|zinc|stone|red|orange|yellow|lime|indigo|sky|cyan|fuchsia|rose|black|white|current|today|past)-(50|100|200|300|400|500|600|700|800|900)/(5|10|20|25|30|40|50|60|70|75|80|90|95)',
+        'dark:bg-(blue|green|amber|emerald|purple|pink|violet|teal|gray|neutral|transparent|slate|zinc|stone|red|orange|yellow|lime|indigo|sky|cyan|fuchsia|rose|black|white|current|today|past)-(50|100|200|300|400|500|600|700|800|900)/(5|10|20|25|30|40|50|60|70|75|80|90|95)',
+
+        // Ensure tooltip-specific styles are preserved
+        'bg-(blue|green|amber|emerald|purple|pink|violet|teal|gray|neutral|transparent|slate|zinc|stone|red|orange|yellow|lime|indigo|sky|cyan|fuchsia|rose|black|white|current|today|past)-50 dark:bg-(blue|green|amber|emerald|purple|pink|violet|teal|gray|neutral|transparent|slate|zinc|stone|red|orange|yellow|lime|indigo|sky|cyan|fuchsia|rose|black|white|current|today|past)-900/90',
+
+        // Specific patterns for dynamically generated styles in StatCard component
+        'ring-(blue|green|amber|violet|teal|gray|red|orange|yellow|lime|indigo|sky|cyan|fuchsia|rose|purple|pink)-(300|400|500|600|900)/(5|10|20)',
+        'dark:ring-(blue|green|amber|violet|teal|gray|red|orange|yellow|lime|indigo|sky|cyan|fuchsia|rose|purple|pink)-(300|400|500|600|900)/(5|10|20)',
+      ].join('\n'),
+    },
+  ],
+  safelist: [
+    {
+      pattern: /(bg|text|ring)-(blue|green|amber|emerald|purple|pink|violet|teal|gray|neutral|transparent|slate|zinc|stone|red|orange|yellow|lime|indigo|sky|cyan|fuchsia|rose|black|white|current|today|past)-(50|100|200|300|400|500|600|700|800|900)/,
+    }
+  ],
+  theme: {
+    extend: {
+      colors: {
+        ...colors,
+      },
+    },
+  },
+  plugins: [tailwindcss_animate],
 } satisfies Config;
+
+export default config;
