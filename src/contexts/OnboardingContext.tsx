@@ -1,3 +1,4 @@
+
 'use client';
 
 import { createContext, ReactNode, useContext, useEffect, useReducer } from 'react';
@@ -62,122 +63,94 @@ function onboardingReducer(state: OnboardingState, action: OnboardingAction): On
         currentStep: 'intro',
       };
     case 'DISMISS_ONBOARDING':
-      // Track onboarding dismissal
-      if (typeof window !== 'undefined' && window.umami) {
-        window.umami.track('Onboarding dismissed');
-      }
-
       return {
         ...state,
         isOnboardingVisible: false,
-        hasCompletedOnboarding: true, // Always mark as completed when dismissed
+        hasCompletedOnboarding: true,
       };
     case 'GO_TO_NEXT_STEP': {
-      const currentStep = STEPS_ORDER.indexOf(state.currentStep);
-      if (currentStep < STEPS_ORDER.length - 1) {
-        const nextStep = STEPS_ORDER[currentStep + 1];
-
-        // Track user going to the next step in the onboarding flow
-        if (typeof window !== 'undefined' && window.umami) {
-          window.umami.track('GO_TO_NEXT_STEP', { currentStep, nextStep });
-        }
-
-        return { ...state, currentStep: nextStep };
+      const currentIndex = STEPS_ORDER.indexOf(state.currentStep);
+      if (currentIndex < STEPS_ORDER.length - 1) {
+        return {
+          ...state,
+          currentStep: STEPS_ORDER[currentIndex + 1],
+        };
       }
       return state;
     }
     case 'GO_TO_PREV_STEP': {
-      const currentStep = STEPS_ORDER.indexOf(state.currentStep);
-      if (currentStep > 0) {
-        const prevStep = STEPS_ORDER[currentStep - 1];
-
-        // Track user going to the next step in the onboarding flow
-        if (typeof window !== 'undefined' && window.umami) {
-          window.umami.track('GO_TO_NEXT_STEP', { currentStep, prevStep });
-        }
-
-        return { ...state, currentStep: prevStep };
+      const currentIndex = STEPS_ORDER.indexOf(state.currentStep);
+      if (currentIndex > 0) {
+        return {
+          ...state,
+          currentStep: STEPS_ORDER[currentIndex - 1],
+        };
       }
       return state;
     }
     case 'SET_COMPLETED_STATUS':
-      return { ...state, hasCompletedOnboarding: action.isCompleted };
+      return {
+        ...state,
+        hasCompletedOnboarding: action.isCompleted,
+      };
     default:
       return state;
   }
 }
 
-// Default context value
-const defaultContext: OnboardingContextType = {
-  ...initialState,
-  startOnboarding: () => undefined,
-  dismissOnboarding: () => undefined,
-  goToNextStep: () => undefined,
-  goToPrevStep: () => undefined,
-  isCurrentStep: () => false,
-};
+const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
 
-// Create the context
-const OnboardingContext = createContext<OnboardingContextType>(defaultContext);
-
-// Hook for using the onboarding context
-export function useOnboarding() {
-  const context = useContext(OnboardingContext);
-  if (!context) {
-    throw new Error('useOnboarding must be used within an OnboardingProvider');
-  }
-  return context;
+interface OnboardingProviderProps {
+  children: ReactNode;
 }
 
-// Provider component
-export function OnboardingProvider({ children }: { children: ReactNode }) {
+export function OnboardingProvider({ children }: OnboardingProviderProps) {
   const [state, dispatch] = useReducer(onboardingReducer, initialState);
 
-  // Check local storage on mount
+  // Check for completed status on mount
   useEffect(() => {
     const hasCompleted = localStorage.getItem(ONBOARDING_COMPLETED_KEY) === 'true';
-
     dispatch({ type: 'SET_COMPLETED_STATUS', isCompleted: hasCompleted });
-
-    // Auto-start onboarding for first-time visitors
+    
+    // Auto-start onboarding if not completed
     if (!hasCompleted) {
       dispatch({ type: 'START_ONBOARDING' });
     }
   }, []);
 
-  // Start onboarding
+  // Save completion status to localStorage when changed
+  useEffect(() => {
+    if (state.hasCompletedOnboarding) {
+      localStorage.setItem(ONBOARDING_COMPLETED_KEY, 'true');
+    }
+  }, [state.hasCompletedOnboarding]);
+
   const startOnboarding = () => dispatch({ type: 'START_ONBOARDING' });
-
-  // Dismiss onboarding
-  const dismissOnboarding = () => {
-    dispatch({ type: 'DISMISS_ONBOARDING' });
-
-    // Always save to localStorage as completed (don't show again is always true)
-    localStorage.setItem(ONBOARDING_COMPLETED_KEY, 'true');
-  };
-
-  // Navigate to next step
+  const dismissOnboarding = () => dispatch({ type: 'DISMISS_ONBOARDING' });
   const goToNextStep = () => dispatch({ type: 'GO_TO_NEXT_STEP' });
-
-  // Navigate to previous step
   const goToPrevStep = () => dispatch({ type: 'GO_TO_PREV_STEP' });
-
-  // Check if a step is the current one
   const isCurrentStep = (step: OnboardingStep) => state.currentStep === step;
 
-  // Context value
-  const value: OnboardingContextType = {
-    ...state,
-    startOnboarding,
-    dismissOnboarding,
-    goToNextStep,
-    goToPrevStep,
-    isCurrentStep,
-  };
-
   return (
-    <OnboardingContext.Provider value={value}>
+    <OnboardingContext.Provider
+      value={{
+        ...state,
+        startOnboarding,
+        dismissOnboarding,
+        goToNextStep,
+        goToPrevStep,
+        isCurrentStep,
+      }}
+    >
       {children}
     </OnboardingContext.Provider>
   );
-} 
+}
+
+export function useOnboarding() {
+  const context = useContext(OnboardingContext);
+  if (context === undefined) {
+    throw new Error('useOnboarding must be used within an OnboardingProvider');
+  }
+  return context;
+}

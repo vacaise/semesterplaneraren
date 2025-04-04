@@ -28,3 +28,18 @@ export const OPTIMIZATION_STRATEGIES = [
     description: 'Concentrate days into fewer, longer 10-15 day vacation periods for substantial trips.',
   },
 ];
+
+export const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
+];

@@ -1,13 +1,8 @@
-'use client';
 
-import { KeyboardEvent, useState } from 'react';
-import { exportToICS } from '@/services/calendarExport';
 import { Break, OptimizationStats } from '@/types';
-import { toast } from 'sonner';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
-import { Calendar, Download, InfoIcon, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { FileDown, Calendar } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
 import { SectionCard } from '@/components/ui/section-card';
 
 interface CalendarExportProps {
@@ -16,132 +11,113 @@ interface CalendarExportProps {
   selectedYear: number;
 }
 
-export const CalendarExport = ({ breaks, stats, selectedYear }: CalendarExportProps) => {
-  const [isExporting, setIsExporting] = useState(false);
-  const [activeExport, setActiveExport] = useState<'ical' | 'google' | null>(null);
-
-  // Handle export to ICS (iCal)
-  const handleExportToICS = async () => {
-    // Track onboarding dismissal
-    if (typeof window !== 'undefined' && window.umami) {
-      window.umami.track('Calendar exported');
-    }
-
-    if (breaks.length === 0) {
-      toast.error("No breaks to export", {
-        description: "There are no vacation breaks to export to calendar."
-      });
-      return;
-    }
-
-    setIsExporting(true);
-    setActiveExport('ical');
+export function CalendarExport({ breaks, stats, selectedYear }: CalendarExportProps) {
+  const handleExportICS = () => {
+    // Create ICS file content
+    let icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Holiday Optimizer//EN',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH',
+      `X-WR-CALNAME:Optimized PTO ${selectedYear}`,
+      'X-WR-TIMEZONE:UTC',
+    ];
     
-    try {
-      const result = await exportToICS({ 
-        breaks, 
-        stats, 
-        selectedYear
-      });
+    // Add events for each break
+    breaks.forEach((breakPeriod, index) => {
+      const startDate = parseISO(breakPeriod.startDate);
+      const endDate = parseISO(breakPeriod.endDate);
       
-      if (result.success) {
-        toast.success("Export Successful", {
-          description: result.message
-        });
-      } else {
-        toast.error("Export Failed", {
-          description: result.message
-        });
+      // Determine break type by days
+      let breakType = 'Break';
+      if (breakPeriod.totalDays >= 10) {
+        breakType = 'Extended Vacation';
+      } else if (breakPeriod.totalDays >= 7) {
+        breakType = 'Week-long Break';
+      } else if (breakPeriod.totalDays >= 5) {
+        breakType = 'Mini Break';
+      } else if (breakPeriod.totalDays >= 3) {
+        breakType = 'Long Weekend';
       }
-    } catch (error) {
-      toast.error("Export Failed", {
-        description: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}`
-      });
-    } finally {
-      setIsExporting(false);
-      setActiveExport(null);
-    }
+      
+      const summary = `${breakType}: ${format(startDate, 'MMM d')} - ${format(endDate, 'MMM d')}`;
+      
+      // Format dates as required for ICS
+      const formatDateForICS = (date: Date) => {
+        return format(date, "yyyyMMdd'T'HHmmss'Z'");
+      };
+      
+      // Add one day to end date for all-day events
+      const eventEndDate = new Date(endDate);
+      eventEndDate.setDate(eventEndDate.getDate() + 1);
+      
+      // Create description with break details
+      const description = [
+        `Holiday Optimizer: ${breakType}`,
+        `Total Days: ${breakPeriod.totalDays}`,
+        `PTO Days: ${breakPeriod.ptoDays}`,
+        `Public Holidays: ${breakPeriod.publicHolidays}`,
+        `Weekend Days: ${breakPeriod.weekends}`,
+        `Company Days Off: ${breakPeriod.companyDaysOff}`,
+      ].join('\\n');
+      
+      icsContent = [
+        ...icsContent,
+        'BEGIN:VEVENT',
+        `UID:holiday-optimizer-${selectedYear}-break-${index}`,
+        `DTSTAMP:${formatDateForICS(new Date())}`,
+        `DTSTART;VALUE=DATE:${format(startDate, 'yyyyMMdd')}`,
+        `DTEND;VALUE=DATE:${format(eventEndDate, 'yyyyMMdd')}`,
+        `SUMMARY:${summary}`,
+        `DESCRIPTION:${description}`,
+        'TRANSP:TRANSPARENT',
+        'END:VEVENT',
+      ];
+    });
+    
+    // End calendar
+    icsContent.push('END:VCALENDAR');
+    
+    // Join with newlines and create download link
+    const icsData = icsContent.join('\r\n');
+    const blob = new Blob([icsData], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    
+    // Create download link and click it
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `holiday-optimizer-${selectedYear}.ics`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
-
-  // Keyboard event handler for info button
-  const handleInfoKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault(); // Prevent default behavior (scrolling) for space key
-      // The tooltip will be shown automatically due to the TooltipTrigger component
-    }
-  };
-
-  if (breaks.length === 0) {
-    return null;
-  }
-
+  
   return (
     <SectionCard
-      title="Export Calendar"
-      subtitle="Take your vacation plan with you"
-      icon={<Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />}
-      rightContent={
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button 
-                className="inline-flex h-6 w-6 items-center justify-center rounded-full text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" 
-                tabIndex={0}
-                aria-label="View export information"
-                onKeyDown={handleInfoKeyDown}
-              >
-                <InfoIcon className="h-3.5 w-3.5" aria-hidden="true" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="left" className="max-w-xs">
-              <p className="text-xs">
-                Export your optimized vacation plan to your preferred calendar application. 
-                Your {breaks.length} breaks use {stats.totalPTODays} PTO days for {stats.totalDaysOff} total days off.
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      }
+      title="Export Your Optimized Schedule"
+      subtitle="Add your breaks to your calendar"
+      icon={<Calendar className="h-4 w-4 text-teal-600 dark:text-teal-400" />}
     >
-      <div className="flex flex-wrap gap-2 pt-1" role="region" aria-label="Calendar export options">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExportToICS}
-                disabled={isExporting}
-                className="h-8 px-3 text-xs focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                aria-label="Export to iCal format for Google Calendar, Apple Calendar, Outlook, and other calendar applications"
-                tabIndex={0}
-              >
-                {activeExport === 'ical' ? (
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="mr-1.5"
-                    aria-hidden="true"
-                  >
-                    <Sparkles className="h-3 w-3" />
-                  </motion.div>
-                ) : (
-                  <Download className="h-3 w-3 mr-1.5" aria-hidden="true" />
-                )}
-                <span>iCal (.ics)</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent className="max-w-xs">
-              <p className="text-xs">
-                Download as iCal file for Google Calendar, Apple Calendar, Outlook, and other calendar applications. 
-                <span className="block mt-1 text-blue-500 dark:text-blue-400">
-                  Events will show on their actual dates regardless of timezone.
-                </span>
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+        <div className="space-y-1.5">
+          <p className="text-sm text-gray-700 dark:text-gray-300">
+            Export {breaks.length} breaks ({stats.totalPTODays} PTO days) as calendar events
+          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Download an .ics file that works with Google Calendar, Apple Calendar, Outlook and more
+          </p>
+        </div>
+        
+        <Button
+          onClick={handleExportICS}
+          className="bg-teal-600 hover:bg-teal-700 text-white gap-2 whitespace-nowrap"
+          aria-label={`Export ${breaks.length} breaks to calendar`}
+        >
+          <FileDown className="h-4 w-4" aria-hidden="true" />
+          <span>Export to Calendar</span>
+        </Button>
       </div>
     </SectionCard>
   );
-}; 
+}
