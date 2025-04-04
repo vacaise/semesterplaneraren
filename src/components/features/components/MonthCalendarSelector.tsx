@@ -1,8 +1,15 @@
 
 import { cn } from '@/lib/utils';
+<<<<<<< HEAD
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { format, addMonths, subMonths, getMonth, setMonth, getYear, setYear, isSameMonth, isToday, isAfter, isBefore, isSameDay, getDay, getDaysInMonth, startOfMonth, endOfMonth, addDays, isSameYear } from 'date-fns';
+=======
+import { DayClickEventHandler } from 'react-day-picker';
+import { useEffect, useState } from 'react';
+import { startOfMonth, startOfYear, addDays, isBefore, isSameDay } from 'date-fns';
+import { ChevronLeft, ChevronRight, LucideIcon } from 'lucide-react';
+>>>>>>> 227f356 (Update project configuration and add missing files)
 
 // Define color scheme mapping for styling
 const colorClasses = {
@@ -119,6 +126,17 @@ export function MonthCalendarSelector({
   const canGoPrevious = !(isCurrentYear && isCurrentMonthInView);
   // Can't go past December of selected year
   const canGoNext = getMonth(currentMonth) < 11;
+
+  const monthDays = Array.from({ length: 31 }, (_, i) => {
+    const date = addDays(currentDate, i);
+    return { 
+      date, 
+      isCurrentMonth: true, 
+      isPast: isBefore(date, new Date()) && !isSameDay(date, new Date()),
+      isToday: isSameDay(date, new Date()),
+      isSelected: selectedDates.some(selectedDate => isSameDay(selectedDate, date)) 
+    };
+  });
 
   return (
     <div ref={containerRef} className="space-y-2" id={id}>

@@ -1,5 +1,17 @@
+<<<<<<< HEAD
 
 // Types for the optimization parameters
+=======
+declare global {
+  interface Window {
+    umami?: {
+      track: (eventName: string, eventData?: Record<string, unknown>) => void;
+    };
+  }
+}
+
+// Optimization Types
+>>>>>>> 227f356 (Update project configuration and add missing files)
 export type OptimizationStrategy = 'balanced' | 'miniBreaks' | 'longWeekends' | 'weekLongBreaks' | 'extendedVacations';
 
 export interface CompanyDayOff {
@@ -55,3 +67,23 @@ export interface OptimizationResult {
   breaks: Break[];
   stats: OptimizationStats;
 }
+<<<<<<< HEAD
+=======
+
+interface CardStyles {
+  hover: string; // Hover state classes
+  ring?: string; // Optional ring/outline classes
+}
+
+// The complete structure of a color scheme definition
+interface ColorSchemeDefinition {
+  icon: TailwindColorStyles;
+  tooltip: TooltipStyles;
+  card: CardStyles;
+  calendar: TailwindColorStyles;
+}
+
+export type PossibleColors = 'teal' | 'blue' | 'amber' | 'violet';
+// The complete COLOR_SCHEMES object type
+export type ColorSchemes = Record<PossibleColors, ColorSchemeDefinition>; // Declare Umami tracking type for TypeScript
+>>>>>>> 227f356 (Update project configuration and add missing files)
