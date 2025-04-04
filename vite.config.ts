@@ -7,11 +7,16 @@ import { componentTagger } from 'lovable-tagger'
 export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
-    mode === 'development' && componentTagger(),
+    mode === 'development' && componentTagger({
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['node_modules/**', 'dist/**'],
+      tagPrefix: 'data-lovable',
+    }),
   ].filter(Boolean),
   server: {
     port: 3000,
     host: true,
+    open: true,
   },
   build: {
     outDir: 'dist',

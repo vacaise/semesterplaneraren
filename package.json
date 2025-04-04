@@ -11,9 +11,9 @@
     "test:watch": "jest --watch",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
-    "lovable:dev": "lovable dev",
+    "lovable:dev": "lovable dev --port 3000",
     "lovable:build": "lovable build",
-    "lovable:preview": "lovable preview"
+    "lovable:preview": "lovable preview --port 3000"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.0.5",
