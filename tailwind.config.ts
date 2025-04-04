@@ -47,6 +47,9 @@ const config = {
       colors: {
         ...colors,
       },
+      fontFamily: {
+        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+      },
     },
   },
   plugins: [tailwindcss_animate],

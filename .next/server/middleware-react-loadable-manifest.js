@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST='{"app/page.tsx -> @/components/SocialShareButtons":{"id":1853,"files":["static/chunks/853.356a15e3ca2cb90e.js"]}}';
+self.__REACT_LOADABLE_MANIFEST="{}";

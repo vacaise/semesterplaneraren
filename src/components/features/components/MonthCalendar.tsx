@@ -1,3 +1,5 @@
+'use client';
+
 import {
   eachDayOfInterval,
   endOfMonth,
@@ -14,6 +16,7 @@ import { StatTooltipContent, Tooltip, TooltipTrigger } from '@/components/ui/too
 import { OptimizedDay } from '@/types';
 import { cn, DayType, dayTypeToColorScheme } from '@/lib/utils';
 import { COLOR_SCHEMES, WEEKDAYS } from '@/constants';
+import { useEffect, useState } from 'react';
 
 interface MonthCalendarProps {
   month: number;
@@ -149,6 +152,12 @@ const getDayStyles = (isCurrentDay: boolean, isPastDay: boolean, dayType: DayTyp
  * Displays a single month calendar with optimized day styling
  */
 export function MonthCalendar({ month, year, days }: MonthCalendarProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Initialize calendar dates
   const firstDay = startOfMonth(new Date(year, month));
   const lastDay = endOfMonth(firstDay);
@@ -242,6 +251,34 @@ export function MonthCalendar({ month, year, days }: MonthCalendarProps) {
       isPastDay
     };
   };
+
+  // Only render tooltips after client-side hydration
+  if (!mounted) {
+    return (
+      <div className="relative p-4 border rounded-lg">
+        <h3 className="text-sm font-medium mb-2">{format(firstDay, 'MMMM yyyy')}</h3>
+        <div className="grid grid-cols-7 gap-1">
+          {WEEKDAYS.map((day, i) => (
+            <div key={i} className="text-xs text-center font-medium text-gray-500">
+              {day.charAt(0)}
+            </div>
+          ))}
+          {calendarDays.map((day, i) => (
+            day ? (
+              <div key={i} className="relative aspect-square">
+                <div className="absolute inset-0.5 rounded-md bg-gray-100" />
+                <div className="absolute inset-0 flex items-center justify-center text-xs">
+                  {format(parse(day.date, 'yyyy-MM-dd', new Date()), 'd')}
+                </div>
+              </div>
+            ) : (
+              <div key={i} />
+            )
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

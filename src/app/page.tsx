@@ -11,12 +11,7 @@ import { PageContent, PageDescription, PageHeader, PageLayout, PageTitle } from 
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import dynamic from 'next/dynamic';
 import { t, tWithParams } from '@/lib/translations';
-
-const SocialShareButtons = dynamic(() => import('@/components/SocialShareButtons'), {
-  ssr: false
-});
 
 interface FormState {
   numberOfDays: number | null
@@ -105,36 +100,32 @@ const HomePage = () => {
                     };
                     handleOptimize(newFormState);
                   }}
-                  isLoading={isOptimizing}
                 />
               </div>
 
-              {/* Results Section with Loading State */}
-              {(isOptimizing || (optimizationResult && optimizationResult.days.length > 0)) && (
-                <div className="space-y-4 min-w-0 max-w-4xl w-full">
+              {/* Results Section - Only visible when optimizing or when results exist */}
+              {(isOptimizing || optimizationResult) && (
+                <div ref={resultsRef} className="space-y-6">
                   <h2 className="sr-only">{t('optimizationResults')}</h2>
                   {isOptimizing ? (
-                    <Card variant="neutral" className="p-8 flex flex-col items-center justify-center min-h-[300px]">
-                      <LoadingSpinner 
-                        variant="primary"
-                        label={t('creatingSchedule')}
-                        description={tWithParams('findingBestWay', { year: selectedYear.toString() })}
-                      />
+                    <Card className="p-6">
+                      <div className="flex items-center justify-center space-x-4">
+                        <LoadingSpinner />
+                        <div>
+                          <h3 className="text-lg font-semibold">{t('creatingSchedule')}</h3>
+                          <p className="text-muted-foreground">
+                            {tWithParams('findingBestWay', { year: selectedYear.toString() })}
+                          </p>
+                        </div>
+                      </div>
                     </Card>
                   ) : optimizationResult && (
-                    <div itemScope itemType="https://schema.org/Event">
-                      <meta itemProp="name" content={`${t('pageTitle')} ${selectedYear}`} />
-                      <ResultsDisplay
-                        ref={resultsRef}
-                        optimizedDays={optimizationResult.days}
-                        breaks={optimizationResult.breaks}
-                        stats={optimizationResult.stats}
-                        selectedYear={selectedYear}
-                      />
-                      <div className="mt-6 flex justify-center">
-                        <SocialShareButtons />
-                      </div>
-                    </div>
+                    <ResultsDisplay
+                      optimizedDays={optimizationResult.days}
+                      breaks={optimizationResult.breaks}
+                      stats={optimizationResult.stats}
+                      selectedYear={selectedYear}
+                    />
                   )}
                 </div>
               )}
