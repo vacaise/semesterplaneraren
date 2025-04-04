@@ -7,17 +7,6 @@ import { BreakDetails } from '@/components/features/BreakDetails';
 import { CalendarView } from '@/components/features/CalendarView';
 import { CalendarExport } from '@/components/features/CalendarExport';
 import { forwardRef } from 'react';
-import { useTranslation } from 'next-i18next'
-import { useOptimizationResults } from '@/hooks/useOptimizationResults'
-import { useLocalStorage } from '@/hooks/useLocalStorage'
-import { useOnboardingOverlay } from '@/hooks/useOnboardingOverlay'
-import { useBreakDetails } from '@/hooks/useBreakDetails'
-import { useCalendarExport } from '@/hooks/useCalendarExport'
-import { useOptimizationStats } from '@/hooks/useOptimizationStats'
-import { useOptimizationHistory } from '@/hooks/useOptimizationHistory'
-import { useOptimizationSettings } from '@/hooks/useOptimizationSettings'
-import { useOptimizationProgress } from '@/hooks/useOptimizationProgress'
-import { useOptimizationError } from '@/hooks/useOptimizationError'
 
 const container = {
   hidden: { opacity: 0 },

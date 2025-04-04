@@ -3,7 +3,7 @@ import { BreakCard } from '@/components/features/components/BreakCard';
 import { BreakTypeLegend } from '@/components/features/components/BreakTypeLegend';
 import { Info } from 'lucide-react';
 import { SectionCard } from '@/components/ui/section-card';
-import { t } from '@/lib/translations';
+import { t, tWithParams } from '@/lib/translations';
 
 interface BreakDetailsProps {
   breaks: Break[];
@@ -24,7 +24,7 @@ export function BreakDetails({ breaks }: BreakDetailsProps) {
       rightContent={
         <span
           className="px-3 py-1.5 bg-violet-100 dark:bg-violet-900/50 rounded-lg text-xs font-medium text-violet-700 dark:text-violet-300">
-          {breaks.length} {t('breaksPlanned', { count: breaks.length })}
+          {breaks.length} {tWithParams('breaksPlanned', { count: breaks.length.toString() })}
         </span>
       }
     >

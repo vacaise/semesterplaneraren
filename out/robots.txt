@@ -1,0 +1,46 @@
+User-Agent: Googlebot
+User-Agent: Googlebot-Image
+User-Agent: Googlebot-News
+User-Agent: Googlebot-Video
+User-Agent: Bingbot
+User-Agent: DuckDuckBot
+User-Agent: Slurp
+User-Agent: Baiduspider
+User-Agent: Yandex
+User-Agent: facebookexternalhit
+User-Agent: LinkedInBot
+User-Agent: Twitterbot
+User-Agent: Applebot
+User-Agent: Pinterestbot
+Allow: /
+Disallow: /api/
+Disallow: /_next/
+Disallow: /static/
+Disallow: /admin/
+Disallow: /*.json$
+Disallow: /*.xml$
+Disallow: /debug/
+Crawl-delay: 2
+
+User-Agent: GPTBot
+User-Agent: ChatGPT-User
+User-Agent: Google-Extended
+User-Agent: Anthropic-AI
+User-Agent: Claude-Web
+User-Agent: Cohere-AI
+User-Agent: CCBot
+Disallow: /
+
+User-Agent: *
+Allow: /
+Disallow: /api/
+Disallow: /_next/
+Disallow: /static/
+Disallow: /admin/
+Disallow: /*.json$
+Disallow: /*.xml$
+Disallow: /debug/
+Crawl-delay: 5
+
+Host: holiday-optimizer.com
+Sitemap: https://holiday-optimizer.com/sitemap.xml

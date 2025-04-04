@@ -73,11 +73,4 @@ export function useLocalStorage() {
       }
     });
   }, [state.companyDaysOff, selectedYear]);
-
-  useEffect(() => {
-    if (clearData) {
-      clearCompanyDays()
-      clearHolidays()
-    }
-  }, [clearData, clearCompanyDays, clearHolidays])
 } 
