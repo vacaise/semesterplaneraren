@@ -6,4 +6,4 @@ command = "pnpm run build"
 
 [site]
 bucket = "out"
-entry-point = "out" 
+main = "out/index.js" 
