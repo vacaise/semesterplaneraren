@@ -1,97 +1,118 @@
 # Holiday Optimizer
 
-A tool to help you optimize your holiday planning throughout the year.
+A web application for optimizing holiday travel planning.
+
+## Overview
+
+Holiday Optimizer is a web application that helps users plan their holidays efficiently. By analyzing travel routes, costs, and optimal scheduling, the application provides recommendations for maximizing travel experiences while minimizing expenses and travel time.
 
 ## Features
 
-- Plan your holidays for the entire year
-- Optimize your time off with different strategies
-- Track public holidays and company days off
-- Generate optimal holiday schedules
+- Interactive calendar visualization
+- Cost comparison between different travel options
+- Automatic optimization of travel routes
+- Shareable trip itineraries
+- Weather forecast integration
+- Accommodation recommendations
+- Local attraction suggestions
+
+## Technology Stack
+
+This project is built with:
+
+- **Frontend**: Next.js, React, TypeScript, TailwindCSS
+- **UI Components**: Shadcn UI
+- **Styling**: TailwindCSS
+- **Testing**: Jest, React Testing Library
+- **Deployment**: Cloudflare Pages
+- **CI/CD**: GitHub Actions for testing and quality assurance
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (v18 or later)
-- npm (v9 or later)
+- Node.js 20+
+- pnpm 10+
 
 ### Installation
 
 1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/semesterplaneraren.git
-cd semesterplaneraren
-```
+   ```bash
+   git clone https://github.com/yourusername/holiday-optimizer.git
+   cd holiday-optimizer
+   ```
 
 2. Install dependencies:
-```bash
-npm install
-```
+   ```bash
+   pnpm install
+   ```
 
-### Development
+3. Start the development server:
+   ```bash
+   pnpm dev
+   ```
 
-To start the development server:
-
-```bash
-npm run lovable:dev
-```
-
-### Building
-
-To build the project:
-
-```bash
-npm run lovable:build
-```
-
-### Preview
-
-To preview the production build:
-
-```bash
-npm run lovable:preview
-```
-
-## Testing
-
-To run the tests:
-
-```bash
-npm test
-```
-
-To run tests in watch mode:
-
-```bash
-npm run test:watch
-```
-
-## Linting
-
-To lint the code:
-
-```bash
-npm run lint
-```
-
-To format the code:
-
-```bash
-npm run format
-```
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Deployment
 
-The project is configured to work seamlessly with Lovable. To deploy:
+This application is deployed to Cloudflare Pages. For deployment details, see [DEPLOYMENT.md](DEPLOYMENT.md).
 
-1. Build the project:
-```bash
-npm run lovable:build
+## Project Structure
+
+```
+holiday-optimizer/
+├── .github/            # GitHub Actions workflows
+├── .husky/             # Git hooks
+├── public/             # Static assets
+├── src/                # Application source code
+│   ├── app/            # Next.js app router
+│   ├── components/     # React components
+│   ├── lib/            # Utility functions and shared logic
+│   ├── styles/         # Global styles
+│   └── types/          # TypeScript type definitions
+└── tests/              # Test files
 ```
 
-2. Deploy the `dist` directory to your hosting provider.
+## Development Workflow
 
-## License
+### Running Tests
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+```bash
+# Run all tests
+pnpm test
+
+# Run tests in watch mode
+pnpm test:watch
+
+# Run specific test categories
+pnpm test:unit
+pnpm test:integration
+pnpm test:e2e
+
+# Generate test coverage report
+pnpm test:coverage
+```
+
+### Linting and Formatting
+
+```bash
+# Run linter
+pnpm lint
+
+# Format code
+pnpm format
+```
+
+## Contributing
+
+1. Create a feature branch from `main`.
+2. Make changes and ensure tests pass.
+3. Submit a pull request.
+
+### Guidelines
+
+- Follow the existing code style and naming conventions.
+- Write tests for new features and bug fixes.
+- Keep pull requests focused on a single feature or fix.
+- Document new features or changes in behavior.

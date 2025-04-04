@@ -45,11 +45,11 @@ export interface DateListProviderProps {
 }
 
 export const DateListProvider = ({
-  children,
-  title,
-  colorScheme,
-  onBulkRename,
-}: DateListProviderProps) => {
+                                   children,
+                                   title,
+                                   colorScheme,
+                                   onBulkRename,
+                                 }: DateListProviderProps) => {
   const {
     companyDaysOff: items,
     addCompanyDay: onUpdateName,
@@ -135,7 +135,7 @@ export const DateListProvider = ({
     setSelectedDates(prev =>
       allSelected
         ? prev.filter(d => !dates.includes(d))
-        : [...Array.from(new Set([...prev, ...dates]))]
+        : [...new Set([...prev, ...dates])],
     );
   };
 
@@ -196,4 +196,4 @@ export const useDateList = () => {
   }
 
   return context;
-};
+}; 

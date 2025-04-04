@@ -1,63 +1,75 @@
-
 import { useEffect } from 'react';
-import { useOptimizer } from '../contexts/OptimizerContext';
-
-// Keys for localStorage
-const STORAGE_KEYS = {
-  DAYS: 'holiday-optimizer-days',
-  STRATEGY: 'holiday-optimizer-strategy',
-  COMPANY_DAYS: 'holiday-optimizer-company-days',
-  HOLIDAYS: 'holiday-optimizer-holidays',
-  SELECTED_YEAR: 'holiday-optimizer-selected-year',
-};
+import { useOptimizer } from '@/contexts/OptimizerContext';
+import { getStoredCompanyDays, removeStoredCompanyDay, storeCompanyDay } from '@/lib/storage/companyDays';
+import { getStoredHolidays, removeStoredHoliday, storeHoliday } from '@/lib/storage/holidays';
+import { useCompanyDays, useHolidays } from '@/hooks/useOptimizer';
 
 export function useLocalStorage() {
   const { state, dispatch } = useOptimizer();
+  const { clearHolidays } = useHolidays();
+  const { clearCompanyDays } = useCompanyDays();
+  const { selectedYear } = state;
 
-  // Load state from localStorage on mount
+  // Load stored data when year changes or on mount
   useEffect(() => {
-    try {
-      const savedDays = localStorage.getItem(STORAGE_KEYS.DAYS);
-      if (savedDays) {
-        dispatch({ type: 'SET_DAYS', payload: savedDays });
-      }
+    // Clear existing holidays and company days when year changes
+    clearHolidays()
+    clearCompanyDays()
 
-      const savedStrategy = localStorage.getItem(STORAGE_KEYS.STRATEGY);
-      if (savedStrategy) {
-        dispatch({ type: 'SET_STRATEGY', payload: savedStrategy as any });
-      }
-
-      const savedCompanyDays = localStorage.getItem(STORAGE_KEYS.COMPANY_DAYS);
-      if (savedCompanyDays) {
-        dispatch({ type: 'SET_COMPANY_DAYS', payload: JSON.parse(savedCompanyDays) });
-      }
-
-      const savedHolidays = localStorage.getItem(STORAGE_KEYS.HOLIDAYS);
-      if (savedHolidays) {
-        dispatch({ type: 'SET_HOLIDAYS', payload: JSON.parse(savedHolidays) });
-      }
-
-      const savedYear = localStorage.getItem(STORAGE_KEYS.SELECTED_YEAR);
-      if (savedYear) {
-        dispatch({ type: 'SET_YEAR', payload: parseInt(savedYear, 10) });
-      }
-    } catch (error) {
-      console.error('Error loading from localStorage:', error);
+    // Load public holidays for the selected year
+    const storedHolidays = getStoredHolidays(selectedYear);
+    if (storedHolidays.length > 0) {
+      storedHolidays.forEach(day => {
+        dispatch({ type: 'ADD_HOLIDAY', payload: day });
+      });
     }
-  }, [dispatch]);
 
-  // Save state to localStorage when it changes
+    // Load company days for the selected year
+    const storedCompanyDays = getStoredCompanyDays(selectedYear);
+    if (storedCompanyDays.length > 0) {
+      storedCompanyDays.forEach(day => {
+        dispatch({ type: 'ADD_COMPANY_DAY', payload: day });
+      });
+    }
+  }, [dispatch, selectedYear]); // Re-run when selected year changes
+
+  // Sync individual holiday changes
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.DAYS, state.days);
-      localStorage.setItem(STORAGE_KEYS.STRATEGY, state.strategy);
-      localStorage.setItem(STORAGE_KEYS.COMPANY_DAYS, JSON.stringify(state.companyDaysOff));
-      localStorage.setItem(STORAGE_KEYS.HOLIDAYS, JSON.stringify(state.holidays));
-      localStorage.setItem(STORAGE_KEYS.SELECTED_YEAR, state.selectedYear.toString());
-    } catch (error) {
-      console.error('Error saving to localStorage:', error);
-    }
-  }, [state]);
+    const storedHolidays = getStoredHolidays(selectedYear);
 
-  return null;
-}
+    // Find holidays to add or update
+    state.holidays.forEach(holiday => {
+      const stored = storedHolidays.find(h => h.date === holiday.date);
+      if (!stored || stored.name !== holiday.name) {
+        storeHoliday(holiday, selectedYear);
+      }
+    });
+
+    // Find holidays to remove
+    storedHolidays.forEach(stored => {
+      if (!state.holidays.some(h => h.date === stored.date)) {
+        removeStoredHoliday(stored.date, selectedYear);
+      }
+    });
+  }, [state.holidays, selectedYear]);
+
+  // Sync individual company day changes
+  useEffect(() => {
+    const storedCompanyDays = getStoredCompanyDays(selectedYear);
+
+    // Find company days to add or update
+    state.companyDaysOff.forEach(day => {
+      const stored = storedCompanyDays.find(d => d.date === day.date);
+      if (!stored || stored.name !== day.name) {
+        storeCompanyDay(day, selectedYear);
+      }
+    });
+
+    // Find company days to remove
+    storedCompanyDays.forEach(stored => {
+      if (!state.companyDaysOff.some(d => d.date === stored.date)) {
+        removeStoredCompanyDay(stored.date, selectedYear);
+      }
+    });
+  }, [state.companyDaysOff, selectedYear]);
+} 

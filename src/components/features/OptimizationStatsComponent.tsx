@@ -1,118 +1,67 @@
-
-import { motion } from 'framer-motion';
+import { FC } from 'react';
 import { OptimizationStats } from '@/types';
-import { Calendar, CheckCircle, Clock, Award, Zap } from 'lucide-react';
-import { cn } from '@/lib/utils';
-
-// Variants for animation
-const statItem = {
-  hidden: { opacity: 0, y: 20 },
-  show: { 
-    opacity: 1, 
-    y: 0,
-    transition: { 
-      type: 'spring',
-      stiffness: 260,
-      damping: 20 
-    }
-  }
-};
-
-// Stat card component
-interface StatCardProps {
-  label: string;
-  value: number | string;
-  icon: React.ReactNode;
-  accentColor: string;
-  suffix?: string;
-}
-
-const StatCard = ({ label, value, icon, accentColor, suffix = '' }: StatCardProps) => (
-  <motion.div 
-    variants={statItem}
-    className={cn(
-      "flex items-center gap-3 p-4 rounded-lg border",
-      "bg-white dark:bg-gray-800",
-      "border-gray-200 dark:border-gray-700"
-    )}
-  >
-    <div className={cn(
-      "flex items-center justify-center p-2.5 rounded-md",
-      accentColor
-    )}>
-      {icon}
-    </div>
-    <div>
-      <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
-        {label}
-      </p>
-      <div className="flex items-baseline gap-1">
-        <span className="text-2xl font-bold text-gray-900 dark:text-white">{value}</span>
-        {suffix && <span className="text-sm text-gray-500 dark:text-gray-400">{suffix}</span>}
-      </div>
-    </div>
-  </motion.div>
-);
+import StatCard from './components/StatCard';
+import { BarChart2, Building2, Calendar, CalendarDays, Sun, Umbrella } from 'lucide-react';
+import { SectionCard } from '@/components/ui/section-card';
 
 interface OptimizationStatsComponentProps {
   stats: OptimizationStats;
 }
 
-const OptimizationStatsComponent = ({ stats }: OptimizationStatsComponentProps) => {
+const OptimizationStatsComponent: FC<OptimizationStatsComponentProps> = ({ stats }) => {
   return (
-    <motion.section 
-      initial="hidden"
-      animate="show"
-      variants={{
-        show: {
-          transition: {
-            staggerChildren: 0.1
-          }
-        }
-      }}
-      className="space-y-4"
+    <SectionCard
+      title="Optimization Stats"
+      subtitle="A breakdown of your optimized time off schedule"
+      icon={<BarChart2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />}
     >
-      <motion.h2 
-        variants={statItem}
-        className="text-lg font-semibold text-gray-900 dark:text-white"
-      >
-        Your Optimization Summary
-      </motion.h2>
-      
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard 
-          label="Total Days Off" 
-          value={stats.totalDaysOff} 
-          icon={<Award className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />} 
-          accentColor="bg-indigo-100 dark:bg-indigo-900/30"
-          suffix="days"
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+        {/* Total Days Off */}
+        <StatCard
+          icon={<CalendarDays className="h-5 w-5" />}
+          value={stats.totalDaysOff}
+          label="Total Days Off"
+          tooltip="Total number of days off including weekends, holidays, and PTO days"
+          colorScheme="blue"
         />
-        <StatCard 
-          label="PTO Days Used" 
-          value={stats.totalPTODays} 
-          icon={<Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />} 
-          accentColor="bg-blue-100 dark:bg-blue-900/30"
+
+        {/* PTO Days */}
+        <StatCard
+          icon={<Calendar className="h-5 w-5" />}
+          value={stats.totalPTODays}
+          label="PTO Days"
+          tooltip="Number of PTO days used in the optimization"
+          colorScheme="green"
         />
-        <StatCard 
-          label="Extended Weekends" 
-          value={stats.totalExtendedWeekends} 
-          icon={<Zap className="h-5 w-5 text-amber-600 dark:text-amber-400" />} 
-          accentColor="bg-amber-100 dark:bg-amber-900/30"
+
+        {/* Public Holidays */}
+        <StatCard
+          icon={<Sun className="h-5 w-5" />}
+          value={stats.totalPublicHolidays}
+          label="Public Holidays"
+          tooltip="Number of public holidays that are part of a longer break"
+          colorScheme="amber"
         />
-        <StatCard 
-          label="Public Holidays" 
-          value={stats.totalPublicHolidays} 
-          icon={<Calendar className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />} 
-          accentColor="bg-emerald-100 dark:bg-emerald-900/30"
+
+        {/* Extended Weekends */}
+        <StatCard
+          icon={<Umbrella className="h-5 w-5" />}
+          value={stats.totalExtendedWeekends}
+          label="Extended Weekends"
+          tooltip="Number of weekends that are part of a longer break"
+          colorScheme="teal"
         />
-        <StatCard 
-          label="Company Days Off" 
-          value={stats.totalCompanyDaysOff} 
-          icon={<CheckCircle className="h-5 w-5 text-teal-600 dark:text-teal-400" />} 
-          accentColor="bg-teal-100 dark:bg-teal-900/30"
+
+        {/* Company Days Off */}
+        <StatCard
+          icon={<Building2 className="h-5 w-5" />}
+          value={stats.totalCompanyDaysOff}
+          label="Company Days Off"
+          tooltip="Number of company-wide days off (e.g., Christmas closure) that part of a longer break"
+          colorScheme="violet"
         />
       </div>
-    </motion.section>
+    </SectionCard>
   );
 };
 

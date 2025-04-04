@@ -1,199 +1,153 @@
-import { createContext, KeyboardEvent as ReactKeyboardEvent, ReactNode, useContext, useReducer } from 'react';
-import { DateItem, GroupedDates } from '../types';
-import { useDateGrouping } from '@/components/features/CompanyDaysDateList/hooks/useDateGrouping';
-import { useBulkSelection } from '@/components/features/CompanyDaysDateList/hooks/useBulkSelection';
-import { useGroupCollapse } from '@/components/features/CompanyDaysDateList/hooks/useGroupCollapse';
+'use client';
+
+import { createContext, useContext, useState } from 'react';
+import { DateItem } from '../types';
 import { useHolidays } from '@/hooks/useOptimizer';
-import { useState } from 'react';
 
-export interface DateListContextProps {
-  // State
-  items: DateItem[];
-  title: string;
-  colorScheme: 'amber';
-  groupedDates: GroupedDates[];
-  selectedDates: string[];
-  collapsedGroups: string[];
-  editingDate: string | null;
-  editingValue: string;
-  headingId: string;
-  itemCount: number;
+// =============================================================================
+// TYPES
+// =============================================================================
 
-  // Actions
-  setSelectedDates: (fn: (prev: string[]) => string[]) => void;
-  setEditingDate: (date: string | null) => void;
-  setEditingValue: (value: string) => void;
-  setCollapsedGroups: (fn: (prev: string[]) => string[]) => void;
+/**
+ * Simplified context API for the DateList component
+ */
+interface DateListContextProps {
+  // ---- State ----
+  items: DateItem[];                              // List of date items
+  colorScheme: 'amber';                           // Color theme
+  title: string;                                  // Title of the list
+  editingDate: string | null;                     // Currently editing date or null
+  editingValue: string;                           // Current input value
+  itemCount: number;                              // Number of items
+  headingId: string;                              // Accessibility ID
 
-  // Handlers
-  handleSelectGroup: (name: string) => void;
-  toggleGroupCollapse: (name: string) => void;
-  handleKeyDown: (e: ReactKeyboardEvent<HTMLButtonElement | HTMLInputElement>, date: string) => void;
-  startEditing: (date: string, currentName: string) => void;
-  handleBlur: () => void;
-  handleBulkRename: () => void;
-  handleBulkRenameConfirm: () => void;
-  onRemoveAction: (date: string) => void;
-  onClearAllAction: () => void;
-  onUpdateName?: (date: string, newName: string) => void;
-  cancelEdit: () => void;
-  confirmEdit: (date: string) => void;
+  // ---- Actions ----
+  onRemoveAction: (date: string) => void;         // Remove a date
+  onClearAllAction: () => void;                   // Clear all dates
+  onUpdateNameAction: (date: string, newName: string) => void; // Update name (optional)
+
+  // ---- Edit Operations ----
+  startEditing: (date: string, currentName: string) => void; // Enter edit mode
+  cancelEdit: () => void;                         // Cancel editing
+  confirmEdit: (date: string) => void;            // Save changes
+  setEditingValue: (value: string) => void;       // Update input value
 }
 
-const DateListContext = createContext<DateListContextProps | undefined>(undefined);
+// =============================================================================
+// CONTEXT CREATION
+// =============================================================================
 
+/**
+ * Context for DateList functionality
+ */
+const DateListContext = createContext<DateListContextProps | null>(null);
+
+/**
+ * Hook to access DateList context
+ */
+export function useDateList() {
+  const context = useContext(DateListContext);
+  if (!context) {
+    throw new Error('useDateList must be used within a DateListProvider');
+  }
+  return context;
+}
+
+// =============================================================================
+// PROVIDER PROPS
+// =============================================================================
+
+/**
+ * Props for the DateListProvider component
+ */
 export interface DateListProviderProps {
-  children: ReactNode;
-  title: string;
-  colorScheme: 'amber';
-  onBulkRename?: (dates: string[], newName: string) => void;
+  title: string;                    // List title
+  colorScheme: 'amber';             // Color theme
+  children: React.ReactNode;        // Child components
 }
 
-export const DateListProvider = ({
-  children,
-  title,
-  colorScheme,
-  onBulkRename,
-}: DateListProviderProps) => {
-  const {
-    holidays: items,
-    addHoliday: onUpdateName,
-    removeHoliday: onRemoveAction,
-    clearHolidays: onClearAllAction,
-  } = useHolidays();
-  
-  const headingId = `holidays-heading-${Math.random().toString(36).substring(2, 9)}`;
-  const itemCount = items.length;
-  
-  const groupedDates = useDateGrouping(items);
-  const { collapsedGroups, setCollapsedGroups } = useGroupCollapse(groupedDates);
-  const {
-    selectedDates,
-    setSelectedDates,
-    editingDate,
-    setEditingDate,
-    editingValue,
-    setEditingValue,
-    handleBulkRenameConfirm,
-  } = useBulkSelection(onBulkRename);
+// =============================================================================
+// PROVIDER COMPONENT
+// =============================================================================
 
-  // Implement the handlers that were missing
-  const handleKeyDown = (e: ReactKeyboardEvent<HTMLButtonElement | HTMLInputElement>, date: string) => {
-    // Implementation similar to CompanyDaysDateList
-    if (editingDate === null) return;
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      confirmEdit(date);
-    } else if (e.key === 'Escape') {
-      e.preventDefault();
-      cancelEdit();
-    }
-  };
+/**
+ * Provider component for DateList context
+ */
+export const DateListProvider = ({ title, colorScheme, children }: DateListProviderProps) => {
+  const { holidays, addHoliday, removeHoliday, clearHolidays } = useHolidays();
+  // =========================================================================
+  // STATE
+  // =========================================================================
+  const [editingDate, setEditingDate] = useState<string | null>(null);
+  const [editingValue, setEditingValue] = useState('');
 
-  const startEditing = (date: string, currentName: string) => {
-    if (!onUpdateName) return;
-    setEditingValue(currentName);
-    setEditingDate(date);
-  };
+  // Derived state
+  const itemCount = holidays.length;
+  const headingId = `holiday-list-heading-${title.toLowerCase().replace(/\s+/g, '-')}`;
 
-  const handleBlur = () => {
-    if (editingDate !== null && onUpdateName && editingDate !== 'bulk') {
-      onUpdateName(editingDate, editingValue.trim());
-      setEditingDate(null);
-    }
-  };
+  // =========================================================================
+  // EDIT OPERATIONS
+  // =========================================================================
 
+  /**
+   * Cancel the current edit
+   */
   const cancelEdit = () => {
     setEditingDate(null);
+    setEditingValue('');
   };
 
+  /**
+   * Save the current edit
+   */
   const confirmEdit = (date: string) => {
-    if (onUpdateName && editingValue.trim()) {
-      onUpdateName(date, editingValue.trim());
-      setEditingDate(null);
+    if (editingValue.trim()) {
+      addHoliday(date, editingValue.trim());
     }
+    cancelEdit();
   };
 
-  const handleSelectGroup = (name: string) => {
-    const groupDates = groupedDates.find(g => g.name === name)?.dates || [];
-    const dates = groupDates.map(d => d.date);
-    const allSelected = dates.every(date => selectedDates.includes(date));
-    setSelectedDates(prev =>
-      allSelected
-        ? prev.filter(d => !dates.includes(d))
-        : [...Array.from(new Set([...prev, ...dates]))]
-    );
+  /**
+   * Start editing an item
+   */
+  const startEditing = (date: string, currentName: string) => {
+    setEditingDate(date);
+    setEditingValue(currentName);
   };
 
-  const toggleGroupCollapse = (name: string) => {
-    setCollapsedGroups(prev =>
-      prev.includes(name)
-        ? prev.filter(n => n !== name)
-        : [...prev, name]
-    );
-  };
+  // =========================================================================
+  // CONTEXT VALUE
+  // =========================================================================
 
-  const handleBulkRename = () => {
-    if (!onBulkRename || selectedDates.length === 0) return;
-    
-    const selectedItems = items.filter(item => selectedDates.includes(item.date));
-    const nameCount = selectedItems.reduce((acc, item) => {
-      acc[item.name] = (acc[item.name] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    
-    const commonName = Object.entries(nameCount).reduce((a, b) => (a[1] > b[1] ? a : b))[0];
-    setEditingValue(commonName);
-    setEditingDate('bulk');
-  };
-
-  const value: DateListContextProps = {
+  const contextValue: DateListContextProps = {
     // State
-    items,
-    title,
+    items: holidays,
     colorScheme,
-    groupedDates,
-    selectedDates,
-    collapsedGroups,
+    title,
     editingDate,
     editingValue,
-    headingId,
     itemCount,
+    headingId,
 
     // Actions
-    setSelectedDates,
-    setEditingDate,
-    setEditingValue,
-    setCollapsedGroups,
+    onRemoveAction: removeHoliday,
+    onClearAllAction: clearHolidays,
+    onUpdateNameAction: addHoliday,
 
-    // Handlers
-    handleSelectGroup,
-    toggleGroupCollapse,
-    handleKeyDown,
+    // Edit operations
     startEditing,
-    handleBlur,
-    handleBulkRename,
-    handleBulkRenameConfirm,
-    onRemoveAction,
-    onClearAllAction,
-    onUpdateName,
     cancelEdit,
     confirmEdit,
+    setEditingValue,
   };
 
+  // =========================================================================
+  // RENDER
+  // =========================================================================
+
   return (
-    <DateListContext.Provider value={value}>
+    <DateListContext.Provider value={contextValue}>
       {children}
     </DateListContext.Provider>
   );
-};
-
-export const useDateList = () => {
-  const context = useContext(DateListContext);
-
-  if (context === undefined) {
-    throw new Error('useDateList must be used within a DateListProvider');
-  }
-
-  return context;
 };

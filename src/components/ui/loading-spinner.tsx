@@ -1,62 +1,84 @@
-
+import React from 'react';
 import { cn } from '@/lib/utils';
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
-  variant?: 'default' | 'primary' | 'accent';
+  variant?: 'primary' | 'secondary' | 'neutral';
   className?: string;
   label?: string;
   description?: string;
 }
 
-export function LoadingSpinner({
+export const LoadingSpinner = ({
   size = 'md',
-  variant = 'default',
+  variant = 'primary',
   className,
   label,
-  description,
-}: LoadingSpinnerProps) {
-  const sizes = {
-    sm: 'h-4 w-4',
-    md: 'h-6 w-6',
-    lg: 'h-8 w-8',
+  description
+}: LoadingSpinnerProps) => {
+  const sizeClasses = {
+    sm: "h-4 w-4 border-2",
+    md: "h-8 w-8 border-2",
+    lg: "h-12 w-12 border-3"
   };
 
-  const variants = {
-    default: 'text-gray-400 dark:text-gray-600',
-    primary: 'text-teal-600 dark:text-teal-400',
-    accent: 'text-blue-600 dark:text-blue-400',
+  const variantClasses = {
+    primary: "border-violet-200 dark:border-violet-700 border-t-violet-500 dark:border-t-violet-400",
+    secondary: "border-blue-200 dark:border-blue-700 border-t-blue-500 dark:border-t-blue-400",
+    neutral: "border-gray-200 dark:border-gray-700 border-t-gray-500 dark:border-t-gray-400"
   };
 
   return (
-    <div className={cn('flex flex-col items-center justify-center', className)}>
-      <svg
-        className={cn('animate-spin', sizes[size], variants[variant])}
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
+    <div className={cn(
+      "flex flex-col items-center justify-center space-y-4",
+      className
+    )}>
+      <div 
+        className={cn(
+          "animate-spin rounded-full",
+          sizeClasses[size],
+          variantClasses[variant]
+        )}
         aria-hidden="true"
-      >
-        <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        ></circle>
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-        ></path>
-      </svg>
-      {label && (
-        <p className="mt-3 text-sm font-medium text-gray-900 dark:text-gray-100">{label}</p>
-      )}
-      {description && (
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{description}</p>
+      />
+      
+      {(label || description) && (
+        <div className="text-center space-y-1">
+          {label && (
+            <p className={cn(
+              "font-medium",
+              {
+                'text-xs': size === 'sm',
+                'text-sm': size === 'md',
+                'text-base': size === 'lg'
+              },
+              {
+                'text-violet-900 dark:text-violet-100': variant === 'primary',
+                'text-blue-900 dark:text-blue-100': variant === 'secondary',
+                'text-gray-900 dark:text-gray-100': variant === 'neutral'
+              }
+            )}>
+              {label}
+            </p>
+          )}
+          
+          {description && (
+            <p className={cn(
+              {
+                'text-xs': size === 'sm' || size === 'md',
+                'text-sm': size === 'lg'
+              },
+              {
+                'text-violet-600/70 dark:text-violet-300/70': variant === 'primary',
+                'text-blue-600/70 dark:text-blue-300/70': variant === 'secondary',
+                'text-gray-600/70 dark:text-gray-300/70': variant === 'neutral'
+              }
+            )}>
+              {description}
+            </p>
+          )}
+        </div>
       )}
     </div>
   );
-}
+}; 

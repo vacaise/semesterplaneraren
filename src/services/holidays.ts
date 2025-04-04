@@ -1,54 +1,107 @@
+interface LocalityInfoItem {
+  name: string;
+  description?: string;
+  isoName?: string;
+  order: number;
+  adminLevel?: number;
+  isoCode?: string;
+  wikidataId?: string;
+  geonameId?: number;
+}
 
-interface PublicHoliday {
+interface LocalityInfo {
+  administrative: LocalityInfoItem[];
+  informative: LocalityInfoItem[];
+}
+
+interface GeoLocationResponse {
+  latitude: number;
+  lookupSource: string;
+  longitude: number;
+  localityLanguageRequested: string;
+  continent: string;
+  continentCode: string;
+  countryName: string;
+  countryCode: string;
+  principalSubdivision: string;
+  principalSubdivisionCode: string;
+  city: string;
+  locality: string;
+  postcode: string;
+  plusCode: string;
+  csdCode: string;
+  localityInfo: LocalityInfo;
+}
+
+interface HolidayResponse {
+  date: string;
+  localName: string;
+  name: string;
+  countryCode: string;
+  fixed: boolean;
+  global: boolean;
+  counties: string[] | null;
+  launchYear: number | null;
+  types: string[];
+}
+
+export interface DetectedHoliday {
   date: string;
   name: string;
-  localName: string;
-  countryCode: string;
 }
 
-// This function will detect public holidays based on the user's region
-export async function detectPublicHolidays(year: number): Promise<Array<{ date: string; name: string }>> {
+const getCountryFromCoordinates = async (latitude: number, longitude: number): Promise<GeoLocationResponse> => {
   try {
-    // First, let's try to get the user's country
-    let countryCode = 'US'; // Default to US
-    
-    try {
-      // Try to get the user's country based on their locale
-      const userLocale = navigator.language;
-      const regionCode = userLocale.split('-')[1];
-      if (regionCode && regionCode.length === 2) {
-        countryCode = regionCode;
+    const response = await fetch(
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
+    );
+    return await response.json();
+  } catch (error) {
+    console.error('Error getting country from coordinates:', error);
+    throw new Error('Failed to detect country from location');
+  }
+};
+
+export const detectPublicHolidays = async (year?: number): Promise<DetectedHoliday[]> => {
+  try {
+    // Get user's location
+    const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error('Geolocation is not supported by your browser'));
+        return;
       }
-    } catch (error) {
-      console.error('Failed to detect country from locale:', error);
-    }
-    
-    // Fetch holidays for the detected country
-    const response = await fetch(`https://date.nager.at/api/v3/PublicHolidays/${year}/${countryCode}`);
-    
+      navigator.geolocation.getCurrentPosition(resolve, reject);
+    });
+
+    // Get country code from coordinates
+    const { countryCode, principalSubdivisionCode } = await getCountryFromCoordinates(
+      position.coords.latitude,
+      position.coords.longitude,
+    );
+
+    // Use provided year or default to current year
+    const targetYear = year || new Date().getUTCFullYear();
+
+    // Fetch holidays from Nager.Date API
+    const response = await fetch(
+      `https://date.nager.at/api/v3/PublicHolidays/${targetYear}/${countryCode}`,
+    );
+
     if (!response.ok) {
-      // If we fail with the detected country, fall back to US
-      if (countryCode !== 'US') {
-        const usResponse = await fetch(`https://date.nager.at/api/v3/PublicHolidays/${year}/US`);
-        if (!usResponse.ok) {
-          throw new Error('Failed to fetch holidays for your region and the fallback region (US)');
-        }
-        const usHolidays: PublicHoliday[] = await usResponse.json();
-        return usHolidays.map(holiday => ({
-          date: holiday.date,
-          name: holiday.name
-        }));
-      }
-      throw new Error(`Failed to fetch holidays: ${response.statusText}`);
+      throw new Error('Failed to fetch holidays');
     }
-    
-    const holidays: PublicHoliday[] = await response.json();
-    return holidays.map(holiday => ({
+
+    const holidays: HolidayResponse[] = await response.json();
+
+    const filteredHolidays = holidays.filter((holiday) => holiday.global || holiday.counties?.includes(principalSubdivisionCode));
+
+    // Transform the response to match our app's format
+    return filteredHolidays.map(holiday => ({
       date: holiday.date,
-      name: holiday.name
+      name: holiday.localName || holiday.name,
     }));
   } catch (error) {
-    console.error('Error detecting holidays:', error);
-    throw new Error('Unable to detect holidays. Please try again or add them manually.');
+    console.error('Error detecting public holidays:', error);
+    throw error;
   }
-}
+};

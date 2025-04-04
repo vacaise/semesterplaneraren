@@ -15,25 +15,16 @@ export function FlatView() {
 
   return (
     <>
-      {items.length === 0 ? (
-        <motion.div
+      {sortedItems.map((item, index) => (
+        <motion.li
+          key={item.date}
           {...ANIMATION_CONFIG}
-          className="p-3 text-center"
+          data-list-item="true"
+          data-list-index={index}
         >
-          <p className="text-sm text-gray-500 dark:text-gray-400">No dates selected</p>
-        </motion.div>
-      ) : (
-        sortedItems.map((item, index) => (
-          <motion.div
-            key={item.date}
-            {...ANIMATION_CONFIG}
-            data-list-item="true"
-            data-list-index={index}
-          >
-            <DateListItem item={item} />
-          </motion.div>
-        ))
-      )}
+          <DateListItem item={item} />
+        </motion.li>
+      ))}
     </>
   );
 } 

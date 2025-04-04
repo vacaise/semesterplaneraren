@@ -1,18 +1,36 @@
-
-import Link from 'next/link';
-import { Calendar } from 'lucide-react';
 import { PROJECT_NAME } from '@/constants';
+import Link from 'next/link';
 
-export const Logo = () => {
-  return (
-    <Link href="/" className="flex items-center gap-2">
-      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-100 dark:bg-teal-900">
-        <Calendar className="h-5 w-5 text-teal-700 dark:text-teal-300" aria-hidden="true" />
-      </span>
-      <span className="flex flex-col">
-        <span className="text-lg font-bold text-gray-900 dark:text-white">{PROJECT_NAME}</span>
-        <span className="text-xs text-gray-500 dark:text-gray-400">Maximize your free time</span>
-      </span>
-    </Link>
-  );
-};
+export const Logo = () =>
+  <Link href="/" tabIndex={0} aria-label="Holiday Optimizer Home">
+    <div className="flex items-center space-x-2">
+      <div
+        className="p-1.5 bg-blue-500 dark:bg-blue-400 rounded-lg shadow-sm">
+        <svg 
+          className="h-5 w-5 text-white" 
+          fill="none" 
+          viewBox="0 0 24 24" 
+          stroke="currentColor"
+          aria-hidden="true"
+          role="img"
+        >
+          <title>Calendar Icon</title>
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={2}
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" 
+          />
+        </svg>
+      </div>
+      <div>
+        <h2
+          className="text-base font-semibold text-gray-900 dark:text-white">
+          {PROJECT_NAME}
+        </h2>
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          Maximize your time off in {new Date().getUTCFullYear()}
+        </p>
+      </div>
+    </div>
+  </Link>;

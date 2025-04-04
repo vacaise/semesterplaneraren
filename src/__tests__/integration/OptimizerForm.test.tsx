@@ -2,12 +2,12 @@ import React from 'react';
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import '@testing-library/jest-dom/extend-expect';
 import { OptimizerForm } from '@/components/OptimizerForm';
 import { OptimizerProvider } from '@/contexts/OptimizerContext';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { toast } from 'sonner';
+import { OnboardingProvider } from '@/contexts/OnboardingContext';
 
 // Mock holiday service
 jest.mock('@/services/holidays', () => ({
@@ -37,9 +37,11 @@ describe('OptimizerForm Integration Tests', () => {
     render(
       <ThemeProvider>
         <TooltipProvider>
-          <OptimizerProvider>
-            <OptimizerForm onSubmitAction={mockOnSubmitAction} />
-          </OptimizerProvider>
+          <OnboardingProvider>
+            <OptimizerProvider>
+              <OptimizerForm onSubmitAction={mockOnSubmitAction} />
+            </OptimizerProvider>
+          </OnboardingProvider>
         </TooltipProvider>
       </ThemeProvider>,
     );

@@ -1,23 +1,36 @@
-
-import React from 'react';
 import { Logo } from '@/components/Logo';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { cn, spacing } from '@/lib/utils';
 import { GitHubLink } from '@/components/ui/github-link';
 import { GITHUB_URL } from '@/constants';
-import { Link } from 'react-router-dom';
 
-const Header = () => {
-  return (
-    <header className="sticky top-0 z-40 border-b border-gray-200/80 bg-white/80 backdrop-blur-sm dark:border-gray-800/80 dark:bg-gray-900/80">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+const Header = () => (
+  <header className={cn(
+    'sticky top-0 z-40 w-full',
+    'bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm',
+    'border-b border-gray-200/60 dark:border-gray-700/30',
+    'pt-[env(safe-area-inset-top)]',
+  )}>
+    <div className={cn(
+      'mx-auto max-w-7xl',
+      spacing.container,
+    )}>
+      <div className="flex h-14 items-center justify-between">
         <Logo />
-        <div className="flex items-center gap-3">
-          <GitHubLink href={GITHUB_URL} variant="compact" />
-          <ThemeToggle />
+        <div className="flex items-center gap-2 sm:gap-3">
+          <GitHubLink
+            href={GITHUB_URL}
+            variant="default"
+            className="hidden sm:inline-flex"
+          />
+          <GitHubLink
+            href={GITHUB_URL}
+            variant="compact"
+            className="sm:hidden"
+          />
         </div>
       </div>
-    </header>
-  );
-};
+    </div>
+  </header>
+);
 
 export default Header;
