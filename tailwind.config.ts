@@ -1,17 +1,15 @@
 
 import type { Config } from 'tailwindcss';
-
 import colors from 'tailwindcss/colors';
-
 import tailwindcss_animate from 'tailwindcss-animate';
 
-// Remove deprecated color references
+// Create a version of colors without the deprecated values
 const {
-  lightBlue,
-  warmGray,
-  trueGray,
-  coolGray,
-  blueGray,
+  lightBlue, // renamed to sky
+  warmGray,  // renamed to stone
+  trueGray,  // renamed to neutral
+  coolGray,  // renamed to gray
+  blueGray,  // renamed to slate
   ...modernColors
 } = colors;
 
@@ -57,12 +55,13 @@ const config = {
     extend: {
       colors: {
         ...modernColors,
-        // Explicitly map the renamed colors for any existing references
-        // sky was previously lightBlue
-        // slate was previously blueGray
-        // gray was previously coolGray
-        // neutral was previously trueGray
-        // stone was previously warmGray
+        // Map deprecated color names to their new equivalents for backward compatibility
+        // This ensures any existing color references continue to work
+        sky: modernColors.sky,      // lightBlue -> sky
+        slate: modernColors.slate,  // blueGray -> slate 
+        gray: modernColors.gray,    // coolGray -> gray
+        neutral: modernColors.neutral, // trueGray -> neutral
+        stone: modernColors.stone,  // warmGray -> stone
       },
     },
   },
