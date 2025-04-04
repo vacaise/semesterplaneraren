@@ -1,103 +1,107 @@
 
-// Add this file to provide the missing functionality for company days
-
 import { useOptimizer } from '@/contexts/OptimizerContext';
-import { CompanyDayOff } from '@/types';
+import { useCallback } from 'react';
+import { CompanyDayOff, OptimizationStrategy } from '@/types';
 
-export function useCompanyDays() {
+export function useDaysInput() {
   const { state, dispatch } = useOptimizer();
-
-  const addCompanyDay = (date: string, name: string) => {
-    dispatch({ 
-      type: 'ADD_COMPANY_DAY', 
-      payload: { date, name } 
-    });
-  };
-
-  const removeCompanyDay = (date: string) => {
-    dispatch({ 
-      type: 'REMOVE_COMPANY_DAY', 
-      payload: date 
-    });
-  };
-
-  const setCompanyDays = (days: CompanyDayOff[]) => {
-    dispatch({ 
-      type: 'SET_COMPANY_DAYS', 
-      payload: days 
-    });
-  };
-
-  const clearCompanyDays = () => {
-    dispatch({ 
-      type: 'SET_COMPANY_DAYS', 
-      payload: [] 
-    });
-  };
-
+  
+  const setDays = useCallback((days: string) => {
+    dispatch({ type: 'SET_DAYS', payload: days });
+  }, [dispatch]);
+  
   return {
-    companyDaysOff: state.companyDaysOff,
-    addCompanyDay,
-    removeCompanyDay,
-    setCompanyDays,
-    clearCompanyDays
+    days: state.days,
+    errors: state.errors?.days,
+    setDays,
   };
 }
 
-export function useYearSelection() {
+export function useStrategySelection() {
   const { state, dispatch } = useOptimizer();
-
-  const setSelectedYear = (year: number) => {
-    dispatch({ type: 'SET_YEAR', payload: year });
-  };
-
+  
+  const setStrategy = useCallback((strategy: OptimizationStrategy) => {
+    dispatch({ type: 'SET_STRATEGY', payload: strategy });
+  }, [dispatch]);
+  
   return {
-    selectedYear: state.selectedYear,
-    setSelectedYear
+    strategy: state.strategy,
+    setStrategy,
   };
 }
 
 export function useHolidays() {
   const { state, dispatch } = useOptimizer();
-
-  const addHoliday = (date: string, name: string) => {
+  
+  const addHoliday = useCallback((date: string, name: string) => {
     dispatch({ 
       type: 'ADD_HOLIDAY', 
       payload: { date, name } 
     });
-  };
-
-  const removeHoliday = (date: string) => {
+  }, [dispatch]);
+  
+  const removeHoliday = useCallback((date: string) => {
     dispatch({ 
       type: 'REMOVE_HOLIDAY', 
       payload: date 
     });
-  };
-
-  const setHolidays = (holidays: Array<{ date: string; name: string }>) => {
-    dispatch({ 
-      type: 'SET_HOLIDAYS', 
-      payload: holidays 
-    });
-  };
-
-  const clearHolidays = () => {
-    dispatch({ 
-      type: 'SET_HOLIDAYS', 
-      payload: [] 
-    });
-  };
-
-  const setDetectedHolidays = (holidays: Array<{ date: string; name: string }>) => {
-    setHolidays(holidays);
-  };
-
+  }, [dispatch]);
+  
+  const clearHolidays = useCallback(() => {
+    dispatch({ type: 'CLEAR_HOLIDAYS' });
+  }, [dispatch]);
+  
+  const setDetectedHolidays = useCallback((holidays: Array<{ date: string; name: string }>) => {
+    dispatch({ type: 'SET_DETECTED_HOLIDAYS', payload: holidays });
+  }, [dispatch]);
+  
   return {
     holidays: state.holidays,
     addHoliday,
     removeHoliday,
-    setHolidays,
     clearHolidays,
-    setDetectedHolidays
+    setDetectedHolidays,
+  };
+}
+
+export function useCompanyDays() {
+  const { state, dispatch } = useOptimizer();
+  
+  const addCompanyDay = useCallback((date: string, name: string) => {
+    dispatch({ 
+      type: 'ADD_COMPANY_DAY', 
+      payload: { date, name } as CompanyDayOff
+    });
+  }, [dispatch]);
+  
+  const removeCompanyDay = useCallback((date: string) => {
+    dispatch({ 
+      type: 'REMOVE_COMPANY_DAY', 
+      payload: date 
+    });
+  }, [dispatch]);
+  
+  const clearCompanyDays = useCallback(() => {
+    dispatch({ type: 'CLEAR_COMPANY_DAYS' });
+  }, [dispatch]);
+  
+  return {
+    companyDaysOff: state.companyDaysOff,
+    addCompanyDay,
+    removeCompanyDay,
+    clearCompanyDays,
+  };
+}
+
+export function useYearSelection() {
+  const { state, dispatch } = useOptimizer();
+  
+  const setSelectedYear = useCallback((year: number) => {
+    dispatch({ type: 'SET_SELECTED_YEAR', payload: year });
+  }, [dispatch]);
+  
+  return {
+    selectedYear: state.selectedYear,
+    setSelectedYear,
   };
 }

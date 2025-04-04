@@ -1,30 +1,36 @@
-import { parse } from 'date-fns';
+
+import { DateListItem } from './DateListItem';
 import { motion } from 'framer-motion';
 import { ANIMATION_CONFIG } from '../constants/animations';
-import { DateListItem } from './DateListItem';
 import { useDateList } from '../context/DateListContext';
+import { BulkRenameInput } from '@/components/features/CompanyDaysDateList/components/BulkRenameInput';
 
 export function FlatView() {
-  const { items } = useDateList();
-  
-  // Simple date sort without any bulk or grouping functionality
-  const sortedItems = [...items].sort((a, b) =>
-    parse(a.date, 'yyyy-MM-dd', new Date()).getTime() -
-    parse(b.date, 'yyyy-MM-dd', new Date()).getTime()
-  );
+  const { items, editingDate } = useDateList();
 
   return (
     <>
-      {sortedItems.map((item, index) => (
+      {/* Bulk Rename Input - Shows at the top when in bulk edit mode */}
+      {editingDate === 'bulk' && (
+        <div className="p-3">
+          <BulkRenameInput />
+        </div>
+      )}
+
+      {items.length === 0 ? (
         <motion.li
-          key={item.date}
           {...ANIMATION_CONFIG}
-          data-list-item="true"
-          data-list-index={index}
+          className="p-3 text-center"
         >
-          <DateListItem item={item} />
+          <p className="text-sm text-gray-500 dark:text-gray-400">No dates selected</p>
         </motion.li>
-      ))}
+      ) : (
+        items.map((item) => (
+          <motion.li key={item.date} {...ANIMATION_CONFIG}>
+            <DateListItem item={item} />
+          </motion.li>
+        ))
+      )}
     </>
   );
-} 
+}

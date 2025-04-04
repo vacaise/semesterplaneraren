@@ -1,3 +1,4 @@
+
 declare global {
   interface Window {
     umami?: {
@@ -61,6 +62,28 @@ export interface OptimizationResult {
   days: OptimizedDay[];
   breaks: Break[];
   stats: OptimizationStats;
+}
+
+export interface DateItem {
+  date: string;
+  name: string;
+}
+
+export interface GroupedDates {
+  name: string;
+  dates: DateItem[];
+}
+
+// Tailwind color style interfaces
+export interface TailwindColorStyles {
+  primary?: string;
+  secondary?: string;
+}
+
+export interface TooltipStyles {
+  background: string;
+  border: string;
+  text: string;
 }
 
 interface CardStyles {

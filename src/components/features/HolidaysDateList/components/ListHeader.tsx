@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Calendar, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -6,17 +7,17 @@ import { useDateList } from '../context/DateListContext';
 
 export function ListHeader() {
   const {
-    headingId: id,
+    headingId,
     title,
     itemCount,
     colorScheme,
-    onClearAllAction: onClearAll
+    onClearAllAction
   } = useDateList();
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      onClearAll();
+      onClearAllAction();
     }
   };
 
@@ -30,7 +31,7 @@ export function ListHeader() {
           </div>
           <div>
             <h3
-              id={id}
+              id={headingId}
               className={cn('text-sm font-medium leading-none mb-1', colorStyles[colorScheme].text)}
             >
               {title}
@@ -46,7 +47,7 @@ export function ListHeader() {
           type="button"
           variant="outline"
           size="sm"
-          onClick={onClearAll}
+          onClick={onClearAllAction}
           onKeyDown={handleKeyDown}
           className={cn(
             'h-7 px-2.5 gap-1.5',
@@ -69,4 +70,4 @@ export function ListHeader() {
       </div>
     </div>
   );
-} 
+}

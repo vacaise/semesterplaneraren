@@ -1,7 +1,8 @@
+
 import Link from 'next/link';
 import { Logo } from '@/components/Logo';
 import { GITHUB_URL, PROJECT_NAME } from '@/constants';
-import { cn, linkStyles, spacing, textSize } from '@/lib/utils';
+import { cn, linkStyles, spacing } from '@/lib/utils';
 import { GitHubLink } from '@/components/ui/github-link';
 
 const Footer = () => (
@@ -17,7 +18,7 @@ const Footer = () => (
           <article className="space-y-3">
             <Logo />
             <p className={cn(
-              textSize('small'),
+              "text-sm",
               'text-gray-500 dark:text-gray-400 max-w-md',
             )}>
               A smart tool to help you plan and optimize your time off for the best possible breaks throughout the year.
@@ -33,8 +34,8 @@ const Footer = () => (
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn(
-                  linkStyles('secondary'),
-                  textSize('small'),
+                  "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100",
+                  "text-sm",
                   'px-2.5 py-1.5 rounded-lg font-medium',
                 )}
                 aria-label="Report an issue on GitHub"
@@ -49,7 +50,7 @@ const Footer = () => (
             </div>
             <div className="flex items-center gap-1.5">
               <span className={cn(
-                textSize('tiny'),
+                "text-xs",
                 'text-gray-500 dark:text-gray-400',
               )}>Built with</span>
               <svg
@@ -65,7 +66,7 @@ const Footer = () => (
                 />
               </svg>
               <span className={cn(
-                textSize('tiny'),
+                "text-xs",
                 'text-gray-500 dark:text-gray-400',
               )}>by</span>
               <a
@@ -73,8 +74,8 @@ const Footer = () => (
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn(
-                  linkStyles('primary'),
-                  textSize('tiny'),
+                  "text-teal-600 hover:text-teal-800 dark:text-teal-400 dark:hover:text-teal-300 underline underline-offset-2",
+                  "text-xs",
                 )}
                 aria-label="Visit Waqar Bin Kalim's GitHub profile"
                 tabIndex={0}
@@ -88,7 +89,7 @@ const Footer = () => (
         {/* Bottom Bar */}
         <section className="pt-4 flex flex-col sm:flex-row justify-between items-center">
           <p className={cn(
-            textSize('tiny'),
+            "text-xs",
             'text-gray-500 dark:text-gray-400',
           )}>
             <small>&copy; {new Date().getUTCFullYear()} {PROJECT_NAME}. All rights reserved.</small>
@@ -99,8 +100,8 @@ const Footer = () => (
                 <Link
                   href="/privacy"
                   className={cn(
-                    linkStyles('ghost'),
-                    textSize('tiny'),
+                    "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300",
+                    "text-xs",
                   )}
                   tabIndex={0}
                 >
@@ -111,8 +112,8 @@ const Footer = () => (
                 <Link
                   href="/terms"
                   className={cn(
-                    linkStyles('ghost'),
-                    textSize('tiny'),
+                    "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300",
+                    "text-xs",
                   )}
                   tabIndex={0}
                 >
@@ -127,4 +128,4 @@ const Footer = () => (
   </footer>
 );
 
-export default Footer; 
+export default Footer;

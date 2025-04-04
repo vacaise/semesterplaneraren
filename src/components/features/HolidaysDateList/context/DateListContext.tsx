@@ -5,6 +5,7 @@ import { useDateGrouping } from '@/components/features/CompanyDaysDateList/hooks
 import { useBulkSelection } from '@/components/features/CompanyDaysDateList/hooks/useBulkSelection';
 import { useGroupCollapse } from '@/components/features/CompanyDaysDateList/hooks/useGroupCollapse';
 import { useHolidays } from '@/hooks/useOptimizer';
+import { useState } from 'react';
 
 export interface DateListContextProps {
   // State
@@ -16,6 +17,8 @@ export interface DateListContextProps {
   collapsedGroups: string[];
   editingDate: string | null;
   editingValue: string;
+  headingId: string;
+  itemCount: number;
 
   // Actions
   setSelectedDates: (fn: (prev: string[]) => string[]) => void;
@@ -34,6 +37,8 @@ export interface DateListContextProps {
   onRemoveAction: (date: string) => void;
   onClearAllAction: () => void;
   onUpdateName?: (date: string, newName: string) => void;
+  cancelEdit: () => void;
+  confirmEdit: (date: string) => void;
 }
 
 const DateListContext = createContext<DateListContextProps | undefined>(undefined);
@@ -58,6 +63,9 @@ export const DateListProvider = ({
     clearHolidays: onClearAllAction,
   } = useHolidays();
   
+  const headingId = `holidays-heading-${Math.random().toString(36).substring(2, 9)}`;
+  const itemCount = items.length;
+  
   const groupedDates = useDateGrouping(items);
   const { collapsedGroups, setCollapsedGroups } = useGroupCollapse(groupedDates);
   const {
@@ -67,21 +75,44 @@ export const DateListProvider = ({
     setEditingDate,
     editingValue,
     setEditingValue,
-    handleBulkRename: bulkRename,
     handleBulkRenameConfirm,
   } = useBulkSelection(onBulkRename);
 
-  // Implement the remaining handlers similarly to CompanyDaysDateList
+  // Implement the handlers that were missing
   const handleKeyDown = (e: ReactKeyboardEvent<HTMLButtonElement | HTMLInputElement>, date: string) => {
     // Implementation similar to CompanyDaysDateList
+    if (editingDate === null) return;
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      confirmEdit(date);
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      cancelEdit();
+    }
   };
 
   const startEditing = (date: string, currentName: string) => {
-    // Implementation similar to CompanyDaysDateList
+    if (!onUpdateName) return;
+    setEditingValue(currentName);
+    setEditingDate(date);
   };
 
   const handleBlur = () => {
-    // Implementation similar to CompanyDaysDateList
+    if (editingDate !== null && onUpdateName && editingDate !== 'bulk') {
+      onUpdateName(editingDate, editingValue.trim());
+      setEditingDate(null);
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingDate(null);
+  };
+
+  const confirmEdit = (date: string) => {
+    if (onUpdateName && editingValue.trim()) {
+      onUpdateName(date, editingValue.trim());
+      setEditingDate(null);
+    }
   };
 
   const handleSelectGroup = (name: string) => {
@@ -96,11 +127,25 @@ export const DateListProvider = ({
   };
 
   const toggleGroupCollapse = (name: string) => {
-    // Implementation similar to CompanyDaysDateList
+    setCollapsedGroups(prev =>
+      prev.includes(name)
+        ? prev.filter(n => n !== name)
+        : [...prev, name]
+    );
   };
 
   const handleBulkRename = () => {
-    // Implementation similar to CompanyDaysDateList
+    if (!onBulkRename || selectedDates.length === 0) return;
+    
+    const selectedItems = items.filter(item => selectedDates.includes(item.date));
+    const nameCount = selectedItems.reduce((acc, item) => {
+      acc[item.name] = (acc[item.name] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    const commonName = Object.entries(nameCount).reduce((a, b) => (a[1] > b[1] ? a : b))[0];
+    setEditingValue(commonName);
+    setEditingDate('bulk');
   };
 
   const value: DateListContextProps = {
@@ -113,6 +158,8 @@ export const DateListProvider = ({
     collapsedGroups,
     editingDate,
     editingValue,
+    headingId,
+    itemCount,
 
     // Actions
     setSelectedDates,
@@ -131,6 +178,8 @@ export const DateListProvider = ({
     onRemoveAction,
     onClearAllAction,
     onUpdateName,
+    cancelEdit,
+    confirmEdit,
   };
 
   return (
