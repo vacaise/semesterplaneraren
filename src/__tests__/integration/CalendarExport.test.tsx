@@ -175,4 +175,4 @@ describe('CalendarExport Integration', () => {
     // Check that the first section is CalendarExport
     expect(sections[0]).toHaveAttribute('data-title', 'Export Calendar');
   });
-});
+}); 

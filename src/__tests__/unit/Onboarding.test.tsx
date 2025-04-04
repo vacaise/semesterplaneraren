@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import {
   HelpButton,
@@ -10,9 +10,6 @@ import {
 } from '@/components/features/onboarding';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { OnboardingStep } from '@/contexts/OnboardingContext';
-
-// Add explicit imports for screen and within
-import { screen, within } from '@testing-library/react';
 
 // Mock the imports that are causing problems
 jest.mock('@/contexts/OnboardingContext', () => ({
@@ -175,4 +172,4 @@ describe('Onboarding Integration Tests', () => {
       expect(progressBar).toHaveAttribute('aria-valuemax', '100');
     });
   });
-});
+}); 

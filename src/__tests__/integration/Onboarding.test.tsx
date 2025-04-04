@@ -1,15 +1,11 @@
-
 import userEvent from '@testing-library/user-event';
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { OnboardingProvider } from '@/contexts/OnboardingContext';
 import { OptimizerProvider } from '@/contexts/OptimizerContext';
 import { OptimizerForm } from '@/components/OptimizerForm';
 import React from 'react';
-
-// Add explicit imports for screen and within
-import { screen, within } from '@testing-library/react';
 
 describe('Onboarding Flow Integration Tests', () => {
   let mockOnSubmitAction: jest.Mock;

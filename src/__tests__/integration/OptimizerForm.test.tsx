@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { OptimizerForm } from '@/components/OptimizerForm';
@@ -9,9 +8,6 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { toast } from 'sonner';
 import { OnboardingProvider } from '@/contexts/OnboardingContext';
-
-// Add explicit imports for screen, waitFor, and within
-import { screen, waitFor, within } from '@testing-library/react';
 
 // Mock holiday service
 jest.mock('@/services/holidays', () => ({
