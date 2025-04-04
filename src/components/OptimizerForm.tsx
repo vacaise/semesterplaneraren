@@ -14,6 +14,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { TooltipProvider } from './ui/tooltip';
 import { useYearSelection } from '@/hooks/useOptimizer';
 import { HelpButton, OnboardingContainer } from './features/onboarding';
+import { t } from '@/lib/translations';
 
 // Update to use dynamic calculation based on current year
 const AVAILABLE_YEARS = Array.from({ length: 5 }, (_, index) => new Date().getFullYear() + index);
@@ -88,7 +89,7 @@ export function OptimizerForm({ onSubmitAction, isLoading = false }: OptimizerFo
               <div className="flex items-center justify-between">
                 <CardTitle id="form-title" className="flex items-center gap-1.5 text-teal-900 dark:text-teal-100">
                   <Calendar className="h-4 w-4 text-teal-600 dark:text-teal-300" aria-hidden="true" />
-                  Plan Your Year
+                  {t('planYourYear')}
                 </CardTitle>
                 <HelpButton className="md:hidden" dataTestId="help-button-mobile" />
               </div>
@@ -98,7 +99,7 @@ export function OptimizerForm({ onSubmitAction, isLoading = false }: OptimizerFo
                   className="flex items-center overflow-hidden rounded-md border border-teal-200 dark:border-teal-800 shadow-sm focus-within:ring-2 focus-within:ring-teal-500/70 dark:focus-within:ring-teal-400/70 focus-within:border-transparent">
                   <div
                     className="flex h-9 items-center border-r border-teal-200 bg-white px-3 text-xs font-medium text-gray-500 dark:border-teal-800 dark:bg-teal-950/50 dark:text-gray-400">
-                    Year:
+                    {t('year')}
                   </div>
                   <div className="relative">
                     <select
@@ -106,7 +107,7 @@ export function OptimizerForm({ onSubmitAction, isLoading = false }: OptimizerFo
                       value={selectedYear.toString()}
                       onChange={(e) => handleYearChange(e.target.value)}
                       className="h-9 border-none bg-white px-3 pr-7 text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 dark:bg-teal-950 dark:text-gray-100 appearance-none cursor-pointer transition-all duration-150"
-                      aria-label="Select planning year"
+                      aria-label={t('selectYear')}
                     >
                       {AVAILABLE_YEARS.map((year) => (
                         <option
@@ -131,7 +132,7 @@ export function OptimizerForm({ onSubmitAction, isLoading = false }: OptimizerFo
               </div>
             </div>
             <CardDescription>
-              Complete these simple steps to optimize your time off throughout the year.
+              {t('completeSteps')}
             </CardDescription>
           </CardHeader>
 
@@ -184,12 +185,12 @@ export function OptimizerForm({ onSubmitAction, isLoading = false }: OptimizerFo
                     <path className="opacity-75" fill="currentColor"
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  <span>Optimizing your schedule...</span>
+                  <span>{t('optimizingSchedule')}</span>
                 </span>
               ) : (
                 <span className="flex items-center justify-center gap-2">
                   <Sparkles className="h-4 w-4" aria-hidden="true" />
-                  <span>Generate</span>
+                  <span>{t('generate')}</span>
                 </span>
               )}
             </Button>

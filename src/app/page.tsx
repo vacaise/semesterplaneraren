@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import dynamic from 'next/dynamic';
+import { t, tWithParams } from '@/lib/translations';
 
 const SocialShareButtons = dynamic(() => import('@/components/SocialShareButtons'), {
   ssr: false
@@ -71,9 +72,9 @@ const HomePage = () => {
       <OnboardingProvider>
         <PageLayout>
           <PageHeader>
-            <PageTitle>Optimize Your Time Off</PageTitle>
+            <PageTitle>{t('pageTitle')}</PageTitle>
             <PageDescription>
-              Make the most of your paid time off in {selectedYear} with smart scheduling
+              {tWithParams('pageDescription', { year: selectedYear.toString() })}
             </PageDescription>
           </PageHeader>
 
@@ -83,7 +84,7 @@ const HomePage = () => {
                 "grid gap-6 mx-auto max-w-[1400px]",
                 isOptimizing || optimizationResult ? 'lg:grid-cols-[minmax(480px,1fr),minmax(480px,2fr)]' : ''
               )}
-              aria-label="Time Off Optimizer Tool"
+              aria-label={t('optimizationForm')}
             >
               {/* Form Section - Always visible */}
               <div className={cn(
@@ -92,7 +93,7 @@ const HomePage = () => {
                   ? 'lg:sticky lg:top-6 lg:self-start max-w-2xl' 
                   : 'max-w-xl mx-auto w-full'
               )}>
-                <h2 className="sr-only">Optimization Form</h2>
+                <h2 className="sr-only">{t('optimizationForm')}</h2>
                 <OptimizerForm
                   onSubmitAction={({ days, strategy, companyDaysOff, holidays, selectedYear }) => {
                     const newFormState = {
@@ -111,18 +112,18 @@ const HomePage = () => {
               {/* Results Section with Loading State */}
               {(isOptimizing || (optimizationResult && optimizationResult.days.length > 0)) && (
                 <div className="space-y-4 min-w-0 max-w-4xl w-full">
-                  <h2 className="sr-only">Optimization Results</h2>
+                  <h2 className="sr-only">{t('optimizationResults')}</h2>
                   {isOptimizing ? (
                     <Card variant="neutral" className="p-8 flex flex-col items-center justify-center min-h-[300px]">
                       <LoadingSpinner 
                         variant="primary"
-                        label="Creating Your Optimal Schedule"
-                        description={`Finding the best way to use your time off in ${selectedYear}...`}
+                        label={t('creatingSchedule')}
+                        description={tWithParams('findingBestWay', { year: selectedYear.toString() })}
                       />
                     </Card>
                   ) : optimizationResult && (
                     <div itemScope itemType="https://schema.org/Event">
-                      <meta itemProp="name" content={`Optimized Time Off Schedule for ${selectedYear}`} />
+                      <meta itemProp="name" content={`${t('pageTitle')} ${selectedYear}`} />
                       <ResultsDisplay
                         ref={resultsRef}
                         optimizedDays={optimizationResult.days}

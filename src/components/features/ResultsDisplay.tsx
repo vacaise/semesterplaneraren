@@ -7,6 +7,7 @@ import { BreakDetails } from '@/components/features/BreakDetails';
 import { CalendarView } from '@/components/features/CalendarView';
 import { CalendarExport } from '@/components/features/CalendarExport';
 import { forwardRef } from 'react';
+import { t } from '@/lib/translations';
 
 const container = {
   hidden: { opacity: 0 },

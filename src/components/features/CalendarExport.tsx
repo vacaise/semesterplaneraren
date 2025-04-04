@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar, Download, InfoIcon, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { SectionCard } from '@/components/ui/section-card';
+import { t, tWithParams } from '@/lib/translations';
 
 interface CalendarExportProps {
   breaks: Break[];
@@ -28,8 +29,8 @@ export const CalendarExport = ({ breaks, stats, selectedYear }: CalendarExportPr
     }
 
     if (breaks.length === 0) {
-      toast.error("No breaks to export", {
-        description: "There are no vacation breaks to export to calendar."
+      toast.error(t('noBreaksToExport'), {
+        description: t('noBreaksToExportDescription')
       });
       return;
     }
@@ -45,17 +46,17 @@ export const CalendarExport = ({ breaks, stats, selectedYear }: CalendarExportPr
       });
       
       if (result.success) {
-        toast.success("Export Successful", {
+        toast.success(t('exportSuccessful'), {
           description: result.message
         });
       } else {
-        toast.error("Export Failed", {
+        toast.error(t('exportFailed'), {
           description: result.message
         });
       }
     } catch (error) {
-      toast.error("Export Failed", {
-        description: `An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}`
+      toast.error(t('exportFailed'), {
+        description: tWithParams('exportError', { error: error instanceof Error ? error.message : String(error) })
       });
     } finally {
       setIsExporting(false);
@@ -77,8 +78,8 @@ export const CalendarExport = ({ breaks, stats, selectedYear }: CalendarExportPr
 
   return (
     <SectionCard
-      title="Export Calendar"
-      subtitle="Take your vacation plan with you"
+      title={t('exportCalendar')}
+      subtitle={t('exportCalendarSubtitle')}
       icon={<Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />}
       rightContent={
         <TooltipProvider>
@@ -87,7 +88,7 @@ export const CalendarExport = ({ breaks, stats, selectedYear }: CalendarExportPr
               <button 
                 className="inline-flex h-6 w-6 items-center justify-center rounded-full text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" 
                 tabIndex={0}
-                aria-label="View export information"
+                aria-label={t('viewExportInfo')}
                 onKeyDown={handleInfoKeyDown}
               >
                 <InfoIcon className="h-3.5 w-3.5" aria-hidden="true" />
@@ -95,15 +96,18 @@ export const CalendarExport = ({ breaks, stats, selectedYear }: CalendarExportPr
             </TooltipTrigger>
             <TooltipContent side="left" className="max-w-xs">
               <p className="text-xs">
-                Export your optimized vacation plan to your preferred calendar application. 
-                Your {breaks.length} breaks use {stats.totalPTODays} PTO days for {stats.totalDaysOff} total days off.
+                {tWithParams('exportInfo', { 
+                  breaksCount: breaks.length.toString(),
+                  ptoDays: stats.totalPTODays.toString(),
+                  totalDays: stats.totalDaysOff.toString()
+                })}
               </p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
       }
     >
-      <div className="flex flex-wrap gap-2 pt-1" role="region" aria-label="Calendar export options">
+      <div className="flex flex-wrap gap-2 pt-1" role="region" aria-label={t('calendarExportOptions')}>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -113,7 +117,7 @@ export const CalendarExport = ({ breaks, stats, selectedYear }: CalendarExportPr
                 onClick={handleExportToICS}
                 disabled={isExporting}
                 className="h-8 px-3 text-xs focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                aria-label="Export to iCal format for Google Calendar, Apple Calendar, Outlook, and other calendar applications"
+                aria-label={t('exportIcalDescription')}
                 tabIndex={0}
               >
                 {activeExport === 'ical' ? (
@@ -128,14 +132,14 @@ export const CalendarExport = ({ breaks, stats, selectedYear }: CalendarExportPr
                 ) : (
                   <Download className="h-3 w-3 mr-1.5" aria-hidden="true" />
                 )}
-                <span>iCal (.ics)</span>
+                <span>{t('exportIcal')}</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent className="max-w-xs">
               <p className="text-xs">
-                Download as iCal file for Google Calendar, Apple Calendar, Outlook, and other calendar applications. 
+                {t('exportIcalTooltip')}
                 <span className="block mt-1 text-blue-500 dark:text-blue-400">
-                  Events will show on their actual dates regardless of timezone.
+                  {t('exportIcalTimezoneInfo')}
                 </span>
               </p>
             </TooltipContent>

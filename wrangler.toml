@@ -1,0 +1,13 @@
+name = "semesterplaneraren"
+compatibility_date = "2024-04-04"
+
+[build]
+command = "pnpm run build"
+output = "out"
+
+[env.production]
+name = "semesterplaneraren"
+route = "https://vacai.se/*"
+
+[site]
+bucket = "out" 
