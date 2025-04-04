@@ -102,3 +102,16 @@ interface ColorSchemeDefinition {
 export type PossibleColors = 'teal' | 'blue' | 'amber' | 'violet';
 // The complete COLOR_SCHEMES object type
 export type ColorSchemes = Record<PossibleColors, ColorSchemeDefinition>;
+
+export interface TailwindColorStyles {
+  text: string;
+  bg: string;
+  ring: string;
+  selected?: string;
+}
+
+export interface TooltipStyles {
+  text: string;
+  bg: string;
+  ring: string;
+}

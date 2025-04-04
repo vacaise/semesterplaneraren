@@ -1,7 +1,6 @@
-
 'use client';
 
-import { createContext, ReactNode, useContext, useEffect, useReducer } from 'react';
+import { createContext, ReactNode, useContext, useEffect, useReducer, useState } from 'react';
 
 // Constants for local storage
 const ONBOARDING_COMPLETED_KEY = 'holiday-optimizer-onboarding-completed';
@@ -38,6 +37,8 @@ interface OnboardingContextType extends OnboardingState {
   goToNextStep: () => void;
   goToPrevStep: () => void;
   isCurrentStep: (step: OnboardingStep) => boolean;
+  skipOnboarding: () => void;
+  completeOnboarding: () => void;
 }
 
 type OnboardingAction =
@@ -98,7 +99,19 @@ function onboardingReducer(state: OnboardingState, action: OnboardingAction): On
   }
 }
 
-const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
+export const OnboardingContext = createContext<OnboardingContextType>({
+  isOnboardingVisible: false,
+  hasCompletedOnboarding: false,
+  currentStep: 'intro',
+  totalSteps: STEPS_ORDER.length - 2,
+  startOnboarding: () => {},
+  dismissOnboarding: () => {},
+  goToNextStep: () => {},
+  goToPrevStep: () => {},
+  isCurrentStep: () => false,
+  skipOnboarding: () => {},
+  completeOnboarding: () => {},
+});
 
 interface OnboardingProviderProps {
   children: ReactNode;
@@ -131,6 +144,14 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
   const goToPrevStep = () => dispatch({ type: 'GO_TO_PREV_STEP' });
   const isCurrentStep = (step: OnboardingStep) => state.currentStep === step;
 
+  const skipOnboarding = () => {
+    dispatch({ type: 'DISMISS_ONBOARDING' });
+  };
+
+  const completeOnboarding = () => {
+    dispatch({ type: 'DISMISS_ONBOARDING' });
+  };
+
   return (
     <OnboardingContext.Provider
       value={{
@@ -140,6 +161,8 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
         goToNextStep,
         goToPrevStep,
         isCurrentStep,
+        skipOnboarding,
+        completeOnboarding,
       }}
     >
       {children}

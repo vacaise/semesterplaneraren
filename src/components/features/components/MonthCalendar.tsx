@@ -1,4 +1,3 @@
-
 import { OptimizedDay } from '@/types';
 import { cn } from '@/lib/utils';
 import { MONTHS } from '@/constants';

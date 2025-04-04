@@ -1,107 +1,118 @@
+// Add this file to provide the missing functionality for company days
 
 import { useOptimizer } from '@/contexts/OptimizerContext';
-import { useCallback } from 'react';
-import { CompanyDayOff, OptimizationStrategy } from '@/types';
+import { CompanyDayOff } from '@/types';
 
-export function useDaysInput() {
-  const { state, dispatch } = useOptimizer();
-  
-  const setDays = useCallback((days: string) => {
-    dispatch({ type: 'SET_DAYS', payload: days });
-  }, [dispatch]);
-  
-  return {
-    days: state.days,
-    errors: state.errors?.days,
-    setDays,
-  };
-}
-
-export function useStrategySelection() {
-  const { state, dispatch } = useOptimizer();
-  
-  const setStrategy = useCallback((strategy: OptimizationStrategy) => {
-    dispatch({ type: 'SET_STRATEGY', payload: strategy });
-  }, [dispatch]);
-  
-  return {
-    strategy: state.strategy,
-    setStrategy,
-  };
-}
-
-export function useHolidays() {
-  const { state, dispatch } = useOptimizer();
-  
-  const addHoliday = useCallback((date: string, name: string) => {
-    dispatch({ 
-      type: 'ADD_HOLIDAY', 
-      payload: { date, name } 
-    });
-  }, [dispatch]);
-  
-  const removeHoliday = useCallback((date: string) => {
-    dispatch({ 
-      type: 'REMOVE_HOLIDAY', 
-      payload: date 
-    });
-  }, [dispatch]);
-  
-  const clearHolidays = useCallback(() => {
-    dispatch({ type: 'CLEAR_HOLIDAYS' });
-  }, [dispatch]);
-  
-  const setDetectedHolidays = useCallback((holidays: Array<{ date: string; name: string }>) => {
-    dispatch({ type: 'SET_DETECTED_HOLIDAYS', payload: holidays });
-  }, [dispatch]);
-  
-  return {
-    holidays: state.holidays,
-    addHoliday,
-    removeHoliday,
-    clearHolidays,
-    setDetectedHolidays,
-  };
-}
+type OptimizerAction =
+  | { type: 'SET_DAYS'; payload: string }
+  | { type: 'SET_STRATEGY'; payload: OptimizationStrategy }
+  | { type: 'SET_COMPANY_DAYS'; payload: Array<CompanyDayOff> }
+  | { type: 'ADD_COMPANY_DAY'; payload: { date: string; name: string } }
+  | { type: 'REMOVE_COMPANY_DAY'; payload: string }
+  | { type: 'SET_HOLIDAYS'; payload: Array<{ date: string; name: string }> }
+  | { type: 'ADD_HOLIDAY'; payload: { date: string; name: string } }
+  | { type: 'REMOVE_HOLIDAY'; payload: string }
+  | { type: 'SET_YEAR'; payload: number }
+  | { type: 'CLEAR_HOLIDAYS' }
+  | { type: 'SET_DETECTED_HOLIDAYS'; payload: any }
+  | { type: 'CLEAR_COMPANY_DAYS' }
+  | { type: 'SET_SELECTED_YEAR'; payload: number }
+  | { type: 'RESET_STATE' };
 
 export function useCompanyDays() {
   const { state, dispatch } = useOptimizer();
-  
-  const addCompanyDay = useCallback((date: string, name: string) => {
+
+  const addCompanyDay = (date: string, name: string) => {
     dispatch({ 
       type: 'ADD_COMPANY_DAY', 
-      payload: { date, name } as CompanyDayOff
+      payload: { date, name } 
     });
-  }, [dispatch]);
-  
-  const removeCompanyDay = useCallback((date: string) => {
+  };
+
+  const removeCompanyDay = (date: string) => {
     dispatch({ 
       type: 'REMOVE_COMPANY_DAY', 
       payload: date 
     });
-  }, [dispatch]);
-  
-  const clearCompanyDays = useCallback(() => {
-    dispatch({ type: 'CLEAR_COMPANY_DAYS' });
-  }, [dispatch]);
-  
+  };
+
+  const setCompanyDays = (days: CompanyDayOff[]) => {
+    dispatch({ 
+      type: 'SET_COMPANY_DAYS', 
+      payload: days 
+    });
+  };
+
+  const clearCompanyDays = () => {
+    dispatch({ 
+      type: 'SET_COMPANY_DAYS', 
+      payload: [] 
+    });
+  };
+
   return {
     companyDaysOff: state.companyDaysOff,
     addCompanyDay,
     removeCompanyDay,
-    clearCompanyDays,
+    setCompanyDays,
+    clearCompanyDays
   };
 }
 
 export function useYearSelection() {
   const { state, dispatch } = useOptimizer();
-  
-  const setSelectedYear = useCallback((year: number) => {
-    dispatch({ type: 'SET_SELECTED_YEAR', payload: year });
-  }, [dispatch]);
-  
+
+  const setSelectedYear = (year: number) => {
+    dispatch({ type: 'SET_YEAR', payload: year });
+  };
+
   return {
     selectedYear: state.selectedYear,
-    setSelectedYear,
+    setSelectedYear
+  };
+}
+
+export function useHolidays() {
+  const { state, dispatch } = useOptimizer();
+
+  const addHoliday = (date: string, name: string) => {
+    dispatch({ 
+      type: 'ADD_HOLIDAY', 
+      payload: { date, name } 
+    });
+  };
+
+  const removeHoliday = (date: string) => {
+    dispatch({ 
+      type: 'REMOVE_HOLIDAY', 
+      payload: date 
+    });
+  };
+
+  const setHolidays = (holidays: Array<{ date: string; name: string }>) => {
+    dispatch({ 
+      type: 'SET_HOLIDAYS', 
+      payload: holidays 
+    });
+  };
+
+  const clearHolidays = () => {
+    dispatch({ 
+      type: 'SET_HOLIDAYS', 
+      payload: [] 
+    });
+  };
+
+  const setDetectedHolidays = (holidays: Array<{ date: string; name: string }>) => {
+    setHolidays(holidays);
+  };
+
+  return {
+    holidays: state.holidays,
+    addHoliday,
+    removeHoliday,
+    setHolidays,
+    clearHolidays,
+    setDetectedHolidays
   };
 }

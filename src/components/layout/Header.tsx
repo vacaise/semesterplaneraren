@@ -4,6 +4,7 @@ import { Logo } from '@/components/Logo';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { GitHubLink } from '@/components/ui/github-link';
 import { GITHUB_URL } from '@/constants';
+import { Link } from 'react-router-dom';
 
 const Header = () => {
   return (

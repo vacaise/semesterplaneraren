@@ -1,9 +1,9 @@
-
 import { Break } from '@/types';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { motion } from 'framer-motion';
 import { Calendar, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Card } from '@/components/ui/card';
 
 interface BreakCardProps {
   breakPeriod: Break;

@@ -1,6 +1,5 @@
-
 import { Break, CompanyDayOff, OptimizationParams, OptimizationResult, OptimizationStats, OptimizationStrategy, OptimizedDay } from '@/types';
-import { eachDayOfInterval, format, getDay, isWeekend, parse, parseISO, addDays, isSameDay } from 'date-fns';
+import { format, parse, addDays, isSameDay } from 'date-fns';
 
 /**
  * Create a schedule of all days in the given year with their properties
