@@ -54,30 +54,6 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/terms": {
-      "experimentalBypassFor": [
-        {
-          "type": "header",
-          "key": "Next-Action"
-        },
-        {
-          "type": "header",
-          "key": "content-type",
-          "value": "multipart/form-data;.*"
-        }
-      ],
-      "initialRevalidateSeconds": false,
-      "srcRoute": "/terms",
-      "dataRoute": "/terms.rsc",
-      "allowHeader": [
-        "host",
-        "x-matched-path",
-        "x-prerender-revalidate",
-        "x-prerender-revalidate-if-generated",
-        "x-next-revalidated-tags",
-        "x-next-revalidate-tag-token"
-      ]
-    },
     "/sitemap.xml": {
       "initialHeaders": {
         "cache-control": "public, max-age=0, must-revalidate",
@@ -130,13 +106,37 @@
         "x-next-revalidated-tags",
         "x-next-revalidate-tag-token"
       ]
+    },
+    "/terms": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "Next-Action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/terms",
+      "dataRoute": "/terms.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
     }
   },
   "dynamicRoutes": {},
   "notFoundRoutes": [],
   "preview": {
-    "previewModeId": "c02bfe60f186fae2c21a8e63acc2bee6",
-    "previewModeSigningKey": "adb0f43c60eb0141e1703c00e7af8f5da30f1841d5664ffcac50feacec66a7a2",
-    "previewModeEncryptionKey": "46a7eb5752c153498538af67bdbf479596e7f71a95158025ebf9eb6149d03c7f"
+    "previewModeId": "dee113dd570187e6a62d88d059a15b90",
+    "previewModeSigningKey": "aa343ad0876e37a301556a7c1fca0ab7827b96a2ecd1b1767cb582cca91e5b1c",
+    "previewModeEncryptionKey": "f4fa9aaef3c097bee05dc671d8c238e48531eeaf88dab784c0aee75d5cdf18da"
   }
 }

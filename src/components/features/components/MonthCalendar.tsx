@@ -5,7 +5,6 @@ import {
   endOfMonth,
   format,
   getDay,
-  getMonth,
   isPast,
   isToday,
   parse,
@@ -35,6 +34,7 @@ interface CalendarDayProps {
     isCurrentDay: boolean
   }>;
   hasPublicHoliday: boolean;
+  mounted: boolean;
 }
 
 const getDayColorScheme = (day: OptimizedDay, date: Date, isCurrentDay: boolean, isCurrentYear: boolean) => {
@@ -66,7 +66,7 @@ const getDayColorScheme = (day: OptimizedDay, date: Date, isCurrentDay: boolean,
 /**
  * Renders a single calendar day with appropriate styling and tooltip
  */
-const CalendarDay = ({ day, dayInfo, hasPublicHoliday }: CalendarDayProps) => {
+const CalendarDay = ({ day, dayInfo, hasPublicHoliday, mounted }: CalendarDayProps) => {
   const { date, tooltipText, bgClass, textClass, isCurrentDay, dayType } = dayInfo;
   
   const today = new Date();
@@ -75,76 +75,73 @@ const CalendarDay = ({ day, dayInfo, hasPublicHoliday }: CalendarDayProps) => {
   
   const colorScheme = getDayColorScheme(day, date, isCurrentDay, isCurrentYear);
 
+  const dayContent = (
+    <div className={cn(
+      'absolute inset-0 flex items-center justify-center font-medium z-10 text-xs',
+      textClass,
+      tooltipText && mounted && 'cursor-help',
+      // Very subtle text emphasis for break days
+      day.isPartOfBreak && dayType !== 'extendedWeekend' && 'text-indigo-700 dark:text-indigo-300'
+    )}>
+      {format(date, 'd')}
+    </div>
+  );
+
+  const dayBackground = (
+    <div
+      className={cn(
+        'absolute inset-0.5 rounded-md',
+        bgClass,
+        isCurrentDay && 'ring-2 ring-blue-400 dark:ring-blue-500 shadow-sm',
+        // Apply dashed ring for regular break days
+        day.isPartOfBreak && dayType !== 'extendedWeekend' && !isCurrentDay && 'ring-1 ring-indigo-300/40 dark:ring-indigo-400/30 ring-dashed',
+        // Apply solid ring for extended weekends
+        dayType === 'extendedWeekend' && !isCurrentDay && 'ring-1 ring-purple-400/70 dark:ring-purple-400/50'
+      )}
+    />
+  );
+
+  const holidayIndicator = hasPublicHoliday && day.isPublicHoliday ? (
+    <div className={cn(
+      'absolute bottom-1 left-1/2 -translate-x-1/2 w-0.5 h-0.5 rounded-full',
+      COLOR_SCHEMES[dayTypeToColorScheme.publicHoliday].calendar.text,
+    )} />
+  ) : null;
+
+  if (!mounted) {
+    return (
+      <>
+        {dayBackground}
+        {dayContent}
+        {holidayIndicator}
+      </>
+    );
+  }
+
+  if (!tooltipText) {
+    return (
+      <>
+        {dayBackground}
+        {dayContent}
+        {holidayIndicator}
+      </>
+    );
+  }
+
   return (
     <>
-      <div
-        className={cn(
-          'absolute inset-0.5 rounded-md',
-          bgClass,
-          isCurrentDay && 'ring-2 ring-blue-400 dark:ring-blue-500 shadow-sm',
-          // Apply dashed ring for regular break days
-          day.isPartOfBreak && dayType !== 'extendedWeekend' && !isCurrentDay && 'ring-1 ring-indigo-300/40 dark:ring-indigo-400/30 ring-dashed',
-          // Apply solid ring for extended weekends
-          dayType === 'extendedWeekend' && !isCurrentDay && 'ring-1 ring-purple-400/70 dark:ring-purple-400/50'
-        )}
-      />
-
+      {dayBackground}
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className={cn(
-            'absolute inset-0 flex items-center justify-center font-medium z-10 text-xs',
-            textClass,
-            tooltipText && 'cursor-help',
-            // Very subtle text emphasis for break days
-            day.isPartOfBreak && dayType !== 'extendedWeekend' && 'text-indigo-700 dark:text-indigo-300'
-          )}>
-            {format(date, 'd')}
-          </div>
+          {dayContent}
         </TooltipTrigger>
-        {tooltipText && (
-          <StatTooltipContent colorScheme={colorScheme}>
-            {/* Enhanced tooltip content with better structure */}
-            {day.isPartOfBreak ? (
-              <div className="space-y-1">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 rounded-sm bg-indigo-500/70 dark:bg-indigo-400/80" />
-                  <p className="text-xs font-medium">Break Period</p>
-                </div>
-                {/* Show more specific information if available */}
-                {tooltipText !== 'Part of Break Period' && (
-                  <p className="text-xs pl-3 text-gray-600 dark:text-gray-300">{tooltipText}</p>
-                )}
-                <p className="text-xs pl-3 text-gray-500 dark:text-gray-400">{format(date, 'EEEE, MMMM d, yyyy')}</p>
-              </div>
-            ) : (
-              <p className="text-xs">{tooltipText}</p>
-            )}
-          </StatTooltipContent>
-        )}
+        <StatTooltipContent colorScheme={colorScheme}>
+          {tooltipText}
+        </StatTooltipContent>
       </Tooltip>
-
-      {/* Holiday Indicator Dot */}
-      {hasPublicHoliday && day.isPublicHoliday && (
-        <div className={cn(
-          'absolute bottom-1 left-1/2 -translate-x-1/2 w-0.5 h-0.5 rounded-full',
-          COLOR_SCHEMES[dayTypeToColorScheme.publicHoliday].calendar.text,
-        )} />
-      )}
+      {holidayIndicator}
     </>
   );
-};
-
-
-// Determine styling based on day state
-const getDayStyles = (isCurrentDay: boolean, isPastDay: boolean, dayType: DayType) => {
-  const colorKey = isCurrentDay ? 'today' : isPastDay ? 'past' : dayTypeToColorScheme[dayType];
-  return {
-    bgClass: COLOR_SCHEMES[colorKey].calendar.bg,
-    textClass: cn(
-      isCurrentDay && 'font-bold',
-      COLOR_SCHEMES[colorKey].calendar.text,
-    ),
-  };
 };
 
 /**
@@ -153,146 +150,45 @@ const getDayStyles = (isCurrentDay: boolean, isPastDay: boolean, dayType: DayTyp
  */
 export function MonthCalendar({ month, year, days }: MonthCalendarProps) {
   const [mounted, setMounted] = useState(false);
+  const [calendarDays, setCalendarDays] = useState<Array<OptimizedDay | null>>([]);
+  const [startDate, setStartDate] = useState<Date | null>(null);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    const start = startOfMonth(new Date(year, month));
+    const end = endOfMonth(start);
+    const daysInMonth = eachDayOfInterval({ start, end });
+    const startingDayIndex = getDay(start);
+    
+    const newCalendarDays = Array(35).fill(null);
+    daysInMonth.forEach((date, index) => {
+      const dateStr = format(date, 'yyyy-MM-dd');
+      const day = days.find(d => d.date === dateStr);
+      newCalendarDays[startingDayIndex + index] = day || {
+        date: dateStr,
+        isWeekend: getDay(date) === 0 || getDay(date) === 6,
+        isPTO: false,
+        isPartOfBreak: false,
+        isPublicHoliday: false,
+        isCompanyDayOff: false,
+      };
+    });
 
-  // Initialize calendar dates
-  const firstDay = startOfMonth(new Date(year, month));
-  const lastDay = endOfMonth(firstDay);
-  const daysInMonth = eachDayOfInterval({ start: firstDay, end: lastDay });
-  const startingDayIndex = getDay(firstDay);
+    setStartDate(start);
+    setCalendarDays(newCalendarDays);
+  }, [month, year, days]);
+
   const today = new Date();
   const currentYear = today.getFullYear();
   const isCurrentYear = year === currentYear;
 
-  // Check if any day types exist in the data
-  const dayTypeFlags = {
-    hasPTODays: days.some(day => day.isPTO),
-    hasPublicHoliday: days.some(day => day.isPublicHoliday),
-    hasCompanyDaysOff: days.some(day => day.isCompanyDayOff),
-    hasExtendedWeekends: days.some(day => day.isPartOfBreak && day.isWeekend),
-    hasBreaks: days.some(day => day.isPartOfBreak), // Added explicit check for breaks
-    hasWeekends: days.some(day => day.isWeekend) // Add check for regular weekends
-  };
-
-  // Get holidays for the current month
-  const holidays = days.filter(day => {
-    const date = parse(day.date, 'yyyy-MM-dd', new Date());
-    return day.isPublicHoliday && getMonth(date) === month;
-  });
-
-  // Create calendar grid with empty cells for proper alignment
-  const calendarDays = Array(35).fill(null);
-  daysInMonth.forEach((date, index) => {
-    const dateStr = format(date, 'yyyy-MM-dd');
-    const day = days.find(d => d.date === dateStr);
-    calendarDays[startingDayIndex + index] = day || {
-      date: dateStr,
-      isWeekend: getDay(date) === 0 || getDay(date) === 6,
-      isPTO: false,
-      isPartOfBreak: false,
-      isPublicHoliday: false,
-      isCompanyDayOff: false,
-    };
-  });
-
-  /**
-   * Helper function to process all day-related information in one pass
-   */
-  const getDayInfo = (day: OptimizedDay) => {
-    const date = parse(day.date, 'yyyy-MM-dd', new Date());
-    const isCurrentDay = isToday(date);
-    // Only consider dates as past when in the current year
-    const isPastDay = isCurrentYear && isPast(startOfDay(date)) && !isCurrentDay;
-
-    // Determine day type with order of precedence
-    let dayType: DayType = 'default';
-    let tooltipText = '';
-
-    if (isPastDay) {
-      tooltipText = 'Past dates are not considered in the optimization';
-    } else if (isCurrentDay) {
-      tooltipText = 'Today';
-    } else {
-      // Order of precedence: Company Days > Public Holidays > Extended Weekends > PTO Days > Regular Weekends
-      if (dayTypeFlags.hasCompanyDaysOff && day.isCompanyDayOff) {
-        dayType = 'companyDayOff';
-        tooltipText = day.companyDayName || 'Company Day Off';
-      } else if (dayTypeFlags.hasPublicHoliday && day.isPublicHoliday) {
-        dayType = 'publicHoliday';
-        tooltipText = day.publicHolidayName || 'Public Holiday';
-      } else if (dayTypeFlags.hasExtendedWeekends && day.isPartOfBreak && day.isWeekend) {
-        dayType = 'extendedWeekend';
-        tooltipText = 'Extended Weekend';
-      } else if (dayTypeFlags.hasPTODays && day.isPTO) {
-        dayType = 'pto';
-        tooltipText = 'PTO Day';
-      } else if (day.isPartOfBreak) {
-        // Add specific tooltip for break days that aren't weekends or holidays
-        tooltipText = 'Part of Break Period';
-      } else if (day.isWeekend) {
-        // Regular weekend
-        dayType = 'weekend';
-        tooltipText = 'Normal Weekend';
-      }
-    }
-
-    const { bgClass, textClass } = getDayStyles(isCurrentDay, isPastDay, dayType);
-
-    return {
-      date,
-      dayType,
-      tooltipText,
-      bgClass,
-      textClass,
-      isCurrentDay,
-      isPastDay
-    };
-  };
-
-  // Only render tooltips after client-side hydration
-  if (!mounted) {
-    return (
-      <div className="relative p-4 border rounded-lg">
-        <h3 className="text-sm font-medium mb-2">{format(firstDay, 'MMMM yyyy')}</h3>
-        <div className="grid grid-cols-7 gap-1">
-          {WEEKDAYS.map((day, i) => (
-            <div key={i} className="text-xs text-center font-medium text-gray-500">
-              {day.charAt(0)}
-            </div>
-          ))}
-          {calendarDays.map((day, i) => (
-            day ? (
-              <div key={i} className="relative aspect-square">
-                <div className="absolute inset-0.5 rounded-md bg-gray-100" />
-                <div className="absolute inset-0 flex items-center justify-center text-xs">
-                  {format(parse(day.date, 'yyyy-MM-dd', new Date()), 'd')}
-                </div>
-              </div>
-            ) : (
-              <div key={i} />
-            )
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className="bg-white dark:bg-gray-800/50 rounded-lg shadow-sm overflow-hidden ring-1 ring-gray-200 dark:ring-gray-700">
+  const calendarContent = (
+    <div className="bg-white dark:bg-gray-800/50 rounded-lg shadow-sm overflow-hidden ring-1 ring-gray-200 dark:ring-gray-700">
       {/* Calendar Header */}
       <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800/80 border-b border-gray-200 dark:border-gray-700">
         <h4 className="text-base font-medium text-gray-900 dark:text-gray-100 leading-none">
-          {format(firstDay, 'MMMM yyyy')}
+          {startDate ? format(startDate, 'MMMM yyyy') : ''}
         </h4>
-        <div className="mt-1 text-xs text-gray-600 dark:text-gray-400 min-h-[1.25rem] flex items-center gap-2">
-          {holidays.length > 0 && (
-            <>Holidays: {holidays.map(h => h.publicHolidayName).join(', ')}</>
-          )}
-        </div>
       </div>
 
       {/* Calendar Grid */}
@@ -314,12 +210,41 @@ export function MonthCalendar({ month, year, days }: MonthCalendarProps) {
                 !day && 'bg-gray-50 dark:bg-gray-800/30',
               )}
             >
-              {day &&
-                <CalendarDay day={day} dayInfo={getDayInfo(day)} hasPublicHoliday={dayTypeFlags.hasPublicHoliday} />}
+              {day && (
+                <CalendarDay
+                  day={day}
+                  dayInfo={{
+                    date: parse(day.date, 'yyyy-MM-dd', new Date()),
+                    dayType: day.isPTO ? 'pto' : 
+                             day.isPublicHoliday ? 'publicHoliday' : 
+                             day.isCompanyDayOff ? 'companyDayOff' : 
+                             day.isWeekend ? 'weekend' : 'default',
+                    tooltipText: day.isPTO ? 'PTO Day' :
+                                day.isPublicHoliday ? 'Public Holiday' :
+                                day.isCompanyDayOff ? 'Company Day Off' :
+                                day.isWeekend ? 'Weekend' : '',
+                    bgClass: COLOR_SCHEMES[getDayColorScheme(day, parse(day.date, 'yyyy-MM-dd', new Date()), isToday(parse(day.date, 'yyyy-MM-dd', new Date())), isCurrentYear)].calendar.bg,
+                    textClass: COLOR_SCHEMES[getDayColorScheme(day, parse(day.date, 'yyyy-MM-dd', new Date()), isToday(parse(day.date, 'yyyy-MM-dd', new Date())), isCurrentYear)].calendar.text,
+                    isCurrentDay: isToday(parse(day.date, 'yyyy-MM-dd', new Date()))
+                  }}
+                  hasPublicHoliday={day.isPublicHoliday}
+                  mounted={mounted}
+                />
+              )}
             </div>
           ))}
         </div>
       </div>
     </div>
   );
+
+  if (!mounted || !startDate) {
+    return (
+      <div className="bg-white dark:bg-gray-800/50 rounded-lg shadow-sm overflow-hidden ring-1 ring-gray-200 dark:ring-gray-700 animate-pulse">
+        <div className="h-64"></div>
+      </div>
+    );
+  }
+
+  return calendarContent;
 }
