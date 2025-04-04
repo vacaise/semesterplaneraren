@@ -90,7 +90,7 @@ const getStrategyParams = (strategy?: OptimizationStrategy) => {
       minBreak = 3;
       maxBreak = 15;
       break;
-  }
+    }
   return { minBreak, maxBreak };
 };
 
@@ -456,7 +456,7 @@ export const optimizeDays = (params: OptimizationParams): OptimizationResult => 
     totalDaysOff: breaks.reduce((acc, br) => acc + br.totalDays, 0),
     totalExtendedWeekends: breaks.reduce((acc, br) => acc + br.ptoDays, 0),
   };
-
+  
   return {
     days: calendar,
     breaks,
