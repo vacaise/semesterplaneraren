@@ -21,5 +21,7 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: 'dist',
     sourcemap: true
-  }
+  },
+  // Add base for GitHub Pages deployment
+  base: process.env.GITHUB_PAGES === 'true' ? '/holiday-optimizer/' : '/',
 }));
