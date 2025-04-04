@@ -5,4 +5,5 @@ compatibility_date = "2024-04-04"
 command = "pnpm run build"
 
 [site]
-bucket = "out" 
+bucket = "out"
+entry-point = "out" 
