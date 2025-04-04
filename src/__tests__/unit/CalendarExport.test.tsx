@@ -1,10 +1,14 @@
+
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CalendarExport } from '@/components/features/CalendarExport';
 import { exportToICS } from '@/services/calendarExport';
 import { toast } from 'sonner';
 import { Break, OptimizationStats } from '@/types';
+
+// We need to import these from the testing library explicitly
+import { screen, waitFor } from '@testing-library/react';
 
 // Mock the export service functions
 jest.mock('@/services/calendarExport', () => ({
