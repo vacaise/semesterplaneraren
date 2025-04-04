@@ -11,7 +11,6 @@ import {
   startOfDay,
   startOfMonth,
 } from 'date-fns';
-import { StatTooltipContent, Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { OptimizedDay } from '@/types';
 import { cn, DayType, dayTypeToColorScheme } from '@/lib/utils';
 import { COLOR_SCHEMES, WEEKDAYS } from '@/constants';
@@ -66,80 +65,39 @@ const getDayColorScheme = (day: OptimizedDay, date: Date, isCurrentDay: boolean,
 /**
  * Renders a single calendar day with appropriate styling and tooltip
  */
-const CalendarDay = ({ day, dayInfo, hasPublicHoliday, mounted }: CalendarDayProps) => {
-  const { date, tooltipText, bgClass, textClass, isCurrentDay, dayType } = dayInfo;
+const CalendarDay = ({ day, dayInfo, hasPublicHoliday }: CalendarDayProps) => {
+  const { date, bgClass, textClass, isCurrentDay, dayType } = dayInfo;
   
   const today = new Date();
   const currentYear = today.getFullYear();
   const isCurrentYear = date.getFullYear() === currentYear;
   
-  const colorScheme = getDayColorScheme(day, date, isCurrentDay, isCurrentYear);
-
-  const dayContent = (
-    <div className={cn(
-      'absolute inset-0 flex items-center justify-center font-medium z-10 text-xs',
-      textClass,
-      tooltipText && mounted && 'cursor-help',
-      // Very subtle text emphasis for break days
-      day.isPartOfBreak && dayType !== 'extendedWeekend' && 'text-indigo-700 dark:text-indigo-300'
-    )}>
-      {format(date, 'd')}
-    </div>
-  );
-
-  const dayBackground = (
-    <div
-      className={cn(
-        'absolute inset-0.5 rounded-md',
-        bgClass,
-        isCurrentDay && 'ring-2 ring-blue-400 dark:ring-blue-500 shadow-sm',
-        // Apply dashed ring for regular break days
-        day.isPartOfBreak && dayType !== 'extendedWeekend' && !isCurrentDay && 'ring-1 ring-indigo-300/40 dark:ring-indigo-400/30 ring-dashed',
-        // Apply solid ring for extended weekends
-        dayType === 'extendedWeekend' && !isCurrentDay && 'ring-1 ring-purple-400/70 dark:ring-purple-400/50'
-      )}
-    />
-  );
-
-  const holidayIndicator = hasPublicHoliday && day.isPublicHoliday ? (
-    <div className={cn(
-      'absolute bottom-1 left-1/2 -translate-x-1/2 w-0.5 h-0.5 rounded-full',
-      COLOR_SCHEMES[dayTypeToColorScheme.publicHoliday].calendar.text,
-    )} />
-  ) : null;
-
-  if (!mounted) {
-    return (
-      <>
-        {dayBackground}
-        {dayContent}
-        {holidayIndicator}
-      </>
-    );
-  }
-
-  if (!tooltipText) {
-    return (
-      <>
-        {dayBackground}
-        {dayContent}
-        {holidayIndicator}
-      </>
-    );
-  }
+  getDayColorScheme(day, date, isCurrentDay, isCurrentYear);
 
   return (
     <>
-      {dayBackground}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          {dayContent}
-        </TooltipTrigger>
-        <StatTooltipContent colorScheme={colorScheme}>
-          {tooltipText}
-        </StatTooltipContent>
-      </Tooltip>
-      {holidayIndicator}
+      <div
+        className={cn(
+          'absolute inset-0.5 rounded-md',
+          bgClass,
+          isCurrentDay && 'ring-2 ring-blue-400 dark:ring-blue-500 shadow-sm',
+          day.isPartOfBreak && dayType !== 'extendedWeekend' && !isCurrentDay && 'ring-1 ring-indigo-300/40 dark:ring-indigo-400/30 ring-dashed',
+          dayType === 'extendedWeekend' && !isCurrentDay && 'ring-1 ring-purple-400/70 dark:ring-purple-400/50'
+        )}
+      />
+      <div className={cn(
+        'absolute inset-0 flex items-center justify-center font-medium z-10 text-xs',
+        textClass,
+        day.isPartOfBreak && dayType !== 'extendedWeekend' && 'text-indigo-700 dark:text-indigo-300'
+      )}>
+        {format(date, 'd')}
+      </div>
+      {hasPublicHoliday && day.isPublicHoliday && (
+        <div className={cn(
+          'absolute bottom-1 left-1/2 -translate-x-1/2 w-0.5 h-0.5 rounded-full',
+          COLOR_SCHEMES[dayTypeToColorScheme.publicHoliday].calendar.text,
+        )} />
+      )}
     </>
   );
 };
