@@ -1,68 +1,118 @@
-# Semester Planeraren
+# Holiday Optimizer
 
-A modern web application for planning and optimizing semester schedules.
+A web application for optimizing holiday travel planning.
+
+## Overview
+
+Holiday Optimizer is a web application that helps users plan their holidays efficiently. By analyzing travel routes, costs, and optimal scheduling, the application provides recommendations for maximizing travel experiences while minimizing expenses and travel time.
 
 ## Features
 
-- Interactive calendar interface
-- Drag and drop functionality
-- Responsive design
-- Dark mode support
-- Optimized for performance
+- Interactive calendar visualization
+- Cost comparison between different travel options
+- Automatic optimization of travel routes
+- Shareable trip itineraries
+- Weather forecast integration
+- Accommodation recommendations
+- Local attraction suggestions
+
+## Technology Stack
+
+This project is built with:
+
+- **Frontend**: Next.js, React, TypeScript, TailwindCSS
+- **UI Components**: Shadcn UI
+- **Styling**: TailwindCSS
+- **Testing**: Jest, React Testing Library
+- **Deployment**: Cloudflare Pages
+- **CI/CD**: GitHub Actions for testing and quality assurance
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (v18 or higher)
-- npm (v9 or higher)
+- Node.js 20+
+- pnpm 10+
 
 ### Installation
 
 1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/semesterplaneraren.git
-cd semesterplaneraren
-```
+   ```bash
+   git clone https://github.com/yourusername/holiday-optimizer.git
+   cd holiday-optimizer
+   ```
 
 2. Install dependencies:
-```bash
-npm install
-```
+   ```bash
+   pnpm install
+   ```
 
 3. Start the development server:
-```bash
-npm run dev
+   ```bash
+   pnpm dev
+   ```
+
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Deployment
+
+This application is deployed to Cloudflare Pages. For deployment details, see [DEPLOYMENT.md](DEPLOYMENT.md).
+
+## Project Structure
+
+```
+holiday-optimizer/
+├── .github/            # GitHub Actions workflows
+├── .husky/             # Git hooks
+├── public/             # Static assets
+├── src/                # Application source code
+│   ├── app/            # Next.js app router
+│   ├── components/     # React components
+│   ├── lib/            # Utility functions and shared logic
+│   ├── styles/         # Global styles
+│   └── types/          # TypeScript type definitions
+└── tests/              # Test files
 ```
 
-4. Open [http://localhost:5173](http://localhost:5173) in your browser.
+## Development Workflow
 
-## Available Scripts
+### Running Tests
 
-- `npm run dev` - Start the development server
-- `npm run build` - Build the application for production
-- `npm run preview` - Preview the production build
-- `npm run test` - Run tests
-- `npm run lint` - Run ESLint
+```bash
+# Run all tests
+pnpm test
 
-## Tech Stack
+# Run tests in watch mode
+pnpm test:watch
 
-- React 18
-- TypeScript
-- Vite
-- Tailwind CSS
-- Framer Motion
-- Vitest
-- React Testing Library
+# Run specific test categories
+pnpm test:unit
+pnpm test:integration
+pnpm test:e2e
+
+# Generate test coverage report
+pnpm test:coverage
+```
+
+### Linting and Formatting
+
+```bash
+# Run linter
+pnpm lint
+
+# Format code
+pnpm format
+```
 
 ## Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. Create a feature branch from `main`.
+2. Make changes and ensure tests pass.
+3. Submit a pull request.
 
-## License
+### Guidelines
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- Follow the existing code style and naming conventions.
+- Write tests for new features and bug fixes.
+- Keep pull requests focused on a single feature or fix.
+- Document new features or changes in behavior.
