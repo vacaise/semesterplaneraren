@@ -4,7 +4,9 @@
     "composite": true,
     "module": "ESNext",
     "moduleResolution": "Node",
-    "types": ["node"]
+    "types": ["node"],
+    "allowJs": true,
+    "outDir": "dist"
   },
   "include": ["vite.config.ts"]
 } 

@@ -4,7 +4,9 @@
     "composite": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    "allowJs": true,
+    "outDir": "dist"
   },
   "include": ["src"]
 } 
