@@ -64,7 +64,7 @@ export const OnboardingComplete = ({ step, className }: OnboardingCompleteProps)
     <OnboardingDialog
       isOpen={shouldRender}
       className={className}
-      overlayRef={overlayRef as RefObject<HTMLDivElement>}
+      overlayRef={overlayRef}
       maxWidth="md"
       labelledBy="onboarding-complete-title"
       describedBy="onboarding-complete-description"

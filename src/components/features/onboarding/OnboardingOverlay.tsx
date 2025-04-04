@@ -1,3 +1,4 @@
+
 'use client';
 
 import { RefObject, useRef } from 'react';
@@ -26,14 +27,14 @@ const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode; titl
 
 export function OnboardingOverlay({ step, className }: OnboardingOverlayProps) {
   const { goToNextStep, dismissOnboarding } = useOnboarding();
-  const startButtonRef = useRef<HTMLButtonElement>(undefined);
+  const startButtonRef = useRef<HTMLButtonElement>(null);
   
   const {
     overlayRef,
     shouldRender,
   } = useOnboardingOverlay({
     step,
-    primaryButtonRef: startButtonRef as RefObject<HTMLButtonElement>,
+    primaryButtonRef: startButtonRef,
   });
   
   if (!shouldRender) return null;
@@ -42,7 +43,7 @@ export function OnboardingOverlay({ step, className }: OnboardingOverlayProps) {
     <OnboardingDialog
       isOpen={shouldRender}
       className={className}
-      overlayRef={overlayRef as RefObject<HTMLDivElement>}
+      overlayRef={overlayRef}
       maxWidth="lg"
       labelledBy="onboarding-title"
       describedBy="onboarding-description"
@@ -133,7 +134,7 @@ export function OnboardingOverlay({ step, className }: OnboardingOverlayProps) {
             Skip tour
           </Button>
           <Button 
-            ref={startButtonRef as RefObject<HTMLButtonElement>}
+            ref={startButtonRef}
             onClick={goToNextStep}
             className="flex-1 sm:flex-initial bg-sky-600 hover:bg-sky-700 text-white"
             aria-label="Start onboarding tour"

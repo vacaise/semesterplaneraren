@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-
-// Types for the optimization parameters
-=======
 declare global {
   interface Window {
     umami?: {
@@ -11,7 +7,6 @@ declare global {
 }
 
 // Optimization Types
->>>>>>> 227f356 (Update project configuration and add missing files)
 export type OptimizationStrategy = 'balanced' | 'miniBreaks' | 'longWeekends' | 'weekLongBreaks' | 'extendedVacations';
 
 export interface CompanyDayOff {
@@ -67,8 +62,6 @@ export interface OptimizationResult {
   breaks: Break[];
   stats: OptimizationStats;
 }
-<<<<<<< HEAD
-=======
 
 interface CardStyles {
   hover: string; // Hover state classes
@@ -85,5 +78,4 @@ interface ColorSchemeDefinition {
 
 export type PossibleColors = 'teal' | 'blue' | 'amber' | 'violet';
 // The complete COLOR_SCHEMES object type
-export type ColorSchemes = Record<PossibleColors, ColorSchemeDefinition>; // Declare Umami tracking type for TypeScript
->>>>>>> 227f356 (Update project configuration and add missing files)
+export type ColorSchemes = Record<PossibleColors, ColorSchemeDefinition>;
