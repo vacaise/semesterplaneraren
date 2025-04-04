@@ -7,7 +7,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-<<<<<<< HEAD
 // Format date as YYYY-MM-DD
 export function formatDateIso(date: Date): string {
   return date.toISOString().split('T')[0];
@@ -20,7 +19,8 @@ export function formatDateLong(date: Date): string {
     day: 'numeric',
     year: 'numeric',
   });
-=======
+}
+
 export const isProd = () => process.env.NODE_ENV === 'production';
 
 // Utility function to get day type colors
@@ -63,5 +63,4 @@ export const spacing = {
   container: 'px-4 sm:px-6 lg:px-8',
   stack: "space-y-4 sm:space-y-6",
   inline: "space-x-2 sm:space-x-4"
->>>>>>> 227f356 (Update project configuration and add missing files)
-}
+};
