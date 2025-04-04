@@ -5,7 +5,10 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
-    "types": ["vite/client", "vitest/globals"]
+    "types": ["vite/client", "vitest/globals"],
+    "declaration": true,
+    "declarationDir": "dist/types",
+    "emitDeclarationOnly": true
   },
   "include": ["src"],
   "exclude": ["src/__tests__/**/*"]

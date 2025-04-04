@@ -44,4 +44,7 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
     },
   },
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom']
+  }
 } as UserConfig) 
