@@ -1,86 +1,100 @@
-import { useOptimizer } from '@/contexts/OptimizerContext';
-import { OptimizationStrategy } from '@/types';
 
-/**
- * Hook for managing days input in the optimizer form
- * Provides access to days state and methods to update it
- */
+import { useOptimizer } from '../contexts/OptimizerContext';
+import { OptimizationStrategy } from '../types';
+
+// Hook for managing days input
 export function useDaysInput() {
   const { state, dispatch } = useOptimizer();
-  
-  return {
-    days: state.days,
-    errors: state.errors.days,
-    setDays: (value: string) => dispatch({ type: 'SET_DAYS', payload: value }),
+  const { days } = state;
+
+  const setDays = (value: string) => {
+    const numValue = value === '' ? '' : value;
+    dispatch({ type: 'SET_DAYS', payload: numValue });
   };
+
+  // Validate days input
+  const validateDays = (value: string): string | null => {
+    if (!value) return 'Please enter the number of days';
+    const numDays = Number(value);
+    if (isNaN(numDays)) return 'Please enter a valid number';
+    if (numDays <= 0) return 'Number of days must be greater than 0';
+    if (numDays > 365) return 'Number of days cannot exceed 365';
+    return null;
+  };
+
+  const errors = validateDays(days);
+
+  return { days, setDays, errors };
 }
 
-/**
- * Hook for managing strategy selection in the optimizer form
- * Provides access to strategy state and methods to update it
- */
+// Hook for managing strategy selection
 export function useStrategySelection() {
   const { state, dispatch } = useOptimizer();
-  
-  return {
-    strategy: state.strategy,
-    setStrategy: (value: OptimizationStrategy) => 
-      dispatch({ type: 'SET_STRATEGY', payload: value }),
+  const { strategy } = state;
+
+  const setStrategy = (value: OptimizationStrategy) => {
+    dispatch({ type: 'SET_STRATEGY', payload: value });
   };
+
+  return { strategy, setStrategy };
 }
 
-/**
- * Hook for managing year selection in the optimizer form
- * Provides access to selected year state and methods to update it
- */
-export function useYearSelection() {
-  const { state, dispatch } = useOptimizer();
-  
-  return {
-    selectedYear: state.selectedYear,
-    setSelectedYear: (value: number) => 
-      dispatch({ type: 'SET_SELECTED_YEAR', payload: value }),
-  };
-}
-
-/**
- * Hook for managing holidays in the optimizer form
- * Provides access to holidays state and methods to update it
- */
+// Hook for managing holidays
 export function useHolidays() {
   const { state, dispatch } = useOptimizer();
-  
-  return {
-    holidays: state.holidays,
-    errors: state.errors.holiday,
-    addHoliday: (date: string, name: string) => 
-      dispatch({ type: 'ADD_HOLIDAY', payload: { date, name } }),
-    removeHoliday: (date: string) => 
-      dispatch({ type: 'REMOVE_HOLIDAY', payload: date }),
-    clearHolidays: () => 
-      dispatch({ type: 'CLEAR_HOLIDAYS' }),
-    setDetectedHolidays: (holidays: Array<{ date: string, name: string }>) =>
-      dispatch({ type: 'SET_DETECTED_HOLIDAYS', payload: holidays }),
+  const { holidays } = state;
+
+  const addHoliday = (date: string, name: string) => {
+    dispatch({ type: 'ADD_HOLIDAY', payload: { date, name } });
   };
+
+  const removeHoliday = (date: string) => {
+    dispatch({ type: 'REMOVE_HOLIDAY', payload: date });
+  };
+
+  const setHolidays = (holidays: Array<{ date: string; name: string }>) => {
+    dispatch({ type: 'SET_HOLIDAYS', payload: holidays });
+  };
+
+  const setDetectedHolidays = (holidays: Array<{ date: string; name: string }>) => {
+    // Combine existing custom holidays with detected ones
+    const existingCustomHolidays = state.holidays.filter(
+      holiday => !holidays.some(h => h.date === holiday.date)
+    );
+    setHolidays([...existingCustomHolidays, ...holidays]);
+  };
+
+  return { holidays, addHoliday, removeHoliday, setHolidays, setDetectedHolidays };
 }
 
-/**
- * Hook for managing company days in the optimizer form
- * Provides access to company days state and methods to update it
- */
+// Hook for managing company days off
 export function useCompanyDays() {
   const { state, dispatch } = useOptimizer();
-  
-  return {
-    companyDaysOff: state.companyDaysOff,
-    errors: state.errors.companyDay,
-    addCompanyDay: (date: string, name: string) => 
-      dispatch({ type: 'ADD_COMPANY_DAY', payload: { date, name } }),
-    removeCompanyDay: (date: string) => 
-      dispatch({ type: 'REMOVE_COMPANY_DAY', payload: date }),
-    clearCompanyDays: () => 
-      dispatch({ type: 'CLEAR_COMPANY_DAYS' }),
-    setCompanyDays: (days: Array<{ date: string, name: string }>) => 
-      dispatch({ type: 'SET_COMPANY_DAYS', payload: days }),
+  const { companyDaysOff } = state;
+
+  const addCompanyDay = (date: string, name: string) => {
+    dispatch({ type: 'ADD_COMPANY_DAY', payload: { date, name } });
   };
-} 
+
+  const removeCompanyDay = (date: string) => {
+    dispatch({ type: 'REMOVE_COMPANY_DAY', payload: date });
+  };
+
+  const setCompanyDays = (days: Array<{ date: string; name: string }>) => {
+    dispatch({ type: 'SET_COMPANY_DAYS', payload: days });
+  };
+
+  return { companyDaysOff, addCompanyDay, removeCompanyDay, setCompanyDays };
+}
+
+// Hook for managing year selection
+export function useYearSelection() {
+  const { state, dispatch } = useOptimizer();
+  const { selectedYear } = state;
+
+  const setSelectedYear = (year: number) => {
+    dispatch({ type: 'SET_YEAR', payload: year });
+  };
+
+  return { selectedYear, setSelectedYear };
+}
