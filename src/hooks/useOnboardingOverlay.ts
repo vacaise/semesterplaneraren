@@ -7,11 +7,11 @@ interface UseOnboardingOverlayProps {
 }
 
 export const useOnboardingOverlay = ({
-                                       step,
-                                       primaryButtonRef,
-                                     }: UseOnboardingOverlayProps) => {
+  step,
+  primaryButtonRef,
+}: UseOnboardingOverlayProps) => {
   const { isOnboardingVisible, isCurrentStep, dismissOnboarding } = useOnboarding();
-  const overlayRef = useRef<HTMLDivElement>(undefined);
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   // Focus management
   useEffect(() => {
@@ -67,7 +67,17 @@ export const useOnboardingOverlay = ({
         document.removeEventListener('keydown', handleEscape);
       };
     }
-  }, [isOnboardingVisible, isCurrentStep, step, primaryButtonRef]);
+  }, [isOnboardingVisible, isCurrentStep, step, primaryButtonRef, dismissOnboarding]);
+
+  // Auto-dismiss after 5 seconds
+  useEffect(() => {
+    if (isOnboardingVisible) {
+      const timer = setTimeout(() => {
+        dismissOnboarding();
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [isOnboardingVisible, dismissOnboarding]);
 
   // If overlay shouldn't be visible, return shouldRender as false
   const shouldRender = isOnboardingVisible && isCurrentStep(step);
