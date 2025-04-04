@@ -1,13 +1,8 @@
-
 import type { Config } from 'tailwindcss';
-import colors from 'tailwindcss/colors';
-import tailwindcss_animate from 'tailwindcss-animate';
 
-// Remove deprecated color names
-const { 
-  lightBlue, warmGray, trueGray, coolGray, blueGray,
-  ...modernColors 
-} = colors;
+import colors from 'tailwindcss/colors';
+
+import tailwindcss_animate from 'tailwindcss-animate';
 
 const config = {
   darkMode: 'class',
@@ -50,13 +45,7 @@ const config = {
   theme: {
     extend: {
       colors: {
-        ...modernColors,
-        // Map deprecated color names to their new equivalents for backward compatibility
-        lightBlue: colors.sky,
-        warmGray: colors.stone,
-        trueGray: colors.neutral,
-        coolGray: colors.gray,
-        blueGray: colors.slate,
+        ...colors,
       },
     },
   },
