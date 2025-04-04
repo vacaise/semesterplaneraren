@@ -5,7 +5,7 @@
     "emitDeclarationOnly": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "types": ["vite/client"],
+    "types": ["vite/client", "jest", "@testing-library/jest-dom"],
     "allowJs": true,
     "outDir": "dist"
   },

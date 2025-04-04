@@ -5,7 +5,7 @@
     "emitDeclarationOnly": true,
     "module": "ESNext",
     "moduleResolution": "Node",
-    "types": ["node"],
+    "types": ["node", "jest", "@testing-library/jest-dom"],
     "allowJs": true,
     "outDir": "dist"
   },
