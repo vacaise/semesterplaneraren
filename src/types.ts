@@ -1,3 +1,4 @@
+
 declare global {
   interface Window {
     umami?: {
@@ -110,8 +111,3 @@ interface ColorSchemeDefinition {
 export type PossibleColors = TailwindColor | SpecialColor | AppSpecificColorScheme;
 // The complete COLOR_SCHEMES object type
 export type ColorSchemes = Record<PossibleColors, ColorSchemeDefinition>; // Declare Umami tracking type for TypeScript
-
-export interface Holiday {
-  date: string;
-  name: string;
-}

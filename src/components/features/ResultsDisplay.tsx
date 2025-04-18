@@ -7,7 +7,6 @@ import { BreakDetails } from '@/components/features/BreakDetails';
 import { CalendarView } from '@/components/features/CalendarView';
 import { CalendarExport } from '@/components/features/CalendarExport';
 import { forwardRef } from 'react';
-import { TooltipProvider } from '@/components/ui/tooltip';
 
 const container = {
   hidden: { opacity: 0 },
@@ -31,37 +30,35 @@ interface ResultsDisplayProps {
 export const ResultsDisplay = forwardRef<HTMLDivElement, ResultsDisplayProps>(
   ({ optimizedDays, breaks, stats, selectedYear }, ref) => {
     return (
-      <TooltipProvider>
-        <motion.div
-          ref={ref}
-          className="space-y-8"
-          initial="hidden"
-          animate="show"
-          variants={container}
-        >
-          {/* Calendar Export - Moved to top for better accessibility */}
-          {breaks.length > 0 && (
-            <CalendarExport
-              breaks={breaks}
-              stats={stats}
-              selectedYear={selectedYear}
-            />
-          )}
-
-          {/* Summary Section */}
-          <OptimizationStatsComponent stats={stats} />
-
-          {/* Break Details */}
-          <BreakDetails breaks={breaks} />
-
-          {/* Calendar View */}
-          <CalendarView 
-            optimizedDays={optimizedDays} 
-            stats={stats} 
+      <motion.div
+        ref={ref}
+        className="space-y-8"
+        initial="hidden"
+        animate="show"
+        variants={container}
+      >
+        {/* Calendar Export - Moved to top for better accessibility */}
+        {breaks.length > 0 && (
+          <CalendarExport
+            breaks={breaks}
+            stats={stats}
             selectedYear={selectedYear}
           />
-        </motion.div>
-      </TooltipProvider>
+        )}
+
+        {/* Summary Section */}
+        <OptimizationStatsComponent stats={stats} />
+
+        {/* Break Details */}
+        <BreakDetails breaks={breaks} />
+
+        {/* Calendar View */}
+        <CalendarView 
+          optimizedDays={optimizedDays} 
+          stats={stats} 
+          selectedYear={selectedYear}
+        />
+      </motion.div>
     );
   }
 );

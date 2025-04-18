@@ -3,7 +3,6 @@ import { BreakCard } from '@/components/features/components/BreakCard';
 import { BreakTypeLegend } from '@/components/features/components/BreakTypeLegend';
 import { Info } from 'lucide-react';
 import { SectionCard } from '@/components/ui/section-card';
-import { t, tWithParams } from '@/lib/translations';
 
 interface BreakDetailsProps {
   breaks: Break[];
@@ -12,8 +11,8 @@ interface BreakDetailsProps {
 export function BreakDetails({ breaks }: BreakDetailsProps) {
   return (
     <SectionCard
-      title={t('breakDetails')}
-      subtitle={t('breakDetailsSubtitle')}
+      title="Break Details"
+      subtitle="Your optimized breaks throughout the year"
       icon={
         <svg className="h-4 w-4 text-violet-600 dark:text-violet-300" fill="none" viewBox="0 0 24 24"
              stroke="currentColor">
@@ -24,7 +23,7 @@ export function BreakDetails({ breaks }: BreakDetailsProps) {
       rightContent={
         <span
           className="px-3 py-1.5 bg-violet-100 dark:bg-violet-900/50 rounded-lg text-xs font-medium text-violet-700 dark:text-violet-300">
-          {breaks.length} {tWithParams('breaksPlanned', { count: breaks.length.toString() })}
+          {breaks.length} break{breaks.length !== 1 ? 's' : ''} planned
         </span>
       }
     >
@@ -33,7 +32,7 @@ export function BreakDetails({ breaks }: BreakDetailsProps) {
         <div className="flex items-center gap-1.5">
           <Info className="h-4 w-4 text-violet-600 dark:text-violet-400" />
           <h3 className="text-xs font-medium text-gray-900 dark:text-gray-100">
-            {t('understandingBreakTypes')}
+            Understanding Your Break Types
           </h3>
         </div>
         <BreakTypeLegend />
@@ -51,20 +50,20 @@ export function BreakDetails({ breaks }: BreakDetailsProps) {
               </svg>
             </div>
             <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
-              {t('noBreaksPlanned')}
+              No Breaks Planned Yet
             </h3>
             <p className="text-xs text-gray-500 dark:text-gray-400 max-w-md">
-              {t('adjustPtoDays')}
+              Adjust your PTO days and preferences to see optimized break suggestions
             </p>
           </div>
         ) : (
           <>
             <div>
               <h3 className="text-xs font-medium text-gray-900 dark:text-gray-100 mb-1">
-                {t('yourOptimizedBreaks')}
+                Your Optimized Breaks
               </h3>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {t('optimizedBreaksDescription')}
+                Below are your optimized breaks based on your preferences and available days
               </p>
             </div>
             <div className="grid gap-3 grid-cols-1 lg:grid-cols-2 auto-rows-fr">

@@ -11,12 +11,7 @@ import Script from 'next/script';
 import { UMAMI_WEBSITE_ID } from '@/constants';
 import { SoftwareApplicationJsonLd, WebsiteJsonLd, FAQPageJsonLd, HowToJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
 
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  preload: true,
-  variable: '--font-inter',
-});
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Holiday Optimizer',
@@ -69,9 +64,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://holiday-optimizer.com';
 
   return (
-    <html lang="en" suppressHydrationWarning className={inter.variable}>
+    <html lang="en" suppressHydrationWarning>
     <Script defer src="https://cloud.umami.is/script.js" data-website-id={UMAMI_WEBSITE_ID} />
-    <body className={`font-sans antialiased bg-white dark:bg-gray-950 transition-colors duration-200`}>
+    <body className={`${inter.className} antialiased bg-white dark:bg-gray-950 transition-colors duration-200`}>
     <ThemeProvider
       attribute="class"
       defaultTheme="light"
@@ -153,13 +148,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         ]}
       />
       <TooltipProvider>
-        <Header />
-        <main className="flex-1">
-          {children}
-        </main>
-        <Footer />
-        <Toaster position="top-center" />
+        <div className="relative min-h-screen flex flex-col">
+          <Header />
+          <main id="main-content" className="flex-grow bg-gray-50 dark:bg-gray-900" role="main">
+            {children}
+          </main>
+          <Footer />
+        </div>
       </TooltipProvider>
+      <Toaster richColors closeButton position="bottom-right" />
     </ThemeProvider>
     </body>
     </html>
